@@ -163,6 +163,9 @@
 		display: flex;
 		align-items: center;
 		gap: 0.65rem;
+		/* Chips may shrink below their label's width on narrow phones … */
+		min-width: 0;
+		max-width: 100%;
 		padding: 0.45rem 0.95rem 0.45rem 0.55rem;
 		border: 1px solid color-mix(in srgb, var(--cosmos-star, #cfe6ff) 28%, transparent);
 		background: color-mix(in srgb, var(--hub-bg, #14143c) 55%, transparent);
@@ -198,6 +201,11 @@
 		fill: var(--accent, #7fd4ff);
 	}
 	.skymap a span {
+		/* … with the label ellipsizing rather than pushing past the viewport. */
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 		font-size: var(--fs-small);
 		text-transform: uppercase;
 		letter-spacing: 0.14em;
@@ -521,6 +529,31 @@
 			overflow: hidden;
 			text-overflow: ellipsis;
 			max-width: 100%;
+		}
+	}
+
+	/* ---- Small phones: shallower rail indent so plates keep their width ---- */
+	@media (max-width: 560px) {
+		.plate::before,
+		.plate.flip::before {
+			width: 0.7rem;
+		}
+		.plate figure,
+		.plate.flip figure {
+			margin-left: 1rem;
+		}
+		.frame {
+			padding: 0.4rem;
+		}
+	}
+
+	/* ---- Narrowest phones: quieter chip tracking so long labels fit -------- */
+	@media (max-width: 360px) {
+		.skymap a {
+			padding-right: 0.6rem;
+		}
+		.skymap a span {
+			letter-spacing: 0.08em;
 		}
 	}
 

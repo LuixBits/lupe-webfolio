@@ -37,6 +37,8 @@
 		font-weight: 600;
 		letter-spacing: 0.05em;
 		padding: 0.2rem 0.6rem;
+		min-height: 2.5rem; /* comfortable touch target; pill look kept by radius */
+		min-width: 2.75rem;
 		border-radius: 999px;
 		cursor: pointer;
 		transition:

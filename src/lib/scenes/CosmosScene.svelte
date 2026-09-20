@@ -502,7 +502,6 @@
   }
 
   /* ---- parallax drift (slow pan, different amplitude per depth) ---- */
-  .layer { will-change: transform; }
   .far { animation: drift 34s ease-in-out infinite alternate; --amp: -4px; }
   .mid { animation: drift 24s ease-in-out infinite alternate; --amp: -8px; }
   .near { animation: drift 17s ease-in-out infinite alternate; --amp: -13px; }
@@ -571,7 +570,6 @@
   }
 
   /* ---- shooting stars ---- */
-  .meteor { will-change: transform; }
   .m1 {
     --x0: 20px; --y0: 56px; --x1: 322px; --y1: 246px;
     animation: shoot 11s linear infinite;
@@ -628,7 +626,6 @@
   /* planet: slow vertical bob on an inner wrapper (outer g keeps its placement) */
   .hbob {
     animation: hbob 26s ease-in-out infinite alternate;
-    will-change: transform;
   }
   @keyframes hbob {
     from { transform: translate(0, 0); }
@@ -663,6 +660,16 @@
     --x0: 300px; --y0: 34px; --x1: 660px; --y1: 142px;
     animation: shoot 27s linear infinite;
     animation-delay: 11s;
+  }
+
+  /* ---- small phones & short landscape: thin the hub starfield ----
+   * Hides half the faint far tier and a third of the mid tier so the
+   * sky keeps its depth while running far fewer twinkle animations. */
+  @media (max-width: 560px), (orientation: landscape) and (max-height: 500px) {
+    .hubscene .far .star:nth-child(2n),
+    .hubscene .mid .star:nth-child(3n) {
+      display: none;
+    }
   }
 
   /* ---- reduced motion: freeze the sky ---- */

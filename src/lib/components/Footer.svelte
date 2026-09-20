@@ -104,6 +104,7 @@
 		align-items: center;
 		gap: 1rem;
 		padding: 0.75rem clamp(1rem, 4vw, 2.5rem);
+		padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
 		padding-left: calc(clamp(1rem, 4vw, 2.5rem) + var(--clear-l, 0px));
 		padding-right: calc(clamp(1rem, 4vw, 2.5rem) + var(--clear-r, 0px));
 	}
