@@ -18,8 +18,8 @@
 	--label-sub-fg: #10131a;
 	--label-active-fg: #10131a;
 	--on-hub: #e8ebf3;
-	--font-display: 'Space Grotesk', system-ui, sans-serif;
-	--font-body: 'Sora', system-ui, sans-serif;
+	--font-display: 'Space Grotesk Variable', 'Space Grotesk', system-ui, sans-serif;
+	--font-body: 'Sora Variable', 'Sora', system-ui, sans-serif;
 	--heading-transform: none;
 	--heading-spacing: normal;
 }
@@ -40,8 +40,8 @@
 	--garden-leaf: #6bbf7b;
 	--label-active-fg: #081109;
 	--on-hub: #eaf4ee;
-	--font-display: 'Fraunces', Georgia, serif;
-	--font-body: 'Nunito Sans', system-ui, sans-serif;
+	--font-display: 'Fraunces Variable', 'Fraunces', Georgia, serif;
+	--font-body: 'Nunito Sans Variable', 'Nunito Sans', system-ui, sans-serif;
 	--heading-transform: none;
 	--heading-spacing: normal;
 }
@@ -64,7 +64,7 @@
 	--label-active-fg: #04181d;
 	--on-hub: #e6f4f9;
 	--font-display: 'Spectral', Georgia, serif;
-	--font-body: 'Karla', system-ui, sans-serif;
+	--font-body: 'Karla Variable', 'Karla', system-ui, sans-serif;
 	--heading-transform: none;
 	--heading-spacing: normal;
 }
@@ -112,8 +112,8 @@
 	--cosmos-dust: #7668c4;
 	--label-active-fg: #1c0a06;
 	--on-hub: #e8ecf8;
-	--font-display: 'Space Grotesk', system-ui, sans-serif;
-	--font-body: 'Sora', system-ui, sans-serif;
+	--font-display: 'Space Grotesk Variable', 'Space Grotesk', system-ui, sans-serif;
+	--font-body: 'Sora Variable', 'Sora', system-ui, sans-serif;
 	--heading-transform: none;
 	--heading-spacing: 0.02em;
 }

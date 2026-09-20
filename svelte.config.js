@@ -8,7 +8,9 @@ const config = {
 	kit: {
 		// adapter-node: builds a standalone Node server (build/index.js) run as a
 		// systemd unit behind Traefik. Reads HOST/PORT/ORIGIN from the env.
-		adapter: adapter()
+		// precompress: ship .br/.gz next to every asset so the node server sends
+		// compressed responses even without a compressing proxy in front.
+		adapter: adapter({ precompress: true })
 	}
 };
 

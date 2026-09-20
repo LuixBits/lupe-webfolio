@@ -186,11 +186,11 @@
 	// Each wedge speaks its section's visual language: its theme's display type
 	// plus a gradient + art derived from the section's signature colour.
 	const WEDGE_TYPO: Record<string, string> = {
-		about: "font-family:'Fraunces', Georgia, serif;",
+		about: "font-family:'Fraunces Variable', Georgia, serif;",
 		projects:
 			"font-family:'Righteous', system-ui, sans-serif; text-transform:uppercase; letter-spacing:0.07em;",
 		cv: "font-family:'Spectral', Georgia, serif; letter-spacing:0.03em;",
-		hobbies: "font-family:'Space Grotesk', system-ui, sans-serif; letter-spacing:0.04em;"
+		hobbies: "font-family:'Space Grotesk Variable', system-ui, sans-serif; letter-spacing:0.04em;"
 	};
 
 	// Wedges are windows into their worlds: fills echo each theme's actual
@@ -665,7 +665,7 @@
 				{cy}
 				r={backR}
 				class="hub-back"
-				role="button"
+				role="menuitem"
 				aria-label={backLabel}
 				tabindex="0"
 				onclick={() => navigate('/')}

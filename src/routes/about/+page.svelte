@@ -23,7 +23,7 @@
 	const figs = $derived(about.highlights.slice(0, FIG_POS.length));
 </script>
 
-<svelte:head><title>{m.nav_about()} — {about.name}</title></svelte:head>
+<svelte:head><title>{m.nav_about()} — {about.name}</title><meta name="description" content={m.meta_desc_about()} /></svelte:head>
 
 <div class="page page--folio">
 	<section id="bio" class="section folio">
@@ -65,7 +65,7 @@
 							class="fig"
 							href="#note-{i}"
 							style="left:{FIG_POS[i].x}%; top:{FIG_POS[i].y}%"
-							aria-label={resolveLocalized(h.title, locale)}
+							aria-label={`${i + 1}: ${resolveLocalized(h.title, locale)}`}
 						>
 							<span class="fig-dot" style="animation-delay:{1.2 + i * 0.5}s" aria-hidden="true"
 								>{i + 1}</span

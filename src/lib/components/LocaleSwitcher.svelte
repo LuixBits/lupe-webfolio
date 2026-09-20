@@ -31,7 +31,7 @@
 	button {
 		border: 0;
 		background: transparent;
-		color: color-mix(in srgb, var(--on-hub) 82%, transparent);
+		color: color-mix(in srgb, var(--on-hub) 96%, transparent);
 		font: inherit;
 		font-size: 0.75rem;
 		font-weight: 600;
