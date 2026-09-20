@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { resolveLocalized, type Project } from './schema';
-	import { getLocale } from '$lib/paraglide/runtime';
+	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
 
 	let { projects, base }: { projects: Project[]; base: string } = $props();
 	const locale = getLocale();
@@ -9,7 +9,7 @@
 <ul class="grid">
 	{#each projects as p (p.slug)}
 		<li>
-			<a href="{base}/{p.slug}">
+			<a href={localizeHref(`${base}/${p.slug}`)}>
 				<h3>{resolveLocalized(p.title, locale)}</h3>
 				<p>{resolveLocalized(p.tagline, locale)}</p>
 				<div class="tags">

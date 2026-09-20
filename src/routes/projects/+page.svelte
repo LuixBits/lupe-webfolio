@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { projectsByCategory } from '$lib/content/projects';
 	import { resolveLocalized, type Project } from '$lib/content/schema';
-	import { getLocale } from '$lib/paraglide/runtime';
+	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
 	import * as m from '$lib/paraglide/messages';
 
 	const locale = getLocale();
@@ -18,7 +18,7 @@
 
 {#snippet tape(p: Project)}
 	<li>
-		<a class="tape" href="/projects/{p.slug}">
+		<a class="tape" href={localizeHref(`/projects/${p.slug}`)}>
 			<span class="spine" aria-hidden="true"></span>
 			<div class="label">
 				<h3>{resolveLocalized(p.title, locale)}</h3>

@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { deLocalizeUrl } from '$lib/paraglide/runtime';
+	import { localizeHref } from '$lib/paraglide/runtime';
+	import { sectionIdForUrl } from './menu';
 	import { wedge, labelArc, radialPath, polarToCartesian, annularSector } from './geometry';
 	import { menuState } from '$lib/dock.svelte';
 	import { colorForSection } from '$lib/themes';
@@ -55,27 +56,17 @@
 		return i * a + a / 2;
 	}
 
-	function sectionIndexFor(path: string): number {
-		let idx = -1;
-		let bestLen = 0;
-		items.forEach((it, i) => {
-			const href = it.href;
-			if (!href || href === '/') return;
-			if (
-				(path === href || path.startsWith(href + '/') || path.startsWith(href + '#')) &&
-				href.length > bestLen
-			) {
-				bestLen = href.length;
-				idx = i;
-			}
-		});
-		return idx;
+	// Route→section matching lives in menu.ts (sectionIdForUrl) so the layout's
+	// theme and the wheel's dock state can never disagree.
+	function sectionIndexFor(url: URL): number {
+		const id = sectionIdForUrl(url);
+		return id === null ? -1 : items.findIndex((it) => it.id === id);
 	}
 
 	// State is derived from the route: home ('/') = hub (centered); a section
 	// path = docked to that section's corner. Initialised from the path so
 	// SSR/refresh render the right state with no flash.
-	const initIdx = sectionIndexFor(deLocalizeUrl(page.url).pathname);
+	const initIdx = sectionIndexFor(page.url);
 	let mode = $state<'hub' | 'docked'>(initIdx >= 0 ? 'docked' : 'hub');
 	let selected = $state<number | null>(initIdx >= 0 ? initIdx : null);
 	let corner = $state<DockPosition>(initIdx >= 0 ? cornerFor(midAngleFor(initIdx)) : 'bottom-left');
@@ -95,7 +86,7 @@
 	}
 
 	$effect(() => {
-		const idx = sectionIndexFor(deLocalizeUrl(page.url).pathname);
+		const idx = sectionIndexFor(page.url);
 		if (idx >= 0) {
 			selected = idx;
 			corner = cornerFor(midAngleFor(idx));
@@ -293,9 +284,11 @@
 	}
 
 	// --- actions -------------------------------------------------------------
+	// Localize at the single write chokepoint so a German visitor stays on
+	// /de/* — raw menu hrefs are unprefixed and would silently switch locale.
 	function navigate(href?: string) {
 		if (!href) return;
-		(onnavigate ?? goto)(href);
+		(onnavigate ?? goto)(localizeHref(href));
 	}
 
 	function onKeydown(e: KeyboardEvent) {
