@@ -5,7 +5,7 @@
 	 *  sandboxed build, EJECT tears it down). At most one heavy surface exists
 	 *  at a time; nothing third-party loads before an explicit tap.
 	 *  With no media at all the set idles on a themed test card. */
-	import { onMount } from 'svelte';
+	import { onMount , untrack } from 'svelte';
 	import { resolveLocalized, type Project } from '$lib/content/schema';
 	import * as m from '$lib/paraglide/messages';
 	import VcrKey from './VcrKey.svelte';
@@ -30,8 +30,9 @@
 
 	/* Deterministic default channel: first available (self-hosted stills win).
 	   Set once at init, identical on SSR and client — no flash. */
-	let active = $state<ChannelId | 'none'>('none');
-	if (channels.length) active = channels[0].id;
+	let active = $state<ChannelId | 'none'>(
+		untrack(() => (channels.length ? channels[0].id : 'none'))
+	);
 
 	/** Heavy surfaces exist only after an explicit tap. */
 	let liveVideo = $state(false);

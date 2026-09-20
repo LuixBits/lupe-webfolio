@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import type { Album } from '$lib/content/schema';
 	import { resolveLocalized } from '$lib/content/schema';
 	import Video from '$lib/content/Video.svelte';
@@ -26,11 +27,12 @@
 	let dialog: HTMLDialogElement;
 	let track: HTMLDivElement;
 
-	let active = $state(start);
+	// Mounted fresh per open — capturing the initial `start`/`album` is intended.
+	let active = $state(untrack(() => start));
 	/** Index of the video slide the visitor explicitly started, if any. */
 	let playing = $state<number | null>(null);
 
-	const count = album.media.length;
+	const count = $derived(album.media.length);
 	const plateId = (i: number) => `${designation}·${i + 1}`;
 
 	const reducedMotion = () =>
