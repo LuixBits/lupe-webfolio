@@ -78,6 +78,9 @@
 <style>
 	.footer {
 		position: relative;
+		/* The footer is the ground plane: above the floating decor layer (z6) so
+		   bottom-anchored decor pieces tuck behind the strip, below content (z10). */
+		z-index: 8;
 		padding-top: var(--wave-h);
 		color: var(--on-hub);
 		isolation: isolate;
@@ -132,11 +135,20 @@
 		min-width: 0;
 	}
 	@media (max-width: 34rem) {
+		/* Small screens: stack the bar rows and cap the dock clearance so the
+		   copyright and the locale switcher never collide. */
 		.bar {
-			grid-template-columns: 1fr auto;
+			grid-template-columns: 1fr;
+			row-gap: 0.4rem;
+			padding-left: calc(clamp(1rem, 4vw, 2.5rem) + min(var(--clear-l, 0px), 10rem));
+			padding-right: calc(clamp(1rem, 4vw, 2.5rem) + min(var(--clear-r, 0px), 10rem));
 		}
 		.bar-center {
 			display: none;
+		}
+		.bar-left,
+		.bar-right {
+			justify-self: start;
 		}
 	}
 </style>

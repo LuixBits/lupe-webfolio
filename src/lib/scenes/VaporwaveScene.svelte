@@ -1,8 +1,9 @@
 <script lang="ts">
   let {
     corner = 'top-right',
-    sectionId = 'projects'
-  }: { corner?: string; sectionId?: string | null } = $props();
+    sectionId = 'projects',
+    variant = 'corner'
+  }: { corner?: string; sectionId?: string | null; variant?: 'corner' | 'hub' } = $props();
 
   // The scene is authored for the top-right corner (vanishing point at 340,0)
   // and mirrored into the other corners with a flip transform.
@@ -71,8 +72,230 @@
 
   // Geometric radii (ratio 1.2) so a scale(1 -> 1.2) loop is perfectly seamless.
   const arcRadii = Array.from({ length: 8 }, (_, i) => +(147 * 1.2 ** i).toFixed(1));
+
+  // ================= hub variant: full-square vaporwave poster =================
+  // 800x500 stage, preserveAspectRatio slice — crops gracefully, never stretches.
+  // Horizon at y=285 (57%), sun centered-ish above it, grid floor below running
+  // to the vanishing point. The wheel overlays this square's bottom-left corner,
+  // so all key motifs (sun, peaks, palm crowns) live center/right/top.
+
+  /** Deterministic 0..1 hash — no Math.random anywhere (same recipe as CosmosScene). */
+  function mix(n: number): number {
+    let x = Math.imul(n ^ 0x9e3779b9, 0x85ebca6b);
+    x ^= x >>> 13;
+    x = Math.imul(x, 0xc2b2ae35);
+    x ^= x >>> 16;
+    return (x >>> 0) / 4294967296;
+  }
+
+  const HZN = 285;
+  const SUN = { x: 430, y: 210, r: 100 };
+
+  // Slats cut out of the sun's lower half, widening downward (classic poster sun).
+  const sunSlats: [number, number][] = [
+    [188, 3],
+    [203, 4.5],
+    [220, 6],
+    [239, 8],
+    [260, 10.5],
+    [283, 13]
+  ];
+
+  // Sky scatter: dots + a few four-point sparkles, kept off the sun's face.
+  function sparklePath(x: number, y: number, s: number): string {
+    return `M ${x} ${y - s} Q ${x} ${y} ${x + s} ${y} Q ${x} ${y} ${x} ${y + s} Q ${x} ${y} ${x - s} ${y} Q ${x} ${y} ${x} ${y - s} Z`;
+  }
+  const hubStars = (() => {
+    const out: { x: number; y: number; r: number; d: number; t: number; big: boolean }[] = [];
+    for (let i = 0; i < 60 && out.length < 26; i++) {
+      const x = +(18 + 764 * mix(900 + i * 7)).toFixed(1);
+      const y = +(14 + 236 * mix(901 + i * 7)).toFixed(1);
+      const dx = x - SUN.x;
+      const dy = y - SUN.y;
+      if (dx * dx + dy * dy < 126 * 126) continue; // keep the sun's face clean
+      out.push({
+        x,
+        y,
+        r: +(0.8 + 1.3 * mix(902 + i * 7)).toFixed(2),
+        d: +(-6 * mix(903 + i * 7)).toFixed(2),
+        t: +(2.6 + 3.4 * mix(904 + i * 7)).toFixed(2),
+        big: mix(905 + i * 7) > 0.8
+      });
+    }
+    return out;
+  })();
+
+  // Perspective floor: rays fanning from the vanishing point + horizontal rows
+  // in geometric progression (ratio 1.3) so a scale(1 -> 1.3) loop about the
+  // vanishing point reads as an endless forward scroll.
+  const hubRays = (() => {
+    let s = '';
+    for (let a = 14; a <= 166.5; a += 9.5) {
+      const rad = (a * Math.PI) / 180;
+      s += `M 400 285.5 L ${(400 + 640 * Math.cos(rad)).toFixed(1)} ${(285 + 640 * Math.sin(rad)).toFixed(1)} `;
+    }
+    return s;
+  })();
+  const hubRows = Array.from({ length: 15 }, (_, i) => +(HZN + 5.5 * 1.3 ** i).toFixed(1))
+    .map((y) => `M -400 ${y} L 1200 ${y}`)
+    .join(' ');
 </script>
 
+{#if variant === 'hub'}
+<div class="vapor-hub" aria-hidden="true" data-section={sectionId ?? undefined}>
+  <svg class="poster" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <!-- dusk sky: near-black zenith warming to accent haze at the horizon -->
+      <linearGradient id="{uid}-hsky" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2={HZN}>
+        <stop offset="0" class="hs-sky-a" />
+        <stop offset="0.46" class="hs-sky-b" />
+        <stop offset="0.82" class="hs-sky-c" />
+        <stop offset="1" class="hs-sky-d" />
+      </linearGradient>
+      <linearGradient id="{uid}-hground" gradientUnits="userSpaceOnUse" x1="0" y1={HZN} x2="0" y2="500">
+        <stop offset="0" class="hs-gr-a" />
+        <stop offset="0.3" class="hs-gr-b" />
+        <stop offset="1" class="hs-gr-c" />
+      </linearGradient>
+      <linearGradient
+        id="{uid}-hsun"
+        gradientUnits="userSpaceOnUse"
+        x1={SUN.x}
+        y1={SUN.y - SUN.r}
+        x2={SUN.x}
+        y2={SUN.y + SUN.r}
+      >
+        <stop class="stop-gold" offset="0" />
+        <stop class="stop-gold" offset="0.4" />
+        <stop class="stop-pink" offset="1" />
+      </linearGradient>
+      <radialGradient id="{uid}-hglow">
+        <stop class="stop-glow-a" offset="0" />
+        <stop class="stop-glow-b" offset="0.45" />
+        <stop class="stop-glow-c" offset="0.75" />
+      </radialGradient>
+      <radialGradient id="{uid}-hpool">
+        <stop class="hs-pool-a" offset="0" />
+        <stop class="stop-glow-c" offset="1" />
+      </radialGradient>
+      <!-- horizon strip: pink flanks flaring to gold beneath the sun -->
+      <linearGradient id="{uid}-hzn" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="800" y2="0">
+        <stop offset="0" class="hs-hz-edge" />
+        <stop offset="0.26" class="hs-hz-pink" />
+        <stop offset="0.54" class="hs-hz-gold" />
+        <stop offset="0.8" class="hs-hz-pink" />
+        <stop offset="1" class="hs-hz-edge" />
+      </linearGradient>
+      <!-- classic sun: disc with widening slats sliced out of its lower half -->
+      <mask id="{uid}-hsunm" maskUnits="userSpaceOnUse" x="320" y="100" width="220" height="220">
+        <circle cx={SUN.x} cy={SUN.y} r={SUN.r} fill="#fff" />
+        {#each sunSlats as [y, h] (y)}
+          <rect x="322" y={y} width="216" height={h} fill="#000" />
+        {/each}
+      </mask>
+      <!-- grid fades out as it meets the horizon so the scroll loop is seamless -->
+      <linearGradient id="{uid}-hfadeg" gradientUnits="userSpaceOnUse" x1="0" y1={HZN} x2="0" y2="510">
+        <stop offset="0" stop-color="#fff" stop-opacity="0" />
+        <stop offset="0.14" stop-color="#fff" stop-opacity="1" />
+        <stop offset="1" stop-color="#fff" stop-opacity="1" />
+      </linearGradient>
+      <mask id="{uid}-hfade" maskUnits="userSpaceOnUse" x="-400" y="280" width="1600" height="240">
+        <rect x="-400" y={HZN} width="1600" height="225" fill="url(#{uid}-hfadeg)" />
+      </mask>
+      <!-- one palm, reused mirrored+scaled: crown at origin, trunk to y≈320 -->
+      <g id="{uid}-palm">
+        <path
+          class="palm-fill"
+          d="M -3 2 C 6 84 20 190 34 318 L 50 320 C 32 192 16 82 7 -2 Z
+             M 0 0 C -4 -34 2 -62 14 -84 C 10 -56 8 -30 6 -2 Z
+             M 2 0 C 26 -30 52 -44 84 -46 C 56 -30 32 -12 8 6 Z
+             M 4 2 C 36 -6 72 2 98 24 C 68 16 36 12 6 10 Z
+             M 4 6 C 32 16 56 36 68 66 C 46 46 24 28 2 12 Z
+             M -2 0 C -24 -32 -48 -46 -80 -48 C -52 -30 -28 -12 -6 6 Z
+             M -4 2 C -34 -8 -68 -2 -94 18 C -64 12 -34 10 -6 10 Z
+             M -4 6 C -28 18 -48 38 -58 64 C -38 44 -18 26 0 12 Z"
+        />
+        <circle class="palm-fill" cx="-6" cy="5" r="5" />
+        <circle class="palm-fill" cx="6" cy="8" r="4.5" />
+      </g>
+    </defs>
+
+    <!-- sky -->
+    <rect x="0" y="0" width="800" height={HZN + 1} fill="url(#{uid}-hsky)" />
+
+    <!-- star field -->
+    <g class="hstars">
+      {#each hubStars as st, i (i)}
+        {#if st.big}
+          <path
+            class="hstar hspark"
+            d={sparklePath(st.x, st.y, 3 + st.r * 2.4)}
+            style={`--t:${st.t}s; --d:${st.d}s`}
+          />
+        {:else}
+          <circle class="hstar" cx={st.x} cy={st.y} r={st.r} style={`--t:${st.t}s; --d:${st.d}s`} />
+        {/if}
+      {/each}
+    </g>
+
+    <!-- sunset haze streaks balancing the left sky -->
+    <g class="hhaze">
+      <path class="hz-gold" d="M 126 166 H 238" />
+      <path class="hz-pink" d="M 158 182 H 250" />
+      <path class="hz-gold" d="M 560 96 H 642" />
+    </g>
+
+    <!-- the sun: soft halo, banded disc; ground rect below covers its set limb -->
+    <circle class="hsun-glow" cx={SUN.x} cy={SUN.y} r="205" fill="url(#{uid}-hglow)" />
+    <circle cx={SUN.x} cy={SUN.y} r={SUN.r} fill="url(#{uid}-hsun)" mask="url(#{uid}-hsunm)" />
+    <!-- thin cloud bar drifting across the sun's face -->
+    <path class="hcloud" d="M 352 170 H 556" />
+
+    <!-- wireframe ranges seated on the horizon, complete peaks at both sides -->
+    <g class="hridges">
+      <path class="ridge-back" d="M 18 285 L 82 234 L 122 258 L 187 210 L 258 285 Z" />
+      <path class="ridge-back" d="M 540 285 L 606 238 L 648 260 L 712 220 L 780 285 Z" />
+      <path class="ridge-ghost" d="M 60 285 L 132 240 L 175 262 L 236 226 L 300 285 Z" transform="translate(2 -1.4)" />
+      <path class="ridge-front" d="M 60 285 L 132 240 L 175 262 L 236 226 L 300 285 Z" />
+      <path class="ridge-ghost" d="M 588 285 L 650 246 L 690 264 L 742 238 L 786 285 Z" transform="translate(2 -1.4)" />
+      <path class="ridge-front" d="M 588 285 L 650 246 L 690 264 L 742 238 L 786 285 Z" />
+    </g>
+
+    <!-- floor -->
+    <rect x="0" y={HZN} width="800" height={500 - HZN} fill="url(#{uid}-hground)" />
+    <ellipse cx={SUN.x} cy={HZN + 18} rx="195" ry="36" fill="url(#{uid}-hpool)" class="hpool" />
+    <g mask="url(#{uid}-hfade)">
+      <path class="hrays-glow" d={hubRays} />
+      <path class="hrays" d={hubRays} />
+      <g class="hflow">
+        <path class="hrows-glow" d={hubRows} vector-effect="non-scaling-stroke" />
+        <path class="hrows" d={hubRows} vector-effect="non-scaling-stroke" />
+      </g>
+    </g>
+
+    <!-- horizon strip -->
+    <path class="hzn-haze" d="M 0 285 L 800 285" stroke="url(#{uid}-hzn)" />
+    <path class="hzn-core" d="M 0 285 L 800 285" stroke="url(#{uid}-hzn)" />
+
+    <!-- foreground palms: tall one right, small mirrored one far left; the
+         bottom-left inner corner (under the wheel) stays clear of key motifs -->
+    <g class="hsway hsway-a">
+      <use href="#{uid}-palm" transform="translate(655 200)" />
+    </g>
+    <g class="hsway hsway-b">
+      <use href="#{uid}-palm" transform="translate(100 250) scale(-0.72 0.72)" />
+    </g>
+  </svg>
+
+  <!-- drifting neon motes -->
+  <div class="hp hp1"></div>
+  <div class="hp hp2"></div>
+  <div class="hp hp3"></div>
+
+  <!-- CRT scanlines -->
+  <div class="hub-scan"></div>
+</div>
+{:else}
 <div class="vapor-corner" aria-hidden="true" data-section={sectionId ?? undefined}>
   <div class="scene" style:transform={flip}>
     <!-- sky halo seating the radial menu -->
@@ -158,6 +381,7 @@
     <div class="scan"></div>
   </div>
 </div>
+{/if}
 
 <style>
   .vapor-corner {
@@ -447,16 +671,297 @@
     100% { transform: translate(calc(var(--k) * -60px), calc(var(--k) * 70px)); opacity: 0; }
   }
 
+  /* ================= hub variant: full-square poster ================= */
+  .vapor-hub {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .poster {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* sky gradient stops */
+  .hs-sky-a {
+    stop-color: color-mix(in srgb, var(--bg, #241046) 55%, #05010e);
+  }
+  .hs-sky-b {
+    stop-color: var(--bg, #241046);
+  }
+  .hs-sky-c {
+    stop-color: color-mix(in srgb, var(--slice-bg, #7b4bd6) 42%, var(--bg, #241046));
+  }
+  .hs-sky-d {
+    stop-color: color-mix(in srgb, var(--accent, #ff5ed1) 34%, var(--bg, #241046));
+  }
+
+  /* floor gradient stops */
+  .hs-gr-a {
+    stop-color: color-mix(in srgb, var(--accent, #ff5ed1) 26%, var(--bg, #241046));
+  }
+  .hs-gr-b {
+    stop-color: color-mix(in srgb, var(--bg, #241046) 82%, #06021a);
+  }
+  .hs-gr-c {
+    stop-color: color-mix(in srgb, var(--bg, #241046) 55%, #05010e);
+  }
+
+  .hs-pool-a {
+    stop-color: color-mix(in srgb, var(--vapor-sun, #ffd36e) 30%, transparent);
+  }
+
+  /* horizon strip stops */
+  .hs-hz-edge {
+    stop-color: transparent;
+  }
+  .hs-hz-pink {
+    stop-color: color-mix(in srgb, var(--vapor-grid, #ff5ed1) 75%, transparent);
+  }
+  .hs-hz-gold {
+    stop-color: var(--vapor-sun, #ffd36e);
+  }
+
+  /* stars */
+  .hstar {
+    fill: color-mix(in srgb, var(--fg, #ffe9ff) 85%, transparent);
+    animation: htwinkle var(--t, 3.4s) ease-in-out infinite alternate;
+    animation-delay: var(--d, 0s);
+  }
+  .hspark {
+    fill: color-mix(in srgb, var(--vapor-sun, #ffd36e) 88%, transparent);
+  }
+
+  /* sunset haze streaks + cloud bar */
+  .hhaze path,
+  .hcloud {
+    fill: none;
+    stroke-linecap: round;
+  }
+  .hz-gold {
+    stroke: color-mix(in srgb, var(--vapor-sun, #ffd36e) 42%, transparent);
+    stroke-width: 2.2;
+  }
+  .hz-pink {
+    stroke: color-mix(in srgb, var(--accent, #ff5ed1) 45%, transparent);
+    stroke-width: 2;
+  }
+  .hcloud {
+    stroke: color-mix(in srgb, var(--bg, #241046) 86%, #05010e);
+    stroke-width: 5;
+    opacity: 0.9;
+    animation: hclouddrift 26s ease-in-out infinite alternate;
+  }
+
+  /* sun */
+  .hsun-glow {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: glowpulse 6.5s ease-in-out infinite alternate;
+  }
+
+  /* mountains share the corner ridge palette */
+  .hridges {
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent, #ff5ed1) 35%, transparent));
+  }
+
+  /* floor glow pool beneath the sun */
+  .hpool {
+    opacity: 0.55;
+    animation: hpoolpulse 6.5s ease-in-out infinite alternate;
+  }
+
+  /* perspective grid */
+  .hrays,
+  .hrays-glow,
+  .hrows,
+  .hrows-glow {
+    fill: none;
+  }
+  .hrays {
+    stroke: color-mix(in srgb, var(--vapor-grid, #ff5ed1) 66%, transparent);
+    stroke-width: 1;
+  }
+  .hrays-glow {
+    stroke: var(--vapor-grid, #ff5ed1);
+    stroke-width: 3.2;
+    opacity: 0.1;
+  }
+  .hrows {
+    stroke: color-mix(in srgb, var(--vapor-grid, #ff5ed1) 85%, transparent);
+    stroke-width: 1;
+  }
+  .hrows-glow {
+    stroke: var(--vapor-grid, #ff5ed1);
+    stroke-width: 3.4;
+    opacity: 0.15;
+  }
+  .hflow {
+    transform-box: view-box;
+    transform-origin: 400px 285px;
+    animation: hubflow 4.6s linear infinite;
+  }
+
+  /* horizon line */
+  .hzn-haze {
+    fill: none;
+    stroke-width: 7;
+    opacity: 0.3;
+  }
+  .hzn-core {
+    fill: none;
+    stroke-width: 1.7;
+    opacity: 0.9;
+    animation: hznshimmer 7s ease-in-out infinite alternate;
+  }
+
+  /* palms */
+  .palm-fill {
+    fill: color-mix(in srgb, var(--bg, #241046) 42%, #05010e);
+    stroke: color-mix(in srgb, var(--accent, #ff5ed1) 42%, transparent);
+    stroke-width: 0.9;
+    stroke-linejoin: round;
+  }
+  .hsway {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+  }
+  .hsway-a {
+    animation: hsway 8s ease-in-out infinite alternate;
+  }
+  .hsway-b {
+    animation: hsway 9.5s ease-in-out infinite alternate;
+    animation-delay: -4s;
+  }
+
+  /* drifting neon motes */
+  .hp {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+  .hp1 {
+    width: 5px;
+    height: 5px;
+    right: 12%;
+    top: 16%;
+    background: var(--accent, #ff5ed1);
+    box-shadow: 0 0 10px 2px color-mix(in srgb, var(--accent, #ff5ed1) 75%, transparent);
+    animation: hdrift1 13s linear infinite;
+  }
+  .hp2 {
+    width: 4px;
+    height: 4px;
+    left: 26%;
+    top: 11%;
+    background: var(--vapor-sun, #ffd36e);
+    box-shadow: 0 0 9px 2px color-mix(in srgb, var(--vapor-sun, #ffd36e) 70%, transparent);
+    animation: hdrift2 16s linear infinite;
+    animation-delay: -6s;
+  }
+  .hp3 {
+    width: 3px;
+    height: 3px;
+    right: 30%;
+    top: 34%;
+    background: var(--vapor-grid, #ff5ed1);
+    box-shadow: 0 0 8px 2px color-mix(in srgb, var(--vapor-grid, #ff5ed1) 70%, transparent);
+    animation: hdrift3 11s linear infinite;
+    animation-delay: -3s;
+  }
+
+  /* CRT scanlines over the whole poster */
+  .hub-scan {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0 2.6px,
+      color-mix(in srgb, #05010e 45%, transparent) 2.6px 3.6px
+    );
+    opacity: 0.3;
+  }
+
+  @keyframes hubflow {
+    from { transform: scale(1); }
+    to   { transform: scale(1.3); }
+  }
+
+  @keyframes htwinkle {
+    from { opacity: 0.3; }
+    to   { opacity: 1; }
+  }
+
+  @keyframes hznshimmer {
+    from { opacity: 0.7; }
+    to   { opacity: 1; }
+  }
+
+  @keyframes hpoolpulse {
+    from { opacity: 0.4; }
+    to   { opacity: 0.65; }
+  }
+
+  @keyframes hsway {
+    from { transform: rotate(-0.7deg); }
+    to   { transform: rotate(0.9deg); }
+  }
+
+  @keyframes hclouddrift {
+    from { transform: translateX(-9px); }
+    to   { transform: translateX(11px); }
+  }
+
+  @keyframes hdrift1 {
+    0%   { transform: translate(30px, -24px); opacity: 0; }
+    12%  { opacity: 0.9; }
+    80%  { opacity: 0.5; }
+    100% { transform: translate(-46px, 30px); opacity: 0; }
+  }
+
+  @keyframes hdrift2 {
+    0%   { transform: translate(-26px, -14px); opacity: 0; }
+    15%  { opacity: 0.8; }
+    82%  { opacity: 0.4; }
+    100% { transform: translate(40px, 26px); opacity: 0; }
+  }
+
+  @keyframes hdrift3 {
+    0%   { transform: translate(18px, -26px); opacity: 0; }
+    14%  { opacity: 0.85; }
+    80%  { opacity: 0.45; }
+    100% { transform: translate(-32px, 28px); opacity: 0; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .arcs,
     .sun-bands,
     .sun-glow,
-    .particle {
+    .particle,
+    .hflow,
+    .hstar,
+    .hsun-glow,
+    .hpool,
+    .hzn-core,
+    .hsway,
+    .hcloud,
+    .hp {
       animation: none !important;
     }
     .particle {
       transform: none;
       opacity: 0.45;
+    }
+    .hp {
+      transform: none;
+      opacity: 0.4;
     }
   }
 </style>
