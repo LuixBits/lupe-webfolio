@@ -535,18 +535,24 @@
 
   /* ---- neon grid ---- */
   .grid {
-    /* reveal the plane only beyond the horizon; a touch dimmer near it */
+    /* reveal the plane only beyond the horizon, then fade it back out well
+       before the mount's edge. The outer fade must live HERE, not only on
+       .scene: the grid's animations promote it to its own compositor layer,
+       which escapes ancestor masks in Chromium and used to end in a hard cut
+       at the overflow edge. */
     -webkit-mask-image: radial-gradient(
       circle calc(var(--k) * 481px) at 100% 0%,
       transparent 0 calc(var(--k) * 204px),
       rgba(0, 0, 0, 0.55) calc(var(--k) * 238px),
-      #000 calc(var(--k) * 305px)
+      #000 calc(var(--k) * 305px) calc(var(--k) * 360px),
+      transparent calc(var(--k) * 462px)
     );
     mask-image: radial-gradient(
       circle calc(var(--k) * 481px) at 100% 0%,
       transparent 0 calc(var(--k) * 204px),
       rgba(0, 0, 0, 0.55) calc(var(--k) * 238px),
-      #000 calc(var(--k) * 305px)
+      #000 calc(var(--k) * 305px) calc(var(--k) * 360px),
+      transparent calc(var(--k) * 462px)
     );
   }
 

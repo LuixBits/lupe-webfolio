@@ -132,6 +132,18 @@
 		hobbies: "font-family:'Space Grotesk', system-ui, sans-serif; letter-spacing:0.04em;"
 	};
 
+	// Wedges are windows into their worlds: fills echo each theme's actual
+	// environment (pale meadow, dusk purple, dark red-nebula sky, pale water)
+	// instead of a flat toy palette. `accent` drives the themed hover glow.
+	const WEDGE_STYLE: Record<string, { g: [string, string, string]; label: string; accent: string }> =
+		{
+			about: { g: ['#f5faf5', '#d6ebdb', '#aed1b7'], label: '#12251a', accent: '#4f8a63' },
+			projects: { g: ['#4b2a7d', '#2c1454', '#1b0a36'], label: '#ffe9ff', accent: '#ff5ed1' },
+			hobbies: { g: ['#1d2447', '#10142e', '#090c1c'], label: '#e9edff', accent: '#ff7a67' },
+			cv: { g: ['#f4fbfd', '#d3ecf4', '#abd9e7'], label: '#08313b', accent: '#2b9cba' }
+		};
+	const styleFor = (id: string) => WEDGE_STYLE[id] ?? WEDGE_STYLE.about;
+
 	// --- geometry ------------------------------------------------------------
 	interface MainSlice {
 		item: MenuItem;
@@ -351,9 +363,9 @@
 					{cy}
 					r={radius}
 				>
-					<stop offset="0%" stop-color={lighten(slice.color, 0.24)} />
-					<stop offset="58%" stop-color={slice.color} />
-					<stop offset="100%" stop-color={darken(slice.color, 0.15)} />
+					<stop offset="0%" stop-color={styleFor(slice.item.id).g[0]} />
+					<stop offset="58%" stop-color={styleFor(slice.item.id).g[1]} />
+					<stop offset="100%" stop-color={styleFor(slice.item.id).g[2]} />
 				</radialGradient>
 			{/each}
 			{#each childSlices as sub (sub.item.id)}
@@ -363,148 +375,6 @@
 			<path id="back-arc" d={backArc} />
 			<clipPath id="clip-sun"><circle cx={art.sun.x} cy={art.sun.y} r={art.sun.r} /></clipPath>
 
-			<!-- ===== Premium wheel finish (visual layer only) =====================
-			     Wedge finish: a blurred-alpha bump map drives a soft specular sheen
-			     along each wedge's edges, plus an inset vignette ring for depth. The
-			     distant light sways slowly for a quiet idle shimmer; reduced-motion
-			     swaps in the still twin. -->
-			<filter id="rm-sheen" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
-				<feGaussianBlur in="SourceAlpha" stdDeviation="5" result="bump" />
-				<feSpecularLighting in="bump" surfaceScale="1.7" specularConstant="0.42" specularExponent="15" lighting-color="#ffffff" result="spec">
-					<feDistantLight azimuth="235" elevation="56">
-						<animate
-							attributeName="azimuth"
-							values="205;295;205"
-							keyTimes="0;0.5;1"
-							calcMode="spline"
-							keySplines="0.42 0 0.58 1;0.42 0 0.58 1"
-							dur="26s"
-							repeatCount="indefinite"
-						/>
-					</feDistantLight>
-				</feSpecularLighting>
-				<feComposite in="spec" in2="SourceAlpha" operator="in" result="sheen" />
-				<feComposite in="SourceAlpha" in2="bump" operator="arithmetic" k1="0" k2="1" k3="-1" k4="0" result="ring0" />
-				<feComponentTransfer in="ring0" result="ring">
-					<feFuncA type="linear" slope="0.3" />
-				</feComponentTransfer>
-				<feMerge>
-					<feMergeNode in="SourceGraphic" />
-					<feMergeNode in="ring" />
-					<feMergeNode in="sheen" />
-				</feMerge>
-			</filter>
-
-			<!-- Still twin of #rm-sheen, used when the user prefers reduced motion. -->
-			<filter id="rm-sheen-still" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
-				<feGaussianBlur in="SourceAlpha" stdDeviation="5" result="bump" />
-				<feSpecularLighting in="bump" surfaceScale="1.7" specularConstant="0.42" specularExponent="15" lighting-color="#ffffff" result="spec">
-					<feDistantLight azimuth="235" elevation="56" />
-				</feSpecularLighting>
-				<feComposite in="spec" in2="SourceAlpha" operator="in" result="sheen" />
-				<feComposite in="SourceAlpha" in2="bump" operator="arithmetic" k1="0" k2="1" k3="-1" k4="0" result="ring0" />
-				<feComponentTransfer in="ring0" result="ring">
-					<feFuncA type="linear" slope="0.3" />
-				</feComponentTransfer>
-				<feMerge>
-					<feMergeNode in="SourceGraphic" />
-					<feMergeNode in="ring" />
-					<feMergeNode in="sheen" />
-				</feMerge>
-			</filter>
-
-			<!-- Hover / active / focus: the halo is made by blurring + saturating the
-			     slice itself, so the glow is automatically themed per wedge colour. -->
-			<filter id="rm-glow" x="-45%" y="-45%" width="190%" height="190%" color-interpolation-filters="sRGB">
-				<feGaussianBlur in="SourceGraphic" stdDeviation="10" result="h0" />
-				<feColorMatrix in="h0" type="saturate" values="1.6" result="h1" />
-				<feComponentTransfer in="h1" result="halo">
-					<feFuncA type="linear" slope="0.8" />
-				</feComponentTransfer>
-				<feGaussianBlur in="SourceAlpha" stdDeviation="6" result="d0" />
-				<feOffset in="d0" dy="5" result="d1" />
-				<feFlood flood-color="#10131a" flood-opacity="0.25" result="dc" />
-				<feComposite in="dc" in2="d1" operator="in" result="lift" />
-				<feGaussianBlur in="SourceAlpha" stdDeviation="5" result="bump" />
-				<feSpecularLighting in="bump" surfaceScale="2" specularConstant="0.65" specularExponent="17" lighting-color="#ffffff" result="spec">
-					<feDistantLight azimuth="235" elevation="60" />
-				</feSpecularLighting>
-				<feComposite in="spec" in2="SourceAlpha" operator="in" result="sheen" />
-				<feComposite in="SourceAlpha" in2="bump" operator="arithmetic" k1="0" k2="1" k3="-1" k4="0" result="ring0" />
-				<feComponentTransfer in="ring0" result="ring">
-					<feFuncA type="linear" slope="0.2" />
-				</feComponentTransfer>
-				<feMerge>
-					<feMergeNode in="halo" />
-					<feMergeNode in="lift" />
-					<feMergeNode in="SourceGraphic" />
-					<feMergeNode in="ring" />
-					<feMergeNode in="sheen" />
-				</feMerge>
-			</filter>
-
-			<!-- Back hub as a jewel: dome bump map -> tight top gleam + low cool rim
-			     light, inner vignette for the cabochon curve, grounding shadow. -->
-			<filter id="rm-hub" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
-				<feGaussianBlur in="SourceAlpha" stdDeviation="7" result="d0" />
-				<feOffset in="d0" dy="4" result="d1" />
-				<feFlood flood-color="#10131a" flood-opacity="0.3" result="dc" />
-				<feComposite in="dc" in2="d1" operator="in" result="ground" />
-				<feGaussianBlur in="SourceAlpha" stdDeviation="13" result="dome" />
-				<feSpecularLighting in="dome" surfaceScale="3.2" specularConstant="0.8" specularExponent="24" lighting-color="#ffffff" result="g0">
-					<feDistantLight azimuth="235" elevation="62" />
-				</feSpecularLighting>
-				<feComposite in="g0" in2="SourceAlpha" operator="in" result="gleam" />
-				<feSpecularLighting in="dome" surfaceScale="2.2" specularConstant="0.3" specularExponent="8" lighting-color="#ffffff" result="r0">
-					<feDistantLight azimuth="55" elevation="16" />
-				</feSpecularLighting>
-				<feComposite in="r0" in2="SourceAlpha" operator="in" result="rimlight" />
-				<feComposite in="SourceAlpha" in2="dome" operator="arithmetic" k1="0" k2="1" k3="-1" k4="0" result="v0" />
-				<feComponentTransfer in="v0" result="vignette">
-					<feFuncA type="linear" slope="0.35" />
-				</feComponentTransfer>
-				<feMerge>
-					<feMergeNode in="ground" />
-					<feMergeNode in="SourceGraphic" />
-					<feMergeNode in="vignette" />
-					<feMergeNode in="rimlight" />
-					<feMergeNode in="gleam" />
-				</feMerge>
-			</filter>
-
-			<!-- Hub on hover/focus: same jewel plus a self-coloured halo. -->
-			<filter id="rm-hub-glow" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
-				<feGaussianBlur in="SourceGraphic" stdDeviation="12" result="h0" />
-				<feColorMatrix in="h0" type="saturate" values="1.5" result="h1" />
-				<feComponentTransfer in="h1" result="halo">
-					<feFuncA type="linear" slope="0.75" />
-				</feComponentTransfer>
-				<feGaussianBlur in="SourceAlpha" stdDeviation="8" result="d0" />
-				<feOffset in="d0" dy="5" result="d1" />
-				<feFlood flood-color="#10131a" flood-opacity="0.32" result="dc" />
-				<feComposite in="dc" in2="d1" operator="in" result="ground" />
-				<feGaussianBlur in="SourceAlpha" stdDeviation="13" result="dome" />
-				<feSpecularLighting in="dome" surfaceScale="3.4" specularConstant="0.95" specularExponent="24" lighting-color="#ffffff" result="g0">
-					<feDistantLight azimuth="235" elevation="62" />
-				</feSpecularLighting>
-				<feComposite in="g0" in2="SourceAlpha" operator="in" result="gleam" />
-				<feSpecularLighting in="dome" surfaceScale="2.2" specularConstant="0.4" specularExponent="8" lighting-color="#ffffff" result="r0">
-					<feDistantLight azimuth="55" elevation="16" />
-				</feSpecularLighting>
-				<feComposite in="r0" in2="SourceAlpha" operator="in" result="rimlight" />
-				<feComposite in="SourceAlpha" in2="dome" operator="arithmetic" k1="0" k2="1" k3="-1" k4="0" result="v0" />
-				<feComponentTransfer in="v0" result="vignette">
-					<feFuncA type="linear" slope="0.3" />
-				</feComponentTransfer>
-				<feMerge>
-					<feMergeNode in="halo" />
-					<feMergeNode in="ground" />
-					<feMergeNode in="SourceGraphic" />
-					<feMergeNode in="vignette" />
-					<feMergeNode in="rimlight" />
-					<feMergeNode in="gleam" />
-				</feMerge>
-			</filter>
 		</defs>
 
 		<!-- Main wedges. Each is a group: coloured wedge + clipped theme art +
@@ -515,6 +385,7 @@
 				class="wedge"
 				class:faded={mode === 'docked' && selected !== slice.index}
 				class:expanded={expandedIdx === slice.index && childSlices.length > 0}
+				style="--wa:{styleFor(slice.item.id).accent}"
 				onmouseenter={() => enterWedge(slice.index)}
 				onmouseleave={leaveWedge}
 				role="presentation"
@@ -567,6 +438,18 @@
 							<circle cx={s.x} cy={s.y} r={art.scallopR * 0.28} class="water-scallop" />
 						{/each}
 					{:else if slice.item.id === 'hobbies'}
+						<!-- soft H-alpha nebula wisp: stacked low-alpha ellipses -->
+						{#each [[0.55, 225, 46, 26, -28], [0.62, 232, 30, 17, -20], [0.48, 218, 20, 12, -35]] as [rf, a, rx, ry, rot], i (i)}
+							{@const p = polarToCartesian(cx, cy, radius * rf, a)}
+							<ellipse
+								cx={p.x}
+								cy={p.y}
+								{rx}
+								{ry}
+								transform="rotate({rot} {p.x} {p.y})"
+								class="cosmos-nebula"
+							/>
+						{/each}
 						<polyline points={art.constellation} class="cosmos-line" />
 						{#each art.stars as s, i (i)}
 							<circle cx={s.x} cy={s.y} r={s.r} class="cosmos-star" />
@@ -594,7 +477,8 @@
 				     Very short labels (like "CV") get extra size + tracking. -->
 				<text
 					class="label"
-					style="{WEDGE_TYPO[slice.item.id] ?? ''}{slice.item.label().length <= 3
+					style="fill:{styleFor(slice.item.id).label}; {WEDGE_TYPO[slice.item.id] ?? ''}{slice
+						.item.label().length <= 3
 						? 'font-size:1.34rem; letter-spacing:0.14em;'
 						: ''}"
 				>
@@ -674,6 +558,9 @@
 			</g>
 		{/each}
 
+		<!-- Luminous outer rim: the same hairline language as the hub seams. -->
+		<circle {cx} {cy} r={radius} class="rim" class:docked={mode === 'docked'} />
+
 		{#if mode === 'docked'}
 			<!-- Bigger corner hub = Back, with the word curved along its center. -->
 			<circle
@@ -732,9 +619,8 @@
 		height: 144%;
 		overflow: visible;
 		outline: none;
-		/* Whole-wheel ambient shadow: a soft floating ring under the disk. */
-		filter: drop-shadow(0 24px 48px rgba(16, 19, 26, 0.18))
-			drop-shadow(0 2px 8px rgba(16, 19, 26, 0.1));
+		/* One quiet grounding shadow — the crisp rim does the framing. */
+		filter: drop-shadow(0 10px 28px rgba(8, 10, 18, 0.3));
 		touch-action: manipulation;
 		-webkit-tap-highlight-color: transparent;
 	}
@@ -750,6 +636,8 @@
 	}
 	.wedge:hover:not(.faded) {
 		transform: scale(1.03);
+		filter: drop-shadow(0 0 16px color-mix(in srgb, var(--wa, #fff) 65%, transparent))
+			brightness(1.05);
 	}
 	.wedge.faded {
 		opacity: 0;
@@ -761,20 +649,16 @@
 	}
 
 	.slice {
-		stroke: var(--bg, #10131b);
-		stroke-width: 1.5;
+		/* Same luminous hairline as the hub seams — the wheel's internal cross. */
+		stroke: rgba(235, 242, 255, 0.38);
+		stroke-width: 1.25;
 		stroke-linejoin: round;
 		cursor: pointer;
 		pointer-events: visiblePainted; /* re-enable under the root's none */
-		outline: none; /* keyboard focus is shown via the glow filter, not the UA box */
-		/* Per-wedge sheen + inset vignette; the light inside sways slowly for
-		   idle life (reduced-motion swaps in the still twin below). */
-		filter: url(#rm-sheen);
+		outline: none; /* keyboard focus is shown via the themed glow, not the UA box */
 	}
-	.wedge:hover .slice:not(.sub),
-	.slice:focus-visible,
-	.slice:active {
-		filter: url(#rm-glow);
+	.slice:focus-visible {
+		filter: drop-shadow(0 0 12px color-mix(in srgb, var(--wa, #fff) 70%, transparent));
 		outline: none;
 	}
 
@@ -805,6 +689,10 @@
 	.cosmos-star {
 		fill: #eaf4ff;
 		opacity: 0.95;
+	}
+	.cosmos-nebula {
+		fill: #c94848;
+		opacity: 0.11;
 	}
 	.cosmos-line {
 		fill: none;
@@ -855,7 +743,6 @@
 	.slice.ring-seg {
 		fill: var(--sub-fill, #d9a441);
 		stroke-width: 1.25;
-		filter: url(#rm-sheen);
 		transform-box: fill-box;
 		transform-origin: center;
 		animation: sub-in 240ms cubic-bezier(0.34, 1.3, 0.5, 1) both;
@@ -865,7 +752,7 @@
 	.slice.ring-seg:hover,
 	.slice.ring-seg:focus-visible {
 		fill: var(--sub-fill-hover, #c48f2f);
-		filter: url(#rm-glow);
+		filter: drop-shadow(0 0 10px color-mix(in srgb, var(--wa, #fff) 60%, transparent));
 	}
 	.label.ring-label {
 		fill: #10131a;
@@ -907,16 +794,15 @@
 
 	.hub-back {
 		fill: var(--hub-bg, #2f4f3a);
-		/* Hairline accent ring: the jewel's setting. */
-		stroke: var(--accent, #d9a441);
+		stroke: rgba(235, 242, 255, 0.45);
 		stroke-width: 1.25;
 		cursor: pointer;
 		pointer-events: visiblePainted; /* re-enable under the root's none */
-		filter: url(#rm-hub);
 		transform-box: fill-box;
 		transform-origin: center;
 		transition:
 			transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+			filter 200ms ease,
 			stroke-width 200ms ease;
 	}
 	/* Gentle breathing while at rest (kept off the interactive states so the
@@ -926,13 +812,12 @@
 	}
 	.hub-back:hover,
 	.hub-back:focus-visible {
-		filter: url(#rm-hub-glow);
+		filter: brightness(1.25) drop-shadow(0 0 12px color-mix(in srgb, var(--accent, #fff) 55%, transparent));
 		transform: scale(1.045);
-		stroke-width: 2;
+		stroke-width: 1.75;
 		outline: none;
 	}
 	.hub-back:active {
-		filter: url(#rm-hub-glow);
 		transform: scale(1.01);
 	}
 	@keyframes rm-breathe {
@@ -954,6 +839,17 @@
 		fill: var(--on-hub, #eaf4ee);
 		pointer-events: none;
 		user-select: none;
+	}
+
+	.rim {
+		fill: none;
+		stroke: rgba(235, 242, 255, 0.5);
+		stroke-width: 1.25;
+		pointer-events: none;
+	}
+	/* Docked: the rim arc still frames the visible quarter. */
+	.rim.docked {
+		stroke: rgba(235, 242, 255, 0.35);
 	}
 
 	/* Shrink the wheel on small screens so it never overflows. */
@@ -985,13 +881,7 @@
 		.hub-back {
 			transition: none;
 		}
-		/* Still sheen (no SMIL light sway), no breathing, no scale — the glow
-		   states remain as static feedback. The ring-seg selector must match the
-		   base rule's specificity or the animated sheen wins. */
-		.slice,
-		.slice.ring-seg {
-			filter: url(#rm-sheen-still);
-		}
+		/* No scale lifts — the glow states remain as static feedback. */
 		.wedge:hover:not(.faded) {
 			transform: none;
 		}
