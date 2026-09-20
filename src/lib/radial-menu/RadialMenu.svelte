@@ -291,7 +291,8 @@
 		width: var(--size);
 		height: var(--size);
 		transform: translate(-50%, -50%);
-		transition: transform 700ms linear;
+		/* Faster, eased slide to the corner — accelerates then settles. */
+		transition: transform 520ms cubic-bezier(0.66, 0, 0.28, 1);
 		z-index: 20;
 	}
 	.menu-root[data-mode='docked'][data-corner='bottom-left'] {
