@@ -78,7 +78,7 @@
 	// random section) — ignore wheel input while a glide is in flight.
 	let gliding = $state(false);
 	let glideTimer: ReturnType<typeof setTimeout> | undefined;
-	let prevMode = mode;
+	let prevMode: 'hub' | 'docked' = initIdx >= 0 ? 'docked' : 'hub';
 
 	// Small grace period on leave so the pointer can cross the gap between the
 	// wedge and its outer sub-segment ring without the ring collapsing.
