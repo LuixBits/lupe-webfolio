@@ -3,7 +3,8 @@
 	import '$lib/themes.css';
 	import * as m from '$lib/paraglide/messages';
 	import { page } from '$app/state';
-	import { fly, fade } from 'svelte/transition';
+	import { onMount } from 'svelte';
+	import { fade, scale } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import RadialMenu from '$lib/radial-menu/RadialMenu.svelte';
 	import HubBackdrop from '$lib/portal/HubBackdrop.svelte';
@@ -40,6 +41,29 @@
 	$effect(() => {
 		document.documentElement.dataset.theme = dataTheme;
 	});
+
+	// Zero out the cinematic motion when the user prefers reduced motion.
+	let reduced = $state(false);
+	onMount(() => {
+		reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	});
+
+	// Opening a section reads as dropping INTO its world, not a crossfade: the
+	// hub grows past the camera as it fades (you fly through the clicked square)
+	// while the new environment settles from slightly-small to full size, and
+	// the content drops in with a touch of depth (translate + scale).
+	const zoomPast = $derived({ start: 1.07, duration: reduced ? 0 : 420, easing: cubicOut });
+	const settleIn = $derived({ start: 0.94, duration: reduced ? 0 : 640, easing: cubicOut });
+
+	function drop(_node: Element, { y = 26, from = 0.975, duration = 560, delay = 0 } = {}) {
+		return {
+			delay,
+			duration: reduced ? 0 : duration,
+			easing: cubicOut,
+			css: (t: number, u: number) =>
+				`transform: translateY(${u * y}px) scale(${from + (1 - from) * t}); opacity: ${t};`
+		};
+	}
 </script>
 
 <div class="app" data-theme={dataTheme}>
@@ -48,12 +72,20 @@
 	<GooeyFilter />
 
 	{#if showContent && section}
-		<!-- Section ambience (behind content): botanical/celestial decor + scene. -->
-		<Decor theme={getThemeForSection(section)} />
-		<CornerScene />
+		<!-- Section ambience (behind content): botanical/celestial decor + scene.
+		     Each fixed layer gets its own fixed inset-0 wrapper so the transition
+		     transform doesn't re-anchor the fixed children. -->
+		<div class="layer layer--decor" in:scale={settleIn} out:fade={{ duration: reduced ? 0 : 220 }}>
+			<Decor theme={getThemeForSection(section)} />
+		</div>
+		<div class="layer layer--scene" in:scale={settleIn} out:fade={{ duration: reduced ? 0 : 220 }}>
+			<CornerScene />
+		</div>
 	{:else}
-		<!-- Home: the four segment-aligned scene squares sit behind the wheel. -->
-		<div in:fade={{ duration: 300 }} out:fade={{ duration: 250 }}>
+		<!-- Home: the four segment-aligned scene squares sit behind the wheel. The
+		     hub flies past the camera on the way in to a section, and settles back
+		     from above when you return. -->
+		<div class="layer layer--hub" in:scale={zoomPast} out:scale={zoomPast}>
 			<HubBackdrop />
 		</div>
 	{/if}
@@ -66,7 +98,7 @@
 		{#key page.url.pathname}
 			<div
 				class="page-shell"
-				in:fly={{ y: 20, duration: 500, easing: cubicOut, delay: 120 }}
+				in:drop={{ y: 26, from: 0.975, duration: 560, delay: 150 }}
 				out:fade={{ duration: 180 }}
 			>
 				{@render children?.()}
@@ -99,6 +131,23 @@
 		position: relative;
 		z-index: 10; /* content sits above the fixed decor layer (z-index 6) */
 		flex: 1;
+	}
+	/* Fixed-inset wrappers for the fixed ambience layers: transforms applied here
+	   scale the whole layer about the viewport center without re-anchoring the
+	   fixed-position children (the wrapper becomes their containing block). */
+	.layer {
+		position: fixed;
+		inset: 0;
+		pointer-events: none;
+	}
+	.layer--hub {
+		z-index: 4;
+	}
+	.layer--decor {
+		z-index: 6;
+	}
+	.layer--scene {
+		z-index: 12;
 	}
 	@media (prefers-reduced-motion: reduce) {
 		.app {

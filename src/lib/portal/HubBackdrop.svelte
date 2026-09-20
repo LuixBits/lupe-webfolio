@@ -35,7 +35,7 @@
 	{#each quadrants as q (q.section)}
 		{@const Scene = q.Scene}
 		<div class="quad" data-theme={q.theme} data-corner={q.corner}>
-			<Scene corner={q.corner} sectionId={q.section} />
+			<Scene corner={q.corner} sectionId={q.section} variant="hub" />
 		</div>
 	{/each}
 </div>
@@ -48,17 +48,75 @@
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		grid-template-rows: 1fr 1fr;
-		gap: 1px;
-		background: rgba(255, 255, 255, 0.14); /* the dividing cross */
+		/* The seam: a luminous hairline where the four worlds touch. */
+		gap: 2px;
+		background: linear-gradient(
+			135deg,
+			rgba(235, 242, 255, 0.28),
+			rgba(235, 242, 255, 0.12) 45%,
+			rgba(235, 242, 255, 0.28)
+		);
 		pointer-events: none;
 	}
-	/* Each panel is filled with a soft themed wash — a gentle glow near its outer
-	   corner easing into the theme background. No mask/vignette, so the square
-	   reads as fully filled (the scene detail sits on top, near the corner). */
+	/* Full-bleed themed panels — no frame, no rounding. Each panel breathes its
+	   accent into the seam along its inner edges, so the cross reads as four
+	   worlds glowing against a thin light joint. */
 	.quad {
 		position: relative;
 		overflow: hidden;
 		background: var(--bg);
+	}
+	.quad::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		opacity: 0.55;
+		animation: seam-breathe 10s ease-in-out infinite;
+	}
+	/* Inner edges per corner: top-left touches right+bottom, and so on. */
+	.quad[data-corner='top-left']::after {
+		background:
+			linear-gradient(to left, color-mix(in srgb, var(--accent) 34%, transparent), transparent 30px),
+			linear-gradient(to top, color-mix(in srgb, var(--accent) 34%, transparent), transparent 30px);
+	}
+	.quad[data-corner='top-right']::after {
+		background:
+			linear-gradient(to right, color-mix(in srgb, var(--accent) 34%, transparent), transparent 30px),
+			linear-gradient(to top, color-mix(in srgb, var(--accent) 34%, transparent), transparent 30px);
+	}
+	.quad[data-corner='bottom-left']::after {
+		background:
+			linear-gradient(to left, color-mix(in srgb, var(--accent) 34%, transparent), transparent 30px),
+			linear-gradient(to bottom, color-mix(in srgb, var(--accent) 34%, transparent), transparent 30px);
+	}
+	.quad[data-corner='bottom-right']::after {
+		background:
+			linear-gradient(to right, color-mix(in srgb, var(--accent) 34%, transparent), transparent 30px),
+			linear-gradient(to bottom, color-mix(in srgb, var(--accent) 34%, transparent), transparent 30px);
+	}
+	.quad:nth-child(2)::after {
+		animation-delay: -2.5s;
+	}
+	.quad:nth-child(3)::after {
+		animation-delay: -5s;
+	}
+	.quad:nth-child(4)::after {
+		animation-delay: -7.5s;
+	}
+	@keyframes seam-breathe {
+		0%,
+		100% {
+			opacity: 0.4;
+		}
+		50% {
+			opacity: 0.75;
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.quad::after {
+			animation: none;
+		}
 	}
 	.quad[data-corner='top-left'] {
 		background: radial-gradient(150% 150% at 0% 0%, color-mix(in srgb, var(--accent) 26%, var(--bg)), var(--bg) 82%);
