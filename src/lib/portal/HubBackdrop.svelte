@@ -14,15 +14,15 @@
 	};
 
 	// The four hub quadrants — the wheel's segments extended into the backdrop.
-	// Positions match the wheel exactly (menu order about/academia/projects/
-	// hobbies → wedges top-right / bottom-right / bottom-left / top-left), and
-	// each scene emanates from that quadrant's outer corner. Non-interactive:
-	// the radial menu is the only navigation. Grid order is row-major TL,TR,BL,BR.
+	// Positions match the wheel exactly: About top-left, Projects top-right,
+	// Hobbies bottom-left, CV bottom-right — each scene emanating from that
+	// quadrant's outer corner. Non-interactive: the radial menu is the only
+	// navigation. Grid order is row-major TL, TR, BL, BR.
 	const layout: { section: string; corner: DockPosition }[] = [
-		{ section: 'hobbies', corner: 'top-left' },
-		{ section: 'about', corner: 'top-right' },
-		{ section: 'projects', corner: 'bottom-left' },
-		{ section: 'academia', corner: 'bottom-right' }
+		{ section: 'about', corner: 'top-left' },
+		{ section: 'projects', corner: 'top-right' },
+		{ section: 'hobbies', corner: 'bottom-left' },
+		{ section: 'cv', corner: 'bottom-right' }
 	];
 
 	const quadrants = layout.map((q) => {

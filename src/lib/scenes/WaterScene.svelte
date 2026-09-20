@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { corner = 'top-left', sectionId = 'academia' }: { corner?: string; sectionId?: string | null } =
+	let { corner = 'top-left', sectionId = 'cv' }: { corner?: string; sectionId?: string | null } =
 		$props();
 
 	// Unique id prefix for SVG defs (SSR-safe, collision-free across instances)

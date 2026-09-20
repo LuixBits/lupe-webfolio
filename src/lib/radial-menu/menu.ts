@@ -5,31 +5,10 @@ import type { MenuItem } from './types';
  *  so the menu updates live when the locale changes. Keep ids stable — they
  *  seed each section's garden and drive dock/route state.
  *
- *  Four sections, one per corner. Each child anchors to a section on its
- *  page, so docking a corner reveals that section's sub-segments. */
+ *  Array order = wedge position (slice 0 top-right, 1 bottom-right, 2 bottom-
+ *  left, 3 top-left). So this order places: About top-left, Projects top-right,
+ *  Hobbies bottom-left, CV bottom-right — matching the hub backdrop squares. */
 export const menu: MenuItem[] = [
-	{
-		id: 'about',
-		label: m.nav_about,
-		href: '/about',
-		children: [
-			{ id: 'about-bio', label: m.nav_about_bio, href: '/about#bio' },
-			{ id: 'about-contact', label: m.nav_about_contact, href: '/about#contact' }
-		]
-	},
-	{
-		id: 'academia',
-		label: m.nav_academia,
-		href: '/academia',
-		children: [
-			{ id: 'academia-research', label: m.nav_academia_research, href: '/academia#research' },
-			{
-				id: 'academia-publications',
-				label: m.nav_academia_publications,
-				href: '/academia#publications'
-			}
-		]
-	},
 	{
 		id: 'projects',
 		label: m.nav_projects,
@@ -41,6 +20,15 @@ export const menu: MenuItem[] = [
 		]
 	},
 	{
+		id: 'cv',
+		label: m.nav_cv,
+		href: '/cv',
+		children: [
+			{ id: 'cv-research', label: m.nav_cv_research, href: '/cv#research' },
+			{ id: 'cv-publications', label: m.nav_cv_publications, href: '/cv#publications' }
+		]
+	},
+	{
 		id: 'hobbies',
 		label: m.nav_hobbies,
 		href: '/hobbies',
@@ -49,12 +37,20 @@ export const menu: MenuItem[] = [
 			{ id: 'hobbies-drone', label: m.nav_hobbies_drone, href: '/hobbies#drone' },
 			{ id: 'hobbies-wildlife', label: m.nav_hobbies_wildlife, href: '/hobbies#wildlife' }
 		]
+	},
+	{
+		id: 'about',
+		label: m.nav_about,
+		href: '/about',
+		children: [
+			{ id: 'about-bio', label: m.nav_about_bio, href: '/about#bio' },
+			{ id: 'about-contact', label: m.nav_about_contact, href: '/about#contact' }
+		]
 	}
 ];
 
 /** The top-level section id a path belongs to (null = home/hub). Longest-prefix
- *  match, so /projects/alpha resolves to `projects`. Drives both routing state
- *  in the menu and the route-derived theme in the layout. */
+ *  match, so /projects/alpha resolves to `projects`. */
 export function sectionIdForPath(path: string): string | null {
 	let id: string | null = null;
 	let bestLen = 0;

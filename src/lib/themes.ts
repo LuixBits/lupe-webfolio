@@ -4,7 +4,7 @@ export type ThemeName = 'garden' | 'water' | 'vaporwave' | 'cosmos';
 
 const SECTION_THEME: Record<string, ThemeName> = {
 	about: 'garden', // 🌲 forest / earth
-	academia: 'water', // 💧 water
+	cv: 'water', // 💧 water
 	projects: 'vaporwave', // 🌆 neon
 	hobbies: 'cosmos' // 🌌 night sky
 };
@@ -26,7 +26,7 @@ export function dataThemeForSection(sectionId: string | null | undefined): strin
  *  wheel previews all four themes at once. */
 export const SECTION_COLORS: Record<string, string> = {
 	about: '#7fb08a', // garden
-	academia: '#6cc3d6', // water
+	cv: '#6cc3d6', // water
 	projects: '#ff8ad9', // vaporwave
 	hobbies: '#7fd4ff' // cosmos
 };

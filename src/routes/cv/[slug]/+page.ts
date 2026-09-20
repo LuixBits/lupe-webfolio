@@ -1,9 +1,9 @@
 import { error } from '@sveltejs/kit';
-import { getAcademiaProject } from '$lib/content/academia';
+import { getCvProject } from '$lib/content/cv';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = ({ params }) => {
-	const project = getAcademiaProject(params.slug);
+	const project = getCvProject(params.slug);
 	if (!project) error(404, 'Not found');
 	return { project };
 };
