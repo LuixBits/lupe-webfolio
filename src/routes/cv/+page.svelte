@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { research, publications, education, positions } from '$lib/content/cv';
 	import { resolveLocalized, resolveSpan } from '$lib/content/schema';
-	import { getLocale } from '$lib/paraglide/runtime';
+	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
 	import * as m from '$lib/paraglide/messages';
 
 	const locale = getLocale();
@@ -135,7 +135,7 @@
 							<span class="pad-peek" aria-hidden="true">
 								{@render lilypad(PAD_ROTS[i % PAD_ROTS.length])}
 							</span>
-							<a class="card" href="/cv/{p.slug}">
+							<a class="card" href={localizeHref(`/cv/${p.slug}`)}>
 								<h3>{resolveLocalized(p.title, locale)}</h3>
 								<p class="tagline">{resolveLocalized(p.tagline, locale)}</p>
 								<ul class="chips">
@@ -170,7 +170,7 @@
 						</span>
 						<span class="stem" aria-hidden="true"></span>
 						<div class="bobwrap">
-							<a class="card card--tablet" href="/cv/{p.slug}">
+							<a class="card card--tablet" href={localizeHref(`/cv/${p.slug}`)}>
 								<h3>{resolveLocalized(p.title, locale)}</h3>
 								<p class="venue">{resolveLocalized(p.tagline, locale)}</p>
 							</a>

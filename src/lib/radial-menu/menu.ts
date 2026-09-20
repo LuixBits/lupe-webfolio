@@ -1,4 +1,5 @@
 import * as m from '$lib/paraglide/messages';
+import { deLocalizeUrl } from '$lib/paraglide/runtime';
 import type { MenuItem } from './types';
 
 /** The site's navigation, described once. Labels are Paraglide message getters,
@@ -49,8 +50,16 @@ export const menu: MenuItem[] = [
 	}
 ];
 
-/** The top-level section id a path belongs to (null = home/hub). Longest-prefix
- *  match, so /projects/alpha resolves to `projects`. */
+/** The top-level section id a URL belongs to (null = home/hub). Strips the
+ *  locale prefix first, so /de/projects matches like /projects. This is THE
+ *  route→section matcher — every consumer (layout theme, wheel dock state,
+ *  server hooks) must go through it so they can never disagree. */
+export function sectionIdForUrl(url: URL | string): string | null {
+	return sectionIdForPath(deLocalizeUrl(url).pathname);
+}
+
+/** The top-level section id a (already delocalized) path belongs to.
+ *  Longest-prefix match, so /projects/alpha resolves to `projects`. */
 export function sectionIdForPath(path: string): string | null {
 	let id: string | null = null;
 	let bestLen = 0;

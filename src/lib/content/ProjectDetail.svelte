@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { resolveLocalized, type Project } from './schema';
-	import { getLocale } from '$lib/paraglide/runtime';
+	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
 	import Video from './Video.svelte';
 
 	let { project, backHref, backLabel }: { project: Project; backHref: string; backLabel: string } =
@@ -9,7 +9,7 @@
 </script>
 
 <article class="page">
-	<a class="back" href={backHref}>← {backLabel}</a>
+	<a class="back" href={localizeHref(backHref)}>← {backLabel}</a>
 	<h1>{resolveLocalized(project.title, locale)}</h1>
 	<p class="tagline">{resolveLocalized(project.tagline, locale)}</p>
 	<p class="meta">{project.year}{#if project.tags.length} · {project.tags.join(' · ')}{/if}</p>
