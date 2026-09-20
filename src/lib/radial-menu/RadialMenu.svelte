@@ -705,6 +705,9 @@
 		/* Faster, eased slide to the corner — accelerates then settles. */
 		transition: transform 520ms cubic-bezier(0.66, 0, 0.28, 1);
 		z-index: 20;
+		/* The root box and the padded svg canvas must not swallow clicks meant
+		   for content beneath them — only the painted shapes hit-test. */
+		pointer-events: none;
 	}
 	.menu-root[data-mode='docked'][data-corner='bottom-left'] {
 		transform: translate(-50%, -50%) translate(-50vw, 50vh);
@@ -752,12 +755,17 @@
 		opacity: 0;
 		pointer-events: none;
 	}
+	/* The slices' explicit pointer-events must not resurrect a faded wedge. */
+	.wedge.faded .slice {
+		pointer-events: none;
+	}
 
 	.slice {
 		stroke: var(--bg, #10131b);
 		stroke-width: 1.5;
 		stroke-linejoin: round;
 		cursor: pointer;
+		pointer-events: visiblePainted; /* re-enable under the root's none */
 		outline: none; /* keyboard focus is shown via the glow filter, not the UA box */
 		/* Per-wedge sheen + inset vignette; the light inside sways slowly for
 		   idle life (reduced-motion swaps in the still twin below). */
@@ -903,6 +911,7 @@
 		stroke: var(--accent, #d9a441);
 		stroke-width: 1.25;
 		cursor: pointer;
+		pointer-events: visiblePainted; /* re-enable under the root's none */
 		filter: url(#rm-hub);
 		transform-box: fill-box;
 		transform-origin: center;
