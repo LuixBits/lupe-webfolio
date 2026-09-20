@@ -6,6 +6,7 @@
 	import { fly, fade } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import RadialMenu from '$lib/radial-menu/RadialMenu.svelte';
+	import HubBackdrop from '$lib/portal/HubBackdrop.svelte';
 	import Decor from '$lib/decor/Decor.svelte';
 	import CornerScene from '$lib/scenes/CornerScene.svelte';
 	import GooeyFilter from '$lib/effects/GooeyFilter.svelte';
@@ -50,9 +51,15 @@
 		<!-- Section ambience (behind content): botanical/celestial decor + scene. -->
 		<Decor theme={getThemeForSection(section)} />
 		<CornerScene />
+	{:else}
+		<!-- Home: the four segment-aligned scene squares sit behind the wheel. -->
+		<div in:fade={{ duration: 300 }} out:fade={{ duration: 250 }}>
+			<HubBackdrop />
+		</div>
 	{/if}
 
-	<!-- The one navigation: centered on home, glides to the corner on a section. -->
+	<!-- The one navigation: centered on home (over the squares), glides to the
+	     corner on a section. -->
 	<RadialMenu items={menu} label={m.menu_label()} backLabel={m.menu_back()} />
 
 	<main id="main">
