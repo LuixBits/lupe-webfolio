@@ -1,4 +1,19 @@
 <script lang="ts">
+	// Self-hosted fonts (Fontsource): same-origin woff2 with font-display swap —
+	// replaces the render-blocking Google Fonts stylesheet (~2.2s on mobile).
+	import '@fontsource-variable/fraunces/opsz.css';
+	import '@fontsource-variable/fraunces/opsz-italic.css';
+	import '@fontsource-variable/nunito-sans';
+	import '@fontsource/spectral/400.css';
+	import '@fontsource/spectral/400-italic.css';
+	import '@fontsource/spectral/500.css';
+	import '@fontsource/spectral/700.css';
+	import '@fontsource-variable/karla';
+	import '@fontsource/righteous';
+	import '@fontsource/space-mono';
+	import '@fontsource/space-mono/700.css';
+	import '@fontsource-variable/space-grotesk';
+	import '@fontsource-variable/sora';
 	import '../app.css';
 	import '$lib/themes.css';
 	import * as m from '$lib/paraglide/messages';

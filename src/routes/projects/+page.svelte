@@ -14,7 +14,7 @@
 	] as const;
 </script>
 
-<svelte:head><title>{m.nav_projects()} — Lupe</title></svelte:head>
+<svelte:head><title>{m.nav_projects()} — Lupe</title><meta name="description" content={m.meta_desc_projects()} /></svelte:head>
 
 {#snippet tape(p: Project)}
 	<li>

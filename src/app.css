@@ -92,7 +92,7 @@ main {
 	text-transform: uppercase;
 	letter-spacing: 0.3em;
 	font-size: 0.75rem;
-	color: var(--accent);
+	color: color-mix(in srgb, var(--accent) 55%, var(--fg));
 	margin: 0 0 0.5rem;
 }
 .lead {

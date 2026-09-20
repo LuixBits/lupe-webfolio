@@ -60,7 +60,7 @@
 	const twinkleDelay = (id: string) => +(mix(seedOf(id) + 9) * 4).toFixed(2);
 </script>
 
-<svelte:head><title>{m.nav_hobbies()} — Lupe</title></svelte:head>
+<svelte:head><title>{m.nav_hobbies()} — Lupe</title><meta name="description" content={m.meta_desc_hobbies()} /></svelte:head>
 
 <div class="page page--atlas">
 	<header class="atlas-head">

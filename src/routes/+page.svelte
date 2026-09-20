@@ -4,7 +4,7 @@
 
 <svelte:head>
 	<title>{m.site_title()} — {m.tagline()}</title>
-</svelte:head>
+<meta name="description" content={m.meta_desc_home()} /></svelte:head>
 
 <!-- The hub (home) is the centered radial menu alone; page content only appears
      once a section is docked. A visually-hidden heading keeps the page titled

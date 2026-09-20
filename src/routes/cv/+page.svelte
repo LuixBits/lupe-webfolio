@@ -18,7 +18,7 @@
 	const PAD_ROTS = [24, 132, -40];
 </script>
 
-<svelte:head><title>{m.nav_cv()} — Lupe</title></svelte:head>
+<svelte:head><title>{m.nav_cv()} — Lupe</title><meta name="description" content={m.meta_desc_cv()} /></svelte:head>
 
 <!-- Seigaiha fan pattern (same construction as the wheel's cv slice + WaterScene):
      rows painted bottom-up so each row of fans is occluded by the row above. -->

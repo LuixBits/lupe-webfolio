@@ -32,5 +32,10 @@
 	"projects_featured": "Featured",
 	"projects_intro": "Things I've built, filed by channel.",
 	"cv_education": "Education",
-	"cv_positions": "Positions"
+	"cv_positions": "Positions",
+	"meta_desc_home": "Luiz Perren — researcher and builder. A portfolio of four worlds: about, projects, hobbies, and CV.",
+	"meta_desc_about": "Who I am: researcher, builder, and open-source contributor — presented as a herbarium specimen sheet.",
+	"meta_desc_projects": "My projects as a VHS rental wall: YouTube, open source, and web experiments.",
+	"meta_desc_hobbies": "An observation log of astrophotography, drone flights, and wildlife.",
+	"meta_desc_cv": "Research, publications, education, and positions — a depth-as-time descent through a Japanese pond."
 }
