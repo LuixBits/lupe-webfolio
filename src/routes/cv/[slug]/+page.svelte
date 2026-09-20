@@ -5,4 +5,4 @@
 	let { data }: { data: PageData } = $props();
 </script>
 
-<ProjectDetail project={data.project} backHref="/academia" backLabel={m.nav_academia()} />
+<ProjectDetail project={data.project} backHref="/cv" backLabel={m.nav_cv()} />

@@ -1,7 +1,7 @@
 import { defineProjects, type Project } from './schema';
 
-/** Academic work — research projects and publications. Edit / extend freely. */
-export const academia: Project[] = defineProjects([
+/** CV / Lebenslauf — research work and publications. Edit / extend freely. */
+export const research: Project[] = defineProjects([
 	{
 		slug: 'sample-research',
 		title: { en: 'Sample Research Project', de: 'Beispiel-Forschungsprojekt' },
@@ -41,6 +41,6 @@ export const publications: Project[] = defineProjects([
 	}
 ]);
 
-export function getAcademiaProject(slug: string): Project | undefined {
-	return [...academia, ...publications].find((p) => p.slug === slug);
+export function getCvProject(slug: string): Project | undefined {
+	return [...research, ...publications].find((p) => p.slug === slug);
 }

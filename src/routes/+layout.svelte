@@ -29,10 +29,10 @@
 	// Which corner each section docks to (matches RadialMenu), so the footer can
 	// clear the menu quarter on the bottom corners.
 	const DOCK_CORNER: Record<string, string> = {
-		about: 'bottom-left',
-		academia: 'top-left',
-		projects: 'top-right',
-		hobbies: 'bottom-right'
+		projects: 'bottom-left',
+		cv: 'top-left',
+		hobbies: 'top-right',
+		about: 'bottom-right'
 	};
 	const dockCorner = $derived(section ? (DOCK_CORNER[section] ?? null) : null);
 
