@@ -118,6 +118,7 @@
 <style>
 	.app {
 		min-height: 100vh;
+		min-height: 100svh;
 		display: flex;
 		flex-direction: column;
 		background: var(--bg);
@@ -148,6 +149,13 @@
 	}
 	.layer--scene {
 		z-index: 12;
+	}
+	/* Phones: the corner scene is nearly viewport-sized there — ambience must
+	   sit UNDER the copy, not on top of it. */
+	@media (max-width: 560px), (max-height: 560px) {
+		.layer--scene {
+			z-index: 9;
+		}
 	}
 	@media (prefers-reduced-motion: reduce) {
 		.app {

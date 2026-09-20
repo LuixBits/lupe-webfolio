@@ -587,6 +587,7 @@
 		margin: 0;
 		display: flex;
 		flex-wrap: wrap;
+		align-items: center;
 		gap: 0.4rem;
 		font-size: 0.75rem;
 	}
@@ -607,6 +608,11 @@
 		margin-top: 0.55rem;
 	}
 	.chip-link {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.28rem;
+		padding: 0.28rem 0.7rem;
 		background: transparent;
 		border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
 		color: var(--accent);
@@ -614,6 +620,23 @@
 		transition:
 			background-color 0.15s ease,
 			border-color 0.15s ease;
+	}
+	.chip-link::before {
+		/* invisible tap-target extension: the anchor's hit area reaches
+		   44x44px even though the pebble itself stays small */
+		content: '';
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		width: max(100%, 2.75rem);
+		height: max(100%, 2.75rem);
+	}
+	.chip-link::after {
+		/* outward arrow: marks the pebble as a link, unlike the inert chips */
+		content: '\2197\FE0E';
+		font-size: 0.9em;
+		line-height: 1;
 	}
 	.chip-link:hover,
 	.chip-link:focus-visible {
@@ -837,6 +860,12 @@
 		}
 	}
 	@media (max-width: 560px) {
+		/* Narrow phones: every horizontal rem is measure the cards need back.
+		   The rail stays centered under the tick dots (half the gutter). */
+		.pond {
+			--rail-x: 0.625rem;
+			--gutter: 1.25rem;
+		}
 		/* The shrunken wheel still owns the top-left corner: drop the title
 		   fully below it instead of squeezing it sideways. */
 		.surface {
@@ -844,6 +873,18 @@
 		}
 		.surface h1 {
 			margin-left: 0;
+		}
+		/* Bedrock strata: the 5rem year column starves the text at this width —
+		   stack the span above the degree/role line and pull the block left. */
+		.bedrock {
+			margin-left: 0.5rem;
+		}
+		.strata li {
+			grid-template-columns: 1fr;
+			gap: 0.1rem;
+		}
+		.strata .span {
+			padding-top: 0;
 		}
 	}
 </style>

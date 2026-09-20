@@ -480,11 +480,11 @@
 			grid-row: 3;
 			margin: 0 0.8rem 0.65rem;
 		}
-		/* Narrow shells: tuck the foil band tighter into the corner so it
-		   clears the label text. */
+		/* Narrow shells: nudge the foil band off the corner far enough that the
+		   whole word clears both clip edges, while staying above the label. */
 		.band {
-			top: 0.85rem;
-			right: -3.1rem;
+			top: 1.15rem;
+			right: -2.5rem;
 			font-size: 0.56rem;
 		}
 	}

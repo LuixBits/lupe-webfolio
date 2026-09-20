@@ -541,4 +541,14 @@
       display: none;
     }
   }
+
+  @media (max-width: 560px) {
+    /* Tuck the right-edge vine into the corner so its curl stays off the prose. */
+    .tendril--tr {
+      top: -14px;
+      right: -28px;
+      width: 92px;
+      opacity: 0.6;
+    }
+  }
 </style>

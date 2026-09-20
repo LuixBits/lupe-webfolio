@@ -557,7 +557,6 @@
 		transform-origin: 0 0;
 		animation: ripple var(--rdur, 9s) cubic-bezier(0.17, 0.55, 0.45, 0.95) infinite;
 		animation-delay: var(--rd, 0s);
-		will-change: transform, opacity;
 	}
 	.ripple.accent {
 		stroke: var(--accent, #2b9cba);
@@ -639,7 +638,6 @@
 		border-radius: 50%;
 		filter: blur(26px);
 		mix-blend-mode: screen;
-		will-change: transform;
 	}
 	.c1 {
 		left: -34px;
@@ -692,7 +690,6 @@
 		top: 0;
 		opacity: 0;
 		animation: rise var(--dur, 9s) linear var(--delay, 0s) infinite;
-		will-change: transform, opacity;
 	}
 	@keyframes rise {
 		0% {
@@ -746,7 +743,6 @@
 		offset-rotate: auto;
 		animation: swim var(--swim, 60s) linear infinite;
 		animation-delay: var(--kd, 0s);
-		will-change: transform;
 	}
 	@keyframes swim {
 		from {
@@ -906,7 +902,6 @@
 	}
 	.rays {
 		animation: raysway 24s ease-in-out infinite alternate;
-		will-change: transform, opacity;
 	}
 	.ray {
 		opacity: 0.11;
@@ -958,7 +953,6 @@
 	}
 	.band-tile {
 		animation: bandDrift 30s ease-in-out infinite alternate;
-		will-change: transform;
 	}
 	@keyframes bandDrift {
 		from {
@@ -1016,7 +1010,6 @@
 		stroke-width: 1;
 		opacity: 0;
 		animation: hubrise var(--d, 12s) linear var(--dl, 0s) infinite;
-		will-change: transform, opacity;
 	}
 	@keyframes hubrise {
 		0% {
@@ -1051,6 +1044,19 @@
 		background: var(--slice-bg, #6cc3d6);
 		opacity: 0.1;
 		animation: driftB 18s ease-in-out infinite alternate;
+	}
+
+	/* ---- small phones & short landscape: halve the particle streams -
+	 * so far fewer infinite animations run while the pond keeps its
+	 * bubbles, foam and drifting look. ------------------------------ */
+	@media (max-width: 560px), (orientation: landscape) and (max-height: 500px) {
+		/* display goes on the animated node itself: hiding only a parent <g>
+		 * keeps the child's CSS animation ticking in Chromium. */
+		.hbubbles > g:nth-child(2n) .hb,
+		.bubbles .bubble-track:nth-child(2n),
+		.foam-swell .speck:nth-of-type(2n) {
+			display: none;
+		}
 	}
 
 	/* ---- reduced motion: freeze into a calm still-water tableau --- */

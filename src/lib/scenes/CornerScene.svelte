@@ -44,6 +44,14 @@
 	.corner-scene[data-theme-name='garden'] {
 		--scene-scale: 0.78;
 	}
+	/* Phones: the 360px floor would span the whole screen — cap the scene so it
+	   stays a corner accent behind the puck. */
+	@media (max-width: 560px), (max-height: 560px) {
+		.corner-scene {
+			width: min(76vmin, 300px);
+			height: min(76vmin, 300px);
+		}
+	}
 	.corner-scene[data-corner='bottom-left'] {
 		bottom: 0;
 		left: 0;

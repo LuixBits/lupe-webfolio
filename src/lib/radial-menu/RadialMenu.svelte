@@ -73,6 +73,13 @@
 	let hovered = $state<number | null>(null);
 	let focused = $state<number | null>(null);
 
+	// Taps during the 520ms dock/undock glide would hit whichever wedge happens
+	// to be sliding under the finger (double-tapping Back could teleport into a
+	// random section) — ignore wheel input while a glide is in flight.
+	let gliding = $state(false);
+	let glideTimer: ReturnType<typeof setTimeout> | undefined;
+	let prevMode = mode;
+
 	// Small grace period on leave so the pointer can cross the gap between the
 	// wedge and its outer sub-segment ring without the ring collapsing.
 	let leaveTimer: ReturnType<typeof setTimeout> | undefined;
@@ -98,6 +105,13 @@
 		// Keyboard focus doesn't survive navigation — clear it so a stale value
 		// can't keep a hover ring expanded after returning to the hub.
 		focused = null;
+		fanOpen = false;
+		if (mode !== prevMode) {
+			prevMode = mode;
+			gliding = true;
+			clearTimeout(glideTimer);
+			glideTimer = setTimeout(() => (gliding = false), 560);
+		}
 	});
 
 	// Collapse the keyboard-driven ring when focus leaves the wheel entirely.
@@ -105,6 +119,53 @@
 		const next = e.relatedTarget as Node | null;
 		if (!next || !(e.currentTarget as Node).contains(next)) focused = null;
 	}
+
+	// --- mobile puck fan ------------------------------------------------------
+	// On phones the docked wheel is a compact corner puck with the sub-wedges
+	// hidden. Tapping the puck's quarter fans them open (the wheel grows to a
+	// readable size); tapping outside, navigating, or tapping Back collapses.
+	let rootEl = $state<HTMLDivElement | null>(null);
+	let isMobile = $state(false);
+	let fanOpen = $state(false);
+	$effect(() => {
+		const mq = window.matchMedia('(max-width: 560px), (max-height: 560px)');
+		isMobile = mq.matches;
+		const onChange = () => {
+			isMobile = mq.matches;
+			if (!mq.matches) fanOpen = false;
+		};
+		mq.addEventListener('change', onChange);
+		return () => mq.removeEventListener('change', onChange);
+	});
+	$effect(() => {
+		if (!fanOpen) return;
+		const onOutside = (e: PointerEvent) => {
+			if (rootEl && !rootEl.contains(e.target as Node)) fanOpen = false;
+		};
+		document.addEventListener('pointerdown', onOutside, true);
+		return () => document.removeEventListener('pointerdown', onOutside, true);
+	});
+
+	// While the reader scrolls, the mobile puck steps back to 40% opacity so the
+	// corner it covers stays readable (CSS handles the fade).
+	let scrolling = $state(false);
+	let scrollTimer: ReturnType<typeof setTimeout> | undefined;
+	$effect(() => {
+		if (!(isMobile && mode === 'docked')) {
+			scrolling = false;
+			return;
+		}
+		const onScroll = () => {
+			scrolling = true;
+			clearTimeout(scrollTimer);
+			scrollTimer = setTimeout(() => (scrolling = false), 220);
+		};
+		window.addEventListener('scroll', onScroll, { passive: true });
+		return () => {
+			window.removeEventListener('scroll', onScroll);
+			clearTimeout(scrollTimer);
+		};
+	});
 
 	// Publish docked state so the layout's corner scene knows what to grow, where.
 	$effect(() => {
@@ -308,7 +369,8 @@
 	// Localize at the single write chokepoint so a German visitor stays on
 	// /de/* — raw menu hrefs are unprefixed and would silently switch locale.
 	function navigate(href?: string) {
-		if (!href) return;
+		if (!href || gliding) return;
+		fanOpen = false;
 		(onnavigate ?? goto)(localizeHref(href));
 	}
 
@@ -342,7 +404,15 @@
 	}
 </script>
 
-<div class="menu-root" data-mode={mode} data-corner={corner} style="--size:{size}px">
+<div
+	class="menu-root"
+	class:fan-open={fanOpen}
+	class:scrolling
+	bind:this={rootEl}
+	data-mode={mode}
+	data-corner={corner}
+	style="--size:{size}px"
+>
 	<svg
 		class="wheel"
 		viewBox="{-PAD} {-PAD} {size + PAD * 2} {size + PAD * 2}"
@@ -399,7 +469,22 @@
 					tabindex={focused === slice.index ? 0 : -1}
 					aria-haspopup={slice.item.children ? 'true' : undefined}
 					onfocus={() => (focused = slice.index)}
-					onclick={() => navigate(slice.item.href)}
+					aria-expanded={mode === 'docked' && isMobile && selected === slice.index
+						? fanOpen
+						: undefined}
+					onclick={() => {
+						if (gliding) return;
+						if (
+							mode === 'docked' &&
+							isMobile &&
+							selected === slice.index &&
+							slice.item.children?.length
+						) {
+							fanOpen = !fanOpen;
+						} else {
+							navigate(slice.item.href);
+						}
+					}}
 					onkeydown={(e) => {
 						if (e.key !== 'Enter' && e.key !== ' ') return;
 						e.stopPropagation();
@@ -562,6 +647,18 @@
 		<circle {cx} {cy} r={radius} class="rim" class:docked={mode === 'docked'} />
 
 		{#if mode === 'docked'}
+			{#if isMobile && !fanOpen}
+				<!-- Invisible enlarged Back hit area: the painted quarter is ~40px on
+				     a phone corner, under the 44px touch minimum. -->
+				<circle
+					{cx}
+					{cy}
+					r={100}
+					class="hub-back-hit"
+					aria-hidden="true"
+					onclick={() => navigate('/')}
+				/>
+			{/if}
 			<!-- Bigger corner hub = Back, with the word curved along its center. -->
 			<circle
 				{cx}
@@ -607,6 +704,23 @@
 	}
 	.menu-root[data-mode='docked'][data-corner='bottom-right'] {
 		transform: translate(-50%, -50%) translate(50vw, 50vh);
+	}
+	/* Mobile toolbars resize the visual viewport but vh keeps the large-viewport
+	   value, drifting the puck off its corner — dynamic units track the visible
+	   viewport instead. */
+	@supports (height: 1dvh) {
+		.menu-root[data-mode='docked'][data-corner='bottom-left'] {
+			transform: translate(-50%, -50%) translate(-50dvw, 50dvh);
+		}
+		.menu-root[data-mode='docked'][data-corner='top-left'] {
+			transform: translate(-50%, -50%) translate(-50dvw, -50dvh);
+		}
+		.menu-root[data-mode='docked'][data-corner='top-right'] {
+			transform: translate(-50%, -50%) translate(50dvw, -50dvh);
+		}
+		.menu-root[data-mode='docked'][data-corner='bottom-right'] {
+			transform: translate(-50%, -50%) translate(50dvw, 50dvh);
+		}
 	}
 
 	svg.wheel {
@@ -792,6 +906,13 @@
 		}
 	}
 
+	.hub-back-hit {
+		fill: transparent;
+		stroke: none;
+		pointer-events: all;
+		cursor: pointer;
+	}
+
 	.hub-back {
 		fill: var(--hub-bg, #2f4f3a);
 		stroke: rgba(235, 242, 255, 0.45);
@@ -808,7 +929,17 @@
 	/* Gentle breathing while at rest (kept off the interactive states so the
 	   hover/press transforms are not fought by the animation). */
 	.hub-back:not(:hover):not(:focus-visible):not(:active) {
-		animation: rm-breathe 7s ease-in-out infinite;
+		animation:
+			back-in 220ms ease 260ms backwards,
+			rm-breathe 7s ease-in-out 500ms infinite;
+	}
+	.back-label {
+		animation: back-in 220ms ease 260ms backwards;
+	}
+	@keyframes back-in {
+		from {
+			opacity: 0;
+		}
 	}
 	.hub-back:hover,
 	.hub-back:focus-visible {
@@ -852,11 +983,12 @@
 		stroke: rgba(235, 242, 255, 0.35);
 	}
 
-	/* Shrink the wheel on small screens so it never overflows. */
-	@media (max-width: 560px) {
+	/* Shrink the wheel on small screens so it never overflows — including short
+	   landscape phones, which are wide but have almost no height. */
+	@media (max-width: 560px), (max-height: 560px) {
 		.menu-root {
-			width: min(86vw, 400px);
-			height: min(86vw, 400px);
+			width: min(86vmin, 400px);
+			height: min(86vmin, 400px);
 		}
 		/* Docked on mobile: a compact corner puck. The quarter keeps its themed
 		   art + section name and the Back hub stays a comfortable tap target,
@@ -866,9 +998,30 @@
 		.menu-root[data-mode='docked'] {
 			width: 240px;
 			height: 240px;
+			transition:
+				transform 520ms cubic-bezier(0.66, 0, 0.28, 1),
+				width 320ms cubic-bezier(0.22, 1, 0.36, 1),
+				height 320ms cubic-bezier(0.22, 1, 0.36, 1);
 		}
-		.menu-root[data-mode='docked'] .slice.sub,
-		.menu-root[data-mode='docked'] .label.sub {
+		/* While the reader scrolls, the puck steps back so the text under the
+		   corner stays readable; it returns as soon as scrolling rests. */
+		.menu-root[data-mode='docked'] {
+			transition:
+				transform 520ms cubic-bezier(0.66, 0, 0.28, 1),
+				width 320ms cubic-bezier(0.22, 1, 0.36, 1),
+				height 320ms cubic-bezier(0.22, 1, 0.36, 1),
+				opacity 220ms ease;
+		}
+		.menu-root[data-mode='docked'].scrolling:not(.fan-open) {
+			opacity: 0.4;
+		}
+		/* Tapping the puck fans the sub-wedges open at a readable size. */
+		.menu-root[data-mode='docked'].fan-open {
+			width: min(88vw, 400px);
+			height: min(88vw, 400px);
+		}
+		.menu-root[data-mode='docked']:not(.fan-open) .slice.sub,
+		.menu-root[data-mode='docked']:not(.fan-open) .label.sub {
 			display: none;
 		}
 	}

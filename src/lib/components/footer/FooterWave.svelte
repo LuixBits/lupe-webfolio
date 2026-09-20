@@ -203,6 +203,36 @@
 		position: absolute;
 		inset: 0;
 		overflow: hidden;
+		/* The bands drift, so at some phase a breaker always straddles the static
+		   viewport edge — on narrow screens the whole crest gets sliced by a hard
+		   vertical cut. Fade the strip's alpha near its left/right edges, but only
+		   above the waterline: two mask layers union (mask-composite's initial
+		   value is `add`), the horizontal one keeping the middle solid at every
+		   height, the vertical one re-solidifying the water toward the bar so it
+		   still grounds flush into the footer. Because `add` shrinks the usable
+		   horizontal fade wherever the vertical layer is non-zero, its ramp sits
+		   low (45%→60% of H=156, i.e. y≈70→94): the full silhouette zone —
+		   crests, curls, claws, face foam — dissolves cleanly, and only the
+		   featureless water mass at the trough line meets the edge hard. */
+		--edge-fade: clamp(24px, 10vw, 56px);
+		-webkit-mask-image:
+			linear-gradient(to bottom, transparent 45%, #000 60%),
+			linear-gradient(
+				to right,
+				transparent,
+				#000 var(--edge-fade),
+				#000 calc(100% - var(--edge-fade)),
+				transparent
+			);
+		mask-image:
+			linear-gradient(to bottom, transparent 45%, #000 60%),
+			linear-gradient(
+				to right,
+				transparent,
+				#000 var(--edge-fade),
+				#000 calc(100% - var(--edge-fade)),
+				transparent
+			);
 		--fw-foam: var(--water-foam);
 		--fw-far: color-mix(in srgb, var(--water-deep) 48%, transparent);
 		--fw-mid: color-mix(in srgb, var(--water-deep) 85%, var(--hub-bg));
