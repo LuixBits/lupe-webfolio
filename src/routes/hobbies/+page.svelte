@@ -2,7 +2,9 @@
 	import { albums } from '$lib/content/hobbies';
 	import { resolveLocalized } from '$lib/content/schema';
 	import { getLocale } from '$lib/paraglide/runtime';
-	import Video from '$lib/content/Video.svelte';
+	import { pushState } from '$app/navigation';
+	import { page } from '$app/state';
+	import Eyepiece from '$lib/hobbies/Eyepiece.svelte';
 	import * as m from '$lib/paraglide/messages';
 
 	const locale = getLocale();
@@ -47,17 +49,28 @@
 	}
 	const glyphs = albums.map((a) => glyphFor(a.slug, a.media.length));
 
-	/* ---- Decorative observation-log fictions, seeded by media id ----------- */
 	const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
-	function coords(id: string): string {
-		const s = seedOf(id);
-		const raH = Math.floor(mix(s) * 24);
-		const raM = Math.floor(mix(s + 1) * 60);
-		const sign = mix(s + 2) < 0.5 ? '−' : '+';
-		const decD = Math.floor(mix(s + 3) * 89);
-		return `RA ${raH}h ${String(raM).padStart(2, '0')}m · DEC ${sign}${String(decD).padStart(2, '0')}°`;
+
+	/* ---- Eyepiece open state lives in shallow-routing history state --------
+	 *  pushState on open means the hardware/browser Back button closes the
+	 *  dialog (popstate reverts page.state → component unmounts) instead of
+	 *  leaving the page; Esc / ✕ / backdrop call history.back() for symmetry. */
+	type EyeState = { album: string; index: number };
+	const eye = $derived((page.state as { eyepiece?: EyeState }).eyepiece);
+	const eyeAlbumIdx = $derived(eye ? albums.findIndex((a) => a.slug === eye.album) : -1);
+
+	let trigger: HTMLElement | null = null;
+	function openPlate(slug: string, index: number, e: MouseEvent) {
+		trigger = e.currentTarget as HTMLElement;
+		pushState('', { eyepiece: { album: slug, index } });
 	}
-	const twinkleDelay = (id: string) => +(mix(seedOf(id) + 9) * 4).toFixed(2);
+	// Restore focus to the plate that opened the eyepiece once it closes.
+	$effect(() => {
+		if (!eye && trigger) {
+			trigger.focus();
+			trigger = null;
+		}
+	});
 </script>
 
 <svelte:head><title>{m.nav_hobbies()} — Lupe</title><meta name="description" content={m.meta_desc_hobbies()} /></svelte:head>
@@ -86,9 +99,10 @@
 	{#each albums as album, ai (album.slug)}
 		{@const imgs = album.media.filter((x) => x.kind === 'image').length}
 		{@const vids = album.media.length - imgs}
+		{@const desig = ROMAN[ai] ?? String(ai + 1)}
 		<section id={album.slug} class="chart">
 			<header class="chart-head">
-				<span class="designation" aria-hidden="true">{ROMAN[ai] ?? String(ai + 1)}</span>
+				<span class="designation" aria-hidden="true">{desig}</span>
 				<h2>{resolveLocalized(album.title, locale)}</h2>
 				<p class="lead">{resolveLocalized(album.intro, locale)}</p>
 				{#if album.media.length > 0}
@@ -100,39 +114,37 @@
 				{/if}
 			</header>
 
-			<ol class="plates">
+			<!-- Contact sheet: the album's plates as a numbered archive grid. -->
+			<ol class="archive">
 				{#each album.media as item, i (item.id)}
 					{@const cap = item.caption ? resolveLocalized(item.caption, locale) : undefined}
-					<li
-						class="plate"
-						class:flip={(ai + i) % 2 === 1}
-						style={`--td:${twinkleDelay(item.id)}s`}
-					>
-						<span class="node" aria-hidden="true"></span>
-						<figure>
-							<div class="frame">
-								{#if item.kind === 'video'}
-									<Video
-										video={{
-											id: item.id,
-											title: cap ?? item.id,
-											provider: item.provider ?? 'file',
-											src: item.src,
-											poster: item.poster
-										}}
-									/>
-								{:else}
-									<img src={item.src} alt={cap ?? ''} loading="lazy" />
-								{/if}
-							</div>
-							<figcaption>
-								<span class="plate-id"
-									>{item.kind === 'video' ? '▸' : '✶'} {ROMAN[ai] ?? String(ai + 1)}·{i + 1}</span
-								>
-								<span class="coords" aria-hidden="true">{coords(item.id)}</span>
-								{#if cap}<span class="cap">{cap}</span>{/if}
-							</figcaption>
-						</figure>
+					<li class="cell" class:wide={item.featured}>
+						<button
+							type="button"
+							class="plate"
+							aria-label={`${m.eyepiece_open()} ${desig}·${i + 1}${cap ? ` — ${cap}` : ''}`}
+							onclick={(e) => openPlate(album.slug, i, e)}
+						>
+							{#if item.kind === 'image' && item.image}
+								<img
+									src={item.image.thumb ?? item.image.src}
+									width={item.image.width}
+									height={item.image.height}
+									alt=""
+									style={`aspect-ratio: ${item.image.width} / ${item.image.height}`}
+									loading={ai === 0 && i < 2 ? 'eager' : 'lazy'}
+									decoding="async"
+								/>
+							{:else}
+								<span class="signal" aria-hidden="true">
+									<span class="tri">▸</span>
+								</span>
+							{/if}
+							<span class="tag" aria-hidden="true">
+								<span class="tag-star">{item.kind === 'video' ? '▸' : '✶'}</span>
+								{desig}·{i + 1}
+							</span>
+						</button>
 					</li>
 				{/each}
 			</ol>
@@ -140,8 +152,18 @@
 	{/each}
 </div>
 
+{#if eye && eyeAlbumIdx >= 0}
+	<Eyepiece
+		album={albums[eyeAlbumIdx]}
+		designation={ROMAN[eyeAlbumIdx] ?? String(eyeAlbumIdx + 1)}
+		start={eye.index}
+		{locale}
+		onclose={() => history.back()}
+	/>
+{/if}
+
 <style>
-	/* Widen the atlas so charts can straddle the meridian; text stays at measure. */
+	/* Widen the atlas so the archive grid breathes; text stays at measure. */
 	.page--atlas {
 		max-width: 64rem;
 	}
@@ -214,7 +236,21 @@
 	/* ---- One chart per album --------------------------------------------- */
 	.chart {
 		scroll-margin-top: 6rem; /* anchored sections clear the fixed menu */
-		margin: 0 0 4.5rem;
+		margin: 0 0 4rem;
+	}
+	/* Meridian motif, turned divider between charts. */
+	.chart + .chart::before {
+		content: '';
+		display: block;
+		height: 1px;
+		margin: 0 0 3.25rem;
+		background-image: repeating-linear-gradient(
+			to right,
+			color-mix(in srgb, var(--cosmos-star, #cfe6ff) 32%, transparent) 0 6px,
+			transparent 6px 14px
+		);
+		-webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+		mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
 	}
 	.chart-head {
 		position: relative;
@@ -280,207 +316,143 @@
 		mask-image: linear-gradient(to right, #000 55%, transparent 100%);
 	}
 
-	/* ---- Plate column with the declination meridian (spine) --------------- */
-	.plates {
+	/* ---- Archive contact sheet -------------------------------------------- */
+	.archive {
 		list-style: none;
 		margin: 0;
-		padding: 2.5rem 0 0.5rem;
-		position: relative;
-		display: flex;
-		flex-direction: column;
-		gap: 2.75rem;
+		padding: 1.5rem 0 0.25rem;
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 0.55rem;
 	}
-	.plates::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		left: 50%;
-		width: 1px;
-		background-image: repeating-linear-gradient(
-			to bottom,
-			color-mix(in srgb, var(--cosmos-star, #cfe6ff) 30%, transparent) 0 6px,
-			transparent 6px 14px
-		);
-		-webkit-mask-image: linear-gradient(to bottom, transparent, #000 2rem, #000 calc(100% - 2rem), transparent);
-		mask-image: linear-gradient(to bottom, transparent, #000 2rem, #000 calc(100% - 2rem), transparent);
-		animation: spine-drift 60s linear infinite;
-	}
-	@keyframes spine-drift {
-		to {
-			background-position: 0 140px;
-		}
+	.cell.wide {
+		grid-column: span 2;
 	}
 
+	/* One plate = one ≥44px tap target; whole frame is the button. */
 	.plate {
 		position: relative;
-	}
-	/* Connector: node on the spine → plate frame. */
-	.plate::before {
-		content: '';
-		position: absolute;
-		top: 1.5rem;
-		left: 50%;
-		width: 2.6rem;
-		height: 1px;
-		background: linear-gradient(
-			to right,
-			color-mix(in srgb, var(--cosmos-star, #cfe6ff) 60%, transparent),
-			color-mix(in srgb, var(--cosmos-star, #cfe6ff) 14%, transparent)
-		);
-		opacity: 0.5;
-		transition: opacity 200ms ease;
-	}
-	.plate.flip::before {
-		left: auto;
-		right: 50%;
-		background: linear-gradient(
-			to left,
-			color-mix(in srgb, var(--cosmos-star, #cfe6ff) 60%, transparent),
-			color-mix(in srgb, var(--cosmos-star, #cfe6ff) 14%, transparent)
-		);
-	}
-	.plate:hover::before,
-	.plate:focus-within::before {
-		opacity: 1;
-	}
-
-	/* Twinkling star node pinned to the spine; 4-point glint blooms on hover. */
-	.node {
-		position: absolute;
-		top: 1.5rem;
-		left: 50%;
-		width: 7px;
-		height: 7px;
-		margin: -3.5px 0 0 -3.5px;
-		border-radius: 50%;
-		background: var(--cosmos-star, #cfe6ff);
-		box-shadow: 0 0 8px 1px color-mix(in srgb, var(--cosmos-star, #cfe6ff) 65%, transparent);
-		animation: node-twinkle 4s ease-in-out infinite alternate;
-		animation-delay: var(--td, 0s);
-	}
-	@keyframes node-twinkle {
-		from {
-			opacity: 0.45;
-		}
-		to {
-			opacity: 1;
-		}
-	}
-	.node::before,
-	.node::after {
-		content: '';
-		position: absolute;
-		left: 50%;
-		top: 50%;
-		border-radius: 1px;
-		background: var(--cosmos-glint, #ff8ad9);
-		transform: translate(-50%, -50%) scale(0);
-		transition: transform 200ms ease;
-	}
-	.node::before {
-		width: 1.5px;
-		height: 22px;
-	}
-	.node::after {
-		width: 22px;
-		height: 1.5px;
-	}
-	.plate:hover .node::before,
-	.plate:hover .node::after,
-	.plate:focus-within .node::before,
-	.plate:focus-within .node::after {
-		transform: translate(-50%, -50%) scale(1);
-	}
-
-	/* Plates alternate sides of the meridian; figure floats up on hover. */
-	.plate figure {
+		display: block;
+		width: 100%;
 		margin: 0;
-		width: calc(50% - 2.6rem);
-		margin-left: auto;
-		transition: transform 200ms ease;
+		padding: 0.35rem;
+		border: 1px solid color-mix(in srgb, var(--cosmos-star, #cfe6ff) 32%, transparent);
+		background: color-mix(in srgb, var(--hub-bg, #14143c) 78%, transparent);
+		cursor: pointer;
+		font: inherit;
+		color: inherit;
+		text-align: left;
+		transition:
+			border-color 200ms ease,
+			transform 200ms ease;
 	}
-	.plate.flip figure {
-		margin-left: 0;
-		margin-right: auto;
-	}
-	.plate:hover figure,
-	.plate:focus-within figure {
+	.plate:hover,
+	.plate:focus-visible {
+		border-color: color-mix(in srgb, var(--cosmos-star, #cfe6ff) 70%, transparent);
 		transform: translateY(-2px);
 	}
-
-	/* Astrometric plate frame: hairline + corner ticks; decor glows through. */
-	.frame {
-		position: relative;
-		padding: 0.55rem;
-		border: 1px solid color-mix(in srgb, var(--cosmos-star, #cfe6ff) 35%, transparent);
-		background: color-mix(in srgb, var(--hub-bg, #14143c) 78%, transparent);
-		transition: border-color 200ms ease;
-	}
-	.plate:hover .frame,
-	.plate:focus-within .frame {
-		border-color: color-mix(in srgb, var(--cosmos-star, #cfe6ff) 70%, transparent);
-	}
-	.frame::before,
-	.frame::after {
+	/* Astrometric corner ticks; they grow on hover/focus (8 → 12px). */
+	.plate::before,
+	.plate::after {
 		content: '';
 		position: absolute;
-		width: 12px;
-		height: 12px;
+		width: 8px;
+		height: 8px;
 		border: 1px solid color-mix(in srgb, var(--accent, #7fd4ff) 85%, transparent);
 		pointer-events: none;
+		transition:
+			width 200ms ease,
+			height 200ms ease;
 	}
-	.frame::before {
+	.plate::before {
 		top: -1px;
 		left: -1px;
 		border-right: 0;
 		border-bottom: 0;
 	}
-	.frame::after {
+	.plate::after {
 		bottom: -1px;
 		right: -1px;
 		border-left: 0;
 		border-top: 0;
 	}
-	.frame img {
+	.plate:hover::before,
+	.plate:hover::after,
+	.plate:focus-visible::before,
+	.plate:focus-visible::after {
+		width: 12px;
+		height: 12px;
+	}
+	.plate img {
 		display: block;
 		width: 100%;
 		height: auto;
 	}
-	/* Video.svelte rounds its media; square it off inside the plate frame. */
-	.frame :global(iframe),
-	.frame :global(video) {
-		border-radius: 0;
-	}
 
-	/* Caption block: log-entry voice. */
-	figcaption {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: baseline;
-		gap: 0.3rem 0.9rem;
-		padding: 0.6rem 0.15rem 0;
+	/* Video cells: a dark signal plate — nothing loads until the eyepiece tap. */
+	.signal {
+		display: grid;
+		place-items: center;
+		width: 100%;
+		aspect-ratio: 8 / 5;
+		background:
+			radial-gradient(60% 75% at 50% 38%, color-mix(in srgb, var(--accent, #7fd4ff) 10%, transparent), transparent 72%),
+			color-mix(in srgb, var(--hub-bg, #14143c) 55%, #000);
 	}
-	.plate-id,
-	.coords {
-		font-size: var(--fs-small);
-		text-transform: uppercase;
-		letter-spacing: 0.18em;
-		color: var(--fg-muted);
-		white-space: nowrap;
-	}
-	.plate-id {
+	.signal .tri {
+		display: grid;
+		place-items: center;
+		width: 2.6rem;
+		height: 2.6rem;
+		padding-left: 0.2rem;
+		border: 1px solid color-mix(in srgb, var(--accent, #7fd4ff) 70%, transparent);
+		border-radius: 50%;
+		font-size: 1.15rem;
+		line-height: 1;
 		color: var(--accent, #7fd4ff);
 	}
-	.cap {
-		flex-basis: 100%;
-		font-size: 0.95rem;
-		line-height: 1.5;
-		color: var(--fg);
-		opacity: 0.88;
+
+	/* Plate number, printed in the frame's lower-left corner. */
+	.tag {
+		position: absolute;
+		left: 0.65rem;
+		bottom: 0.65rem;
+		padding: 0.14rem 0.42rem;
+		background: color-mix(in srgb, var(--hub-bg, #14143c) 40%, rgba(0, 0, 0, 0.55));
+		font-size: var(--fs-small);
+		text-transform: uppercase;
+		letter-spacing: 0.16em;
+		color: var(--cosmos-star, #cfe6ff);
+		white-space: nowrap;
+	}
+	.tag-star {
+		color: var(--accent, #7fd4ff);
 	}
 
-	/* ---- Mobile: meridian becomes a left rail, plates go full-width -------- */
+	/* ---- Wider screens ----------------------------------------------------- */
+	@media (min-width: 720px) {
+		.archive {
+			grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+			grid-auto-flow: dense;
+			gap: 0.8rem;
+		}
+		/* Featured plates take a 2×2 block; neighbours pack around them. */
+		.cell.wide {
+			grid-row: span 2;
+		}
+		.cell.wide .plate {
+			height: 100%;
+			display: flex;
+			flex-direction: column;
+		}
+		.cell.wide .plate img {
+			flex: 1;
+			min-height: 0;
+			object-fit: cover;
+		}
+	}
+
+	/* ---- Mobile head tweaks ------------------------------------------------ */
 	@media (max-width: 720px) {
 		.atlas-head {
 			margin-bottom: 2.5rem;
@@ -500,51 +472,6 @@
 			height: 2.2rem;
 			font-size: 1.05rem;
 		}
-		.plates {
-			gap: 2.25rem;
-		}
-		.plates::before {
-			left: 0.45rem;
-		}
-		.node {
-			left: 0.45rem;
-		}
-		.plate::before,
-		.plate.flip::before {
-			left: 0.45rem;
-			right: auto;
-			width: 1.6rem;
-			background: linear-gradient(
-				to right,
-				color-mix(in srgb, var(--cosmos-star, #cfe6ff) 60%, transparent),
-				color-mix(in srgb, var(--cosmos-star, #cfe6ff) 14%, transparent)
-			);
-		}
-		.plate figure,
-		.plate.flip figure {
-			width: auto;
-			margin: 0 0 0 2rem;
-		}
-		.coords {
-			overflow: hidden;
-			text-overflow: ellipsis;
-			max-width: 100%;
-		}
-	}
-
-	/* ---- Small phones: shallower rail indent so plates keep their width ---- */
-	@media (max-width: 560px) {
-		.plate::before,
-		.plate.flip::before {
-			width: 0.7rem;
-		}
-		.plate figure,
-		.plate.flip figure {
-			margin-left: 1rem;
-		}
-		.frame {
-			padding: 0.4rem;
-		}
 	}
 
 	/* ---- Narrowest phones: quieter chip tracking so long labels fit -------- */
@@ -555,23 +482,24 @@
 		.skymap a span {
 			letter-spacing: 0.08em;
 		}
+		.archive {
+			gap: 0.45rem;
+		}
 	}
 
 	/* ---- Reduced motion: still sky, cues stay legible ---------------------- */
 	@media (prefers-reduced-motion: reduce) {
-		.plates::before,
-		.node {
-			animation: none;
+		.plate,
+		.plate::before,
+		.plate::after,
+		.skymap a {
+			transition: none;
 		}
-		.plate:hover figure,
-		.plate:focus-within figure,
+		.plate:hover,
+		.plate:focus-visible,
 		.skymap a:hover,
 		.skymap a:focus-visible {
 			transform: none;
-		}
-		.node::before,
-		.node::after {
-			transition: none;
 		}
 	}
 </style>
