@@ -7,23 +7,30 @@
 	"skip_to_content": "Zum Inhalt springen",
 	"home_welcome": "Luiz Perren",
 	"home_intro": "Dreh am Rad. Jeder Zweig ist ein Teil meiner Welt — Forschung, Projekte und die Dinge, die ich zum Spaß verfolge.",
-
 	"nav_about": "Über mich",
 	"nav_cv": "Lebenslauf",
 	"nav_projects": "Projekte",
 	"nav_hobbies": "Hobbys",
-
 	"nav_about_bio": "Bio",
 	"nav_about_contact": "Kontakt",
-
 	"nav_cv_research": "Forschung",
 	"nav_cv_publications": "Publikationen",
-
 	"nav_projects_youtube": "YouTube",
 	"nav_projects_opensource": "Open Source",
 	"nav_projects_web": "Web",
-
 	"nav_hobbies_astro": "Astrofotografie",
 	"nav_hobbies_drone": "Drohne",
-	"nav_hobbies_wildlife": "Tierwelt"
+	"nav_hobbies_wildlife": "Tierwelt",
+	"about_folio_eyebrow": "Herbarium",
+	"about_notes_title": "Kulturnotizen",
+	"about_seeds_hint": "Nimm ein Samenkorn mit.",
+	"about_plate_det": "Exemplar in laufender Kultivierung",
+	"hobbies_eyebrow": "Beobachtungsprotokoll",
+	"hobbies_skymap": "Himmelskarte",
+	"hobbies_plates": "Aufnahmen",
+	"hobbies_signals": "Signale",
+	"projects_featured": "Empfohlen",
+	"projects_intro": "Dinge, die ich gebaut habe – sortiert nach Kanal.",
+	"cv_education": "Ausbildung",
+	"cv_positions": "Stationen"
 }

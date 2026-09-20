@@ -16,7 +16,12 @@
 </script>
 
 {#if menuState.docked}
-	<div class="corner-scene" data-corner={menuState.corner} aria-hidden="true">
+	<div
+		class="corner-scene"
+		data-corner={menuState.corner}
+		data-theme-name={menuState.themeName}
+		aria-hidden="true"
+	>
 		<Scene corner={menuState.corner} sectionId={menuState.sectionId} />
 	</div>
 {/if}
@@ -32,29 +37,39 @@
 		z-index: 12;
 		pointer-events: none;
 		overflow: visible;
+		transform: scale(var(--scene-scale, 1));
+	}
+	/* The garden's L-system growth can reach far across the viewport over the
+	   content — pull it back toward its corner. */
+	.corner-scene[data-theme-name='garden'] {
+		--scene-scale: 0.78;
 	}
 	.corner-scene[data-corner='bottom-left'] {
 		bottom: 0;
 		left: 0;
-		-webkit-mask-image: radial-gradient(135% 135% at 0% 100%, #000 42%, transparent 80%);
-		mask-image: radial-gradient(135% 135% at 0% 100%, #000 42%, transparent 80%);
+		transform-origin: 0% 100%;
+		-webkit-mask-image: radial-gradient(135% 135% at 0% 100%, #000 40%, transparent 72%);
+		mask-image: radial-gradient(135% 135% at 0% 100%, #000 40%, transparent 72%);
 	}
 	.corner-scene[data-corner='top-left'] {
 		top: 0;
 		left: 0;
-		-webkit-mask-image: radial-gradient(135% 135% at 0% 0%, #000 42%, transparent 80%);
-		mask-image: radial-gradient(135% 135% at 0% 0%, #000 42%, transparent 80%);
+		transform-origin: 0% 0%;
+		-webkit-mask-image: radial-gradient(135% 135% at 0% 0%, #000 40%, transparent 72%);
+		mask-image: radial-gradient(135% 135% at 0% 0%, #000 40%, transparent 72%);
 	}
 	.corner-scene[data-corner='top-right'] {
 		top: 0;
 		right: 0;
-		-webkit-mask-image: radial-gradient(135% 135% at 100% 0%, #000 42%, transparent 80%);
-		mask-image: radial-gradient(135% 135% at 100% 0%, #000 42%, transparent 80%);
+		transform-origin: 100% 0%;
+		-webkit-mask-image: radial-gradient(135% 135% at 100% 0%, #000 40%, transparent 72%);
+		mask-image: radial-gradient(135% 135% at 100% 0%, #000 40%, transparent 72%);
 	}
 	.corner-scene[data-corner='bottom-right'] {
 		bottom: 0;
 		right: 0;
-		-webkit-mask-image: radial-gradient(135% 135% at 100% 100%, #000 42%, transparent 80%);
-		mask-image: radial-gradient(135% 135% at 100% 100%, #000 42%, transparent 80%);
+		transform-origin: 100% 100%;
+		-webkit-mask-image: radial-gradient(135% 135% at 100% 100%, #000 40%, transparent 72%);
+		mask-image: radial-gradient(135% 135% at 100% 100%, #000 40%, transparent 72%);
 	}
 </style>

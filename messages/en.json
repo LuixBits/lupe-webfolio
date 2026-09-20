@@ -7,23 +7,30 @@
 	"skip_to_content": "Skip to content",
 	"home_welcome": "Luiz Perren",
 	"home_intro": "Spin the dial. Every branch is a part of my world — research, projects, and the things I chase for fun.",
-
 	"nav_about": "About",
 	"nav_cv": "CV",
 	"nav_projects": "Projects",
 	"nav_hobbies": "Hobbies",
-
 	"nav_about_bio": "Bio",
 	"nav_about_contact": "Contact",
-
 	"nav_cv_research": "Research",
 	"nav_cv_publications": "Publications",
-
 	"nav_projects_youtube": "YouTube",
 	"nav_projects_opensource": "Open Source",
 	"nav_projects_web": "Web",
-
 	"nav_hobbies_astro": "Astrophotography",
 	"nav_hobbies_drone": "Drone",
-	"nav_hobbies_wildlife": "Wildlife"
+	"nav_hobbies_wildlife": "Wildlife",
+	"about_folio_eyebrow": "Herbarium",
+	"about_notes_title": "Notes on cultivation",
+	"about_seeds_hint": "Take a seed with you.",
+	"about_plate_det": "Specimen in ongoing cultivation",
+	"hobbies_eyebrow": "Observation log",
+	"hobbies_skymap": "Sky map",
+	"hobbies_plates": "plates",
+	"hobbies_signals": "signals",
+	"projects_featured": "Featured",
+	"projects_intro": "Things I've built, filed by channel.",
+	"cv_education": "Education",
+	"cv_positions": "Positions"
 }

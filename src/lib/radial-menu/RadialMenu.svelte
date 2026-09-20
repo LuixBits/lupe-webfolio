@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { wedge, labelArc, radialPath, polarToCartesian } from './geometry';
+	import { wedge, labelArc, radialPath, polarToCartesian, annularSector } from './geometry';
 	import { menuState } from '$lib/dock.svelte';
 	import { colorForSection } from '$lib/themes';
 	import { lighten, darken } from '$lib/color';
@@ -81,6 +81,18 @@
 	let hovered = $state<number | null>(null);
 	let focused = $state<number | null>(null);
 
+	// Small grace period on leave so the pointer can cross the gap between the
+	// wedge and its outer sub-segment ring without the ring collapsing.
+	let leaveTimer: ReturnType<typeof setTimeout> | undefined;
+	function enterWedge(i: number) {
+		clearTimeout(leaveTimer);
+		hovered = i;
+	}
+	function leaveWedge() {
+		clearTimeout(leaveTimer);
+		leaveTimer = setTimeout(() => (hovered = null), 140);
+	}
+
 	$effect(() => {
 		const idx = sectionIndexFor(page.url.pathname);
 		if (idx >= 0) {
@@ -130,12 +142,22 @@
 	interface SubSlice {
 		item: MenuItem;
 		index: number;
-		path: string;
-		radial: string; // lengthwise label baseline
+		path: string; // docked: sub-wedge subdividing the parent quarter
+		radial: string; // docked: lengthwise label baseline
+		ring: string; // hub hover: annular segment in the outer ring
+		ringArc: string; // hub hover: curved label baseline along the ring
 		fill: string;
 		fillHover: string;
 		font: number; // px, shrunk so long labels fit the radial baseline
+		ringFont: number; // px, shrunk so long labels fit the ring arc
 	}
+
+	// The hover ring: a second row of segments floating just outside the wheel,
+	// confined to the parent wedge's quarter.
+	const RING_GAP = 10;
+	const RING_W = 56;
+	// SVG canvas padding so the ring (and glows) never clip at the element box.
+	const PAD = 88;
 
 	const slices = $derived.by<MainSlice[]>(() =>
 		items.map((item, index) => {
@@ -151,17 +173,19 @@
 		})
 	);
 
-	// Children subdivide the expanded slice's 90° span. When docked the Back hub
-	// occupies the center, so the label baselines start further out.
+	// Children of the expanded slice. Docked: they subdivide the parent's 90°
+	// quarter (the Back hub occupies the center, so labels start further out).
+	// Hub hover: they form a second row — an outer ring confined to the quarter.
 	const childSlices = $derived.by<SubSlice[]>(() => {
 		if (expandedIdx === null) return [];
 		const parent = items[expandedIdx];
 		const kids = parent?.children;
 		if (!kids?.length) return [];
 		const base = colorForSection(parent.id);
-		const rIn = mode === 'docked' ? 0.4 : 0.3;
+		const rIn = 0.4;
 		const rOut = 0.96;
 		const pathLen = radius * (rOut - rIn);
+		const ringMid = radius + RING_GAP + RING_W * 0.52;
 		const start0 = expandedIdx * sliceAngle;
 		const step = sliceAngle / kids.length;
 		return kids.map((item, index) => {
@@ -169,16 +193,28 @@
 			const end = start + step;
 			const mid = (start + end) / 2;
 			const label = item.label();
+			const arcLen = (((end - start - 4) * Math.PI) / 180) * ringMid;
 			return {
 				item,
 				index,
 				path: wedge(cx, cy, radius, start, end),
 				radial: radialPath(cx, cy, radius * rIn, radius * rOut, mid),
+				ring: annularSector(cx, cy, radius + RING_GAP, radius + RING_GAP + RING_W, start + 1.2, end - 1.2),
+				ringArc: labelArc(cx, cy, ringMid, start + 2, end - 2),
 				fill: lighten(base, index % 2 ? 0.42 : 0.28),
 				fillHover: lighten(base, 0.14),
-				font: Math.max(9, Math.min(13, (pathLen - 8) / (label.length * 0.6)))
+				font: Math.max(9, Math.min(13, (pathLen - 8) / (label.length * 0.6))),
+				ringFont: Math.max(9.5, Math.min(13.5, (arcLen - 10) / (label.length * 0.62)))
 			};
 		});
+	});
+
+	// Invisible bridge covering the gap + ring band of the expanded quarter, so
+	// the pointer can travel from the wedge onto the ring without a dead zone.
+	const bridgePath = $derived.by(() => {
+		if (expandedIdx === null) return '';
+		const start = expandedIdx * sliceAngle;
+		return annularSector(cx, cy, radius - 2, radius + RING_GAP + RING_W, start, start + sliceAngle);
 	});
 
 	// Bigger corner hub carrying the curved "Back" word, facing into the viewport.
@@ -292,9 +328,8 @@
 
 <div class="menu-root" data-mode={mode} data-corner={corner} style="--size:{size}px">
 	<svg
-		width="100%"
-		height="100%"
-		viewBox="0 0 {size} {size}"
+		class="wheel"
+		viewBox="{-PAD} {-PAD} {size + PAD * 2} {size + PAD * 2}"
 		role="menu"
 		aria-label={label}
 		tabindex="0"
@@ -318,6 +353,7 @@
 			{/each}
 			{#each childSlices as sub (sub.item.id)}
 				<path id="rad-{sub.item.id}" d={sub.radial} />
+				<path id="ringarc-{sub.item.id}" d={sub.ringArc} />
 			{/each}
 			<path id="back-arc" d={backArc} />
 			<clipPath id="clip-sun"><circle cx={art.sun.x} cy={art.sun.y} r={art.sun.r} /></clipPath>
@@ -474,8 +510,8 @@
 				class="wedge"
 				class:faded={mode === 'docked' && selected !== slice.index}
 				class:expanded={expandedIdx === slice.index && childSlices.length > 0}
-				onmouseenter={() => (hovered = slice.index)}
-				onmouseleave={() => (hovered = null)}
+				onmouseenter={() => enterWedge(slice.index)}
+				onmouseleave={leaveWedge}
 				role="presentation"
 			>
 				<path
@@ -557,9 +593,8 @@
 					</textPath>
 				</text>
 
-				<!-- Sub-wedges: the wedge subdivides into its children — shown docked,
-				     and previewed on hub hover/focus, right in the wedge's space. -->
-				{#if expandedIdx === slice.index}
+				{#if mode === 'docked' && selected === slice.index}
+					<!-- Docked: children subdivide the corner quarter, labels lengthwise. -->
 					{#each childSlices as sub (sub.item.id)}
 						<path
 							d={sub.path}
@@ -581,6 +616,36 @@
 							style="--i:{sub.index}; font-size:{sub.font}px; {WEDGE_TYPO[slice.item.id] ?? ''}"
 						>
 							<textPath href="#rad-{sub.item.id}" startOffset="50%" text-anchor="middle">
+								{sub.item.label()}
+							</textPath>
+						</text>
+					{/each}
+				{:else if mode === 'hub' && expandedIdx === slice.index}
+					<!-- Hub hover/focus: a second row of segments blooms just outside the
+					     wheel, confined to this wedge's quarter. The invisible bridge
+					     keeps the pointer path from wedge to ring unbroken. -->
+					<path d={bridgePath} class="bridge" role="presentation" />
+					{#each childSlices as sub (sub.item.id)}
+						<path
+							d={sub.ring}
+							class="slice ring-seg"
+							style="--sub-fill:{sub.fill}; --sub-fill-hover:{sub.fillHover}; --i:{sub.index}"
+							role="menuitem"
+							aria-label={sub.item.label()}
+							tabindex="0"
+							onclick={(e) => {
+								e.stopPropagation();
+								navigate(sub.item.href);
+							}}
+							onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate(sub.item.href)}
+						/>
+					{/each}
+					{#each childSlices as sub (sub.item.id)}
+						<text
+							class="label ring-label"
+							style="--i:{sub.index}; font-size:{sub.ringFont}px; {WEDGE_TYPO[slice.item.id] ?? ''}"
+						>
+							<textPath href="#ringarc-{sub.item.id}" startOffset="50%" text-anchor="middle">
 								{sub.item.label()}
 							</textPath>
 						</text>
@@ -634,7 +699,14 @@
 		transform: translate(-50%, -50%) translate(50vw, 50vh);
 	}
 
-	svg {
+	svg.wheel {
+		/* Padded canvas: the hover ring lives outside the wheel, so the svg is
+		   larger than the (unchanged) menu-root box. 22% pad = PAD 88 at size 400;
+		   percentages so the mobile root-shrink scales the whole canvas. */
+		position: absolute;
+		inset: -22%;
+		width: 144%;
+		height: 144%;
 		overflow: visible;
 		outline: none;
 		/* Whole-wheel ambient shadow: a soft floating ring under the disk. */
@@ -666,6 +738,7 @@
 		stroke-width: 1.5;
 		stroke-linejoin: round;
 		cursor: pointer;
+		outline: none; /* keyboard focus is shown via the glow filter, not the UA box */
 		/* Per-wedge sheen + inset vignette; the light inside sways slowly for
 		   idle life (reduced-motion swaps in the still twin below). */
 		filter: url(#rm-sheen);
@@ -680,11 +753,6 @@
 	.art {
 		pointer-events: none;
 		opacity: 0.85;
-		transition: opacity 240ms ease;
-	}
-	/* Art yields while the children are on display so labels stay legible. */
-	.wedge.expanded .art {
-		opacity: 0.25;
 	}
 	.vapor-line {
 		fill: none;
@@ -748,8 +816,34 @@
 			opacity 260ms ease,
 			letter-spacing 240ms ease;
 	}
-	.wedge.expanded > .label:not(.sub) {
-		opacity: 0;
+	/* Invisible hover bridge between wedge and ring. */
+	.bridge {
+		fill: transparent;
+		stroke: none;
+		pointer-events: all;
+	}
+
+	/* The hover ring: a second row of segments outside the wheel. */
+	.slice.ring-seg {
+		fill: var(--sub-fill, #d9a441);
+		stroke-width: 1.25;
+		filter: url(#rm-sheen);
+		transform-box: fill-box;
+		transform-origin: center;
+		animation: sub-in 240ms cubic-bezier(0.34, 1.3, 0.5, 1) both;
+		animation-delay: calc(var(--i, 0) * 40ms);
+		transition: fill 160ms ease;
+	}
+	.slice.ring-seg:hover,
+	.slice.ring-seg:focus-visible {
+		fill: var(--sub-fill-hover, #c48f2f);
+		filter: url(#rm-glow);
+	}
+	.label.ring-label {
+		fill: #10131a;
+		font-weight: 600;
+		animation: sub-in 240ms ease both;
+		animation-delay: calc(var(--i, 0) * 40ms + 30ms);
 	}
 
 	/* Sub-wedges bloom in: a quick staggered fade-and-grow per child. */
@@ -858,7 +952,9 @@
 			transform: none;
 		}
 		.slice.sub,
-		.label.sub {
+		.label.sub,
+		.slice.ring-seg,
+		.label.ring-label {
 			animation: none;
 		}
 		.hub-back,
