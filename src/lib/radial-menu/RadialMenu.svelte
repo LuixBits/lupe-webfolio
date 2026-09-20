@@ -95,7 +95,16 @@
 			mode = 'hub';
 			selected = null;
 		}
+		// Keyboard focus doesn't survive navigation — clear it so a stale value
+		// can't keep a hover ring expanded after returning to the hub.
+		focused = null;
 	});
+
+	// Collapse the keyboard-driven ring when focus leaves the wheel entirely.
+	function onFocusOut(e: FocusEvent) {
+		const next = e.relatedTarget as Node | null;
+		if (!next || !(e.currentTarget as Node).contains(next)) focused = null;
+	}
 
 	// Publish docked state so the layout's corner scene knows what to grow, where.
 	$effect(() => {
@@ -295,6 +304,7 @@
 		const n = items.length;
 		if (!n) return;
 		if (e.key === 'Escape') {
+			focused = null;
 			navigate('/');
 			e.preventDefault();
 			return;
@@ -328,6 +338,7 @@
 		aria-label={label}
 		tabindex="0"
 		onkeydown={onKeydown}
+		onfocusout={onFocusOut}
 	>
 		<defs>
 			{#each slices as slice (slice.item.id)}
@@ -518,7 +529,12 @@
 					aria-haspopup={slice.item.children ? 'true' : undefined}
 					onfocus={() => (focused = slice.index)}
 					onclick={() => navigate(slice.item.href)}
-					onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate(slice.item.href)}
+					onkeydown={(e) => {
+						if (e.key !== 'Enter' && e.key !== ' ') return;
+						e.stopPropagation();
+						e.preventDefault();
+						navigate(slice.item.href);
+					}}
 				/>
 
 				<!-- Themed art, clipped to the wedge, purely decorative. -->
@@ -601,7 +617,12 @@
 								e.stopPropagation();
 								navigate(sub.item.href);
 							}}
-							onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate(sub.item.href)}
+							onkeydown={(e) => {
+								if (e.key !== 'Enter' && e.key !== ' ') return;
+								e.stopPropagation();
+								e.preventDefault();
+								navigate(sub.item.href);
+							}}
 						/>
 					{/each}
 					{#each childSlices as sub (sub.item.id)}
@@ -631,7 +652,12 @@
 								e.stopPropagation();
 								navigate(sub.item.href);
 							}}
-							onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate(sub.item.href)}
+							onkeydown={(e) => {
+								if (e.key !== 'Enter' && e.key !== ' ') return;
+								e.stopPropagation();
+								e.preventDefault();
+								navigate(sub.item.href);
+							}}
 						/>
 					{/each}
 					{#each childSlices as sub (sub.item.id)}
@@ -927,6 +953,19 @@
 			width: min(86vw, 400px);
 			height: min(86vw, 400px);
 		}
+		/* Docked on mobile: a compact corner puck. The quarter keeps its themed
+		   art + section name and the Back hub stays a comfortable tap target,
+		   but the sub-wedges are dropped — their labels can't stay legible at
+		   this size, and the section content they anchor to is right there to
+		   scroll. Content stays readable underneath. */
+		.menu-root[data-mode='docked'] {
+			width: 240px;
+			height: 240px;
+		}
+		.menu-root[data-mode='docked'] .slice.sub,
+		.menu-root[data-mode='docked'] .label.sub {
+			display: none;
+		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
@@ -938,8 +977,10 @@
 			transition: none;
 		}
 		/* Still sheen (no SMIL light sway), no breathing, no scale — the glow
-		   states remain as static feedback. */
-		.slice {
+		   states remain as static feedback. The ring-seg selector must match the
+		   base rule's specificity or the animated sheen wins. */
+		.slice,
+		.slice.ring-seg {
 			filter: url(#rm-sheen-still);
 		}
 		.wedge:hover:not(.faded) {
