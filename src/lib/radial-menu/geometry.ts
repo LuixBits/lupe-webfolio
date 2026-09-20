@@ -87,7 +87,8 @@ export function labelArc(
 }
 
 /** A straight radial baseline (inner→outer along `angle`) for text that runs
- *  lengthwise down a wedge. Flips direction on the left half to stay upright. */
+ *  lengthwise down a wedge. Flips direction when the outward direction points
+ *  left (screen-x negative, i.e. angle in (180°, 360°)) so text stays upright. */
 export function radialPath(
 	cx: number,
 	cy: number,
@@ -95,7 +96,8 @@ export function radialPath(
 	rOuter: number,
 	angle: number
 ): string {
-	const flip = angle > 90 && angle < 270;
+	const a = ((angle % 360) + 360) % 360;
+	const flip = a > 180;
 	const inner = polarToCartesian(cx, cy, rInner, angle);
 	const outer = polarToCartesian(cx, cy, rOuter, angle);
 	return flip
