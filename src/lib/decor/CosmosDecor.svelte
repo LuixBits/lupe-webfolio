@@ -210,22 +210,22 @@
   <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <radialGradient id="cdl-planet" cx="34%" cy="30%" r="80%">
-        <stop offset="0%" stop-color="var(--accent, #7fd4ff)" stop-opacity="0.85" />
-        <stop offset="46%" stop-color="var(--cosmos-nebula, #7c5cff)" stop-opacity="0.45" />
-        <stop offset="100%" stop-color="var(--bg, #0b0b2a)" stop-opacity="0.95" />
+        <stop offset="0%" stop-color="var(--accent, #ff7a67)" stop-opacity="0.85" />
+        <stop offset="46%" stop-color="var(--cosmos-nebula, #c94848)" stop-opacity="0.45" />
+        <stop offset="100%" stop-color="var(--bg, #090c1c)" stop-opacity="0.95" />
       </radialGradient>
       <radialGradient id="cdl-moon" cx="38%" cy="34%" r="75%">
         <stop offset="0%" stop-color="var(--cosmos-star, #cfe6ff)" stop-opacity="0.55" />
         <stop offset="70%" stop-color="var(--cosmos-star, #cfe6ff)" stop-opacity="0.12" />
-        <stop offset="100%" stop-color="var(--bg, #0b0b2a)" stop-opacity="0.9" />
+        <stop offset="100%" stop-color="var(--bg, #090c1c)" stop-opacity="0.9" />
       </radialGradient>
       <radialGradient id="cdl-halo" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="var(--accent, #7fd4ff)" stop-opacity="0.28" />
-        <stop offset="100%" stop-color="var(--accent, #7fd4ff)" stop-opacity="0" />
+        <stop offset="0%" stop-color="var(--accent, #ff7a67)" stop-opacity="0.28" />
+        <stop offset="100%" stop-color="var(--accent, #ff7a67)" stop-opacity="0" />
       </radialGradient>
       <linearGradient id="cdl-tail" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="var(--cosmos-glint, #ff8ad9)" stop-opacity="0" />
-        <stop offset="62%" stop-color="var(--cosmos-glint, #ff8ad9)" stop-opacity="0.35" />
+        <stop offset="0%" stop-color="var(--cosmos-glint, #ffab7a)" stop-opacity="0" />
+        <stop offset="62%" stop-color="var(--cosmos-glint, #ffab7a)" stop-opacity="0.35" />
         <stop offset="100%" stop-color="var(--cosmos-star, #cfe6ff)" stop-opacity="0.95" />
       </linearGradient>
       <filter id="cdl-soft" x="-60%" y="-60%" width="220%" height="220%">
@@ -234,25 +234,25 @@
       <!-- brushed metal for the telescope tube (runs across the tube's height) -->
       <linearGradient id="cdl-tube" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color="var(--cosmos-star, #cfe6ff)" stop-opacity="0.5" />
-        <stop offset="40%" stop-color="var(--cosmos-nebula, #7c5cff)" stop-opacity="0.3" />
-        <stop offset="100%" stop-color="var(--bg, #0b0b2a)" stop-opacity="0.92" />
+        <stop offset="40%" stop-color="var(--cosmos-dust, #7668c4)" stop-opacity="0.3" />
+        <stop offset="100%" stop-color="var(--bg, #090c1c)" stop-opacity="0.92" />
       </linearGradient>
       <!-- shell material for the drone body / owl plumage -->
       <radialGradient id="cdl-shell" cx="35%" cy="28%" r="90%">
         <stop offset="0%" stop-color="var(--cosmos-star, #cfe6ff)" stop-opacity="0.45" />
-        <stop offset="55%" stop-color="var(--cosmos-nebula, #7c5cff)" stop-opacity="0.26" />
-        <stop offset="100%" stop-color="var(--bg, #0b0b2a)" stop-opacity="0.95" />
+        <stop offset="55%" stop-color="var(--cosmos-dust, #7668c4)" stop-opacity="0.26" />
+        <stop offset="100%" stop-color="var(--bg, #090c1c)" stop-opacity="0.95" />
       </radialGradient>
       <!-- hot glow core for owl eyes / camera lens -->
       <radialGradient id="cdl-eye" cx="50%" cy="50%" r="50%">
         <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
-        <stop offset="32%" stop-color="var(--accent, #7fd4ff)" stop-opacity="0.8" />
-        <stop offset="100%" stop-color="var(--accent, #7fd4ff)" stop-opacity="0" />
+        <stop offset="32%" stop-color="var(--accent, #ff7a67)" stop-opacity="0.8" />
+        <stop offset="100%" stop-color="var(--accent, #ff7a67)" stop-opacity="0" />
       </radialGradient>
       <!-- moonlit paper for the origami crane -->
       <linearGradient id="cdl-paper" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0%" stop-color="var(--cosmos-star, #cfe6ff)" stop-opacity="0.34" />
-        <stop offset="100%" stop-color="var(--cosmos-nebula, #7c5cff)" stop-opacity="0.16" />
+        <stop offset="100%" stop-color="var(--cosmos-dust, #7668c4)" stop-opacity="0.16" />
       </linearGradient>
       <filter id="cdl-blur1" x="-15%" y="-15%" width="130%" height="130%">
         <feGaussianBlur stdDeviation="0.7" />
@@ -264,21 +264,21 @@
       <path
         class="wisp-a"
         d="M -80 210 C 90 240, 150 330, 70 430 C 10 500, 60 570, -60 610 Z"
-        fill="var(--cosmos-nebula, #7c5cff)"
+        fill="var(--cosmos-nebula, #c94848)"
         opacity="0.12"
         filter="url(#cdl-soft)"
       />
       <path
         class="wisp-b"
         d="M 1520 560 C 1360 570, 1300 660, 1370 740 C 1420 800, 1360 880, 1520 900 Z"
-        fill="var(--cosmos-nebula, #7c5cff)"
+        fill="var(--cosmos-dust, #7668c4)"
         opacity="0.11"
         filter="url(#cdl-soft)"
       />
       <path
         class="wisp-c"
         d="M 260 -60 C 330 30, 480 20, 560 -40 C 480 -70, 330 -90, 260 -60 Z"
-        fill="var(--cosmos-glint, #ff8ad9)"
+        fill="var(--cosmos-glint, #ffab7a)"
         opacity="0.07"
         filter="url(#cdl-soft)"
       />
@@ -286,7 +286,7 @@
       <path
         d="M 1010 -40 A 430 430 0 0 0 1480 330"
         fill="none"
-        stroke="var(--accent, #7fd4ff)"
+        stroke="var(--accent, #ff7a67)"
         stroke-width="1"
         opacity="0.16"
       />
@@ -296,7 +296,7 @@
         <g transform="translate(175 555)">
           <circle r="112" fill="none" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="1" />
           <circle r="96" fill="none" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.7" opacity="0.7" />
-          <circle r="104" fill="none" stroke="var(--cosmos-nebula, #7c5cff)" stroke-width="15" opacity="0.16" />
+          <circle r="104" fill="none" stroke="var(--cosmos-nebula, #c94848)" stroke-width="15" opacity="0.16" />
           {#each chartTicks as t, i (i)}
             <line
               x1={t.x1}
@@ -312,22 +312,22 @@
             <path
               d="M -6 0 L 0 3 L 6 0 L 0 -3 Z"
               transform={`rotate(${a}) translate(104 0)`}
-              fill="var(--accent, #7fd4ff)"
+              fill="var(--accent, #ff7a67)"
               opacity="0.8"
             />
           {/each}
           <!-- offset ecliptic circle -->
-          <circle cx="12" cy="-10" r="52" fill="none" stroke="var(--cosmos-glint, #ff8ad9)" stroke-width="0.7" opacity="0.5" />
+          <circle cx="12" cy="-10" r="52" fill="none" stroke="var(--cosmos-glint, #ffab7a)" stroke-width="0.7" opacity="0.5" />
           <!-- rotating rete: dashed sky circle, rule lines, pointer arm, chart stars -->
           <g class="chart-rete">
-            <circle r="68" fill="none" stroke="var(--accent, #7fd4ff)" stroke-width="0.8" stroke-dasharray="3 6" opacity="0.8" />
+            <circle r="68" fill="none" stroke="var(--accent, #ff7a67)" stroke-width="0.8" stroke-dasharray="3 6" opacity="0.8" />
             <line x1="-96" y1="0" x2="96" y2="0" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.7" opacity="0.55" />
             <line x1="0" y1="-96" x2="0" y2="96" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.7" opacity="0.3" />
-            <path d="M 88 0 L -22 4.5 L -38 0 L -22 -4.5 Z" fill="var(--cosmos-glint, #ff8ad9)" opacity="0.5" />
+            <path d="M 88 0 L -22 4.5 L -38 0 L -22 -4.5 Z" fill="var(--cosmos-glint, #ffab7a)" opacity="0.5" />
             <path d="M 34 -22 Q 0 8 -18 40" fill="none" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.5" opacity="0.45" />
             <circle cx="34" cy="-22" r="2" fill="var(--cosmos-star, #cfe6ff)" opacity="0.9" />
             <circle cx="-18" cy="40" r="1.6" fill="var(--cosmos-star, #cfe6ff)" opacity="0.8" />
-            <circle cx="-42" cy="-30" r="1.4" fill="var(--cosmos-glint, #ff8ad9)" opacity="0.85" />
+            <circle cx="-42" cy="-30" r="1.4" fill="var(--cosmos-glint, #ffab7a)" opacity="0.85" />
           </g>
         </g>
       </g>
@@ -378,7 +378,7 @@
           <circle r="46" fill="none" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="1" opacity="0.4" />
           <!-- terminator line -->
           <path d="M 8 -45.3 A 46 46 0 0 1 8 45.3 A 60 46 0 0 0 8 -45.3 Z"
-            fill="var(--bg, #0b0b2a)" opacity="0.55" />
+            fill="var(--bg, #090c1c)" opacity="0.55" />
           <!-- craters, editorial line work -->
           <circle cx="-14" cy="-10" r="8" fill="none" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.8" opacity="0.35" />
           <circle cx="-2" cy="18" r="5" fill="none" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.8" opacity="0.3" />
@@ -389,10 +389,10 @@
       <!-- tiny ringed moonlet, mid-left edge -->
       <g class="moonlet-drift">
         <g transform="translate(58 386) rotate(-24)">
-          <ellipse rx="30" ry="8.5" fill="none" stroke="var(--cosmos-glint, #ff8ad9)" stroke-width="0.9" opacity="0.4" />
+          <ellipse rx="30" ry="8.5" fill="none" stroke="var(--cosmos-glint, #ffab7a)" stroke-width="0.9" opacity="0.4" />
           <circle r="13" fill="url(#cdl-moon)" />
           <circle r="13" fill="none" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.8" opacity="0.45" />
-          <path d="M -30 0 A 30 8.5 0 0 0 30 0" fill="none" stroke="var(--cosmos-glint, #ff8ad9)" stroke-width="0.9" opacity="0.6" />
+          <path d="M -30 0 A 30 8.5 0 0 0 30 0" fill="none" stroke="var(--cosmos-glint, #ffab7a)" stroke-width="0.9" opacity="0.6" />
         </g>
       </g>
 
@@ -429,13 +429,13 @@
             <path
               d="M -21.5 -29 C -24 -11 -21 5 -12 12"
               fill="none"
-              stroke="var(--accent, #7fd4ff)"
+              stroke="var(--accent, #ff7a67)"
               stroke-width="0.9"
               opacity="0.5"
             />
             <!-- facial discs + glowing eyes -->
-            <circle cx="-7" cy="-37" r="8.5" fill="var(--bg, #0b0b2a)" opacity="0.35" />
-            <circle cx="7" cy="-37" r="8.5" fill="var(--bg, #0b0b2a)" opacity="0.35" />
+            <circle cx="-7" cy="-37" r="8.5" fill="var(--bg, #090c1c)" opacity="0.35" />
+            <circle cx="7" cy="-37" r="8.5" fill="var(--bg, #090c1c)" opacity="0.35" />
             <circle cx="-7" cy="-37" r="8.5" fill="none" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.7" opacity="0.45" />
             <circle cx="7" cy="-37" r="8.5" fill="none" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.7" opacity="0.45" />
             <circle class="owl-eye" cx="-7" cy="-37" r="4.6" fill="url(#cdl-eye)" opacity="0.95" />
@@ -465,7 +465,7 @@
           <!-- far wing -->
           <polygon
             points="-4,-6 -34,-52 12,-4"
-            fill="var(--cosmos-nebula, #7c5cff)"
+            fill="var(--cosmos-dust, #7668c4)"
             opacity="0.28"
             stroke="var(--cosmos-star, #cfe6ff)"
             stroke-width="0.7"
@@ -508,7 +508,7 @@
           <!-- fold creases -->
           <path d="M -28 0 L 2 14 M 0 -10 L 2 14" fill="none" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.5" opacity="0.35" />
           <!-- head glint -->
-          <circle cx="-55" cy="-34" r="1.4" fill="var(--accent, #7fd4ff)" opacity="0.9" />
+          <circle cx="-55" cy="-34" r="1.4" fill="var(--accent, #ff7a67)" opacity="0.9" />
         </g>
       </g>
     </g>
@@ -532,7 +532,7 @@
           <circle r="112" fill="url(#cdl-halo)" />
           <!-- back half of rings -->
           <path d="M -118 0 A 118 30 0 0 1 118 0" fill="none" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="1.1" opacity="0.35" />
-          <path d="M -134 0 A 134 37 0 0 1 134 0" fill="none" stroke="var(--accent, #7fd4ff)" stroke-width="0.8" opacity="0.22" />
+          <path d="M -134 0 A 134 37 0 0 1 134 0" fill="none" stroke="var(--accent, #ff7a67)" stroke-width="0.8" opacity="0.22" />
           <!-- body -->
           <circle r="68" fill="url(#cdl-planet)" opacity="0.9" />
           <circle r="68" fill="none" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="1" opacity="0.35" />
@@ -542,8 +542,8 @@
           <path d="M -58 34 A 80 26 0 0 1 58 34" fill="none" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.8" opacity="0.2" />
           <!-- front half of rings -->
           <path d="M -118 0 A 118 30 0 0 0 118 0" fill="none" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="1.4" opacity="0.65" />
-          <path d="M -134 0 A 134 37 0 0 0 134 0" fill="none" stroke="var(--accent, #7fd4ff)" stroke-width="0.9" opacity="0.4" />
-          <path d="M -150 0 A 150 44 0 0 0 150 0" fill="none" stroke="var(--cosmos-glint, #ff8ad9)" stroke-width="0.7" opacity="0.25" />
+          <path d="M -134 0 A 134 37 0 0 0 134 0" fill="none" stroke="var(--accent, #ff7a67)" stroke-width="0.9" opacity="0.4" />
+          <path d="M -150 0 A 150 44 0 0 0 150 0" fill="none" stroke="var(--cosmos-glint, #ffab7a)" stroke-width="0.7" opacity="0.25" />
         </g>
       </g>
 
@@ -552,13 +552,13 @@
         <g class="comet" opacity="0">
           <g transform="rotate(15)">
             <!-- ion tail: thin, straighter, cooler -->
-            <path d="M -118 -7 L 0 -0.8 L 0 0.8 Z" fill="var(--accent, #7fd4ff)" opacity="0.28" />
+            <path d="M -118 -7 L 0 -0.8 L 0 0.8 Z" fill="var(--accent, #ff7a67)" opacity="0.28" />
             <path d="M -128 0 L 0 -2.6 L 0 2.6 Z" fill="url(#cdl-tail)" />
             <!-- dust particles shed along the tail -->
             {#each cometDust as d, i (i)}
               <circle cx={d.x} cy={d.y} r={d.r} fill="var(--cosmos-star, #cfe6ff)" opacity={d.o} />
             {/each}
-            <circle r="7" fill="var(--cosmos-glint, #ff8ad9)" opacity="0.25" />
+            <circle r="7" fill="var(--cosmos-glint, #ffab7a)" opacity="0.25" />
             <circle r="3" fill="var(--cosmos-star, #cfe6ff)" />
           </g>
         </g>
@@ -570,7 +570,7 @@
           <!-- arms: dark underlay + light centerline -->
           <path
             d="M -13 -10 L -34 -34 M 13 -10 L 34 -34 M 13 10 L 34 34 M -13 10 L -34 34"
-            stroke="var(--bg, #0b0b2a)"
+            stroke="var(--bg, #090c1c)"
             stroke-width="6"
             stroke-linecap="round"
             opacity="0.75"
@@ -585,29 +585,29 @@
           <!-- motors + spinning props -->
           {#each motors as m, i (i)}
             <g transform={`translate(${m[0]} ${m[1]})`}>
-              <circle r="24" fill="var(--accent, #7fd4ff)" opacity="0.05" />
-              <circle r="24" fill="none" stroke="var(--accent, #7fd4ff)" stroke-width="0.6" stroke-dasharray="1.5 5" opacity="0.35" />
-              <circle r="4.2" fill="var(--bg, #0b0b2a)" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.9" opacity="0.9" />
+              <circle r="24" fill="var(--accent, #ff7a67)" opacity="0.05" />
+              <circle r="24" fill="none" stroke="var(--accent, #ff7a67)" stroke-width="0.6" stroke-dasharray="1.5 5" opacity="0.35" />
+              <circle r="4.2" fill="var(--bg, #090c1c)" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.9" opacity="0.9" />
               <g class="rotor" transform={`rotate(${i * 45})`}>
                 <ellipse rx="22" ry="2.6" fill="var(--cosmos-star, #cfe6ff)" opacity="0.42" />
                 <ellipse rx="2.6" ry="22" fill="var(--cosmos-star, #cfe6ff)" opacity="0.16" />
               </g>
-              <circle r="1.6" fill="var(--cosmos-glint, #ff8ad9)" opacity="0.9" />
+              <circle r="1.6" fill="var(--cosmos-glint, #ffab7a)" opacity="0.9" />
             </g>
           {/each}
           <!-- body shell -->
           <rect x="-16" y="-13" width="32" height="26" rx="9" fill="url(#cdl-shell)" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="1" opacity="0.95" />
           <path d="M -9 -13 L -9 13 M 9 -13 L 9 13" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.6" opacity="0.3" />
           <!-- camera gimbal lens -->
-          <circle r="6.5" fill="var(--bg, #0b0b2a)" opacity="0.8" />
-          <circle r="6.5" fill="none" stroke="var(--accent, #7fd4ff)" stroke-width="0.9" opacity="0.6" />
+          <circle r="6.5" fill="var(--bg, #090c1c)" opacity="0.8" />
+          <circle r="6.5" fill="none" stroke="var(--accent, #ff7a67)" stroke-width="0.9" opacity="0.6" />
           <circle r="3.6" fill="url(#cdl-eye)" />
           <circle r="1.2" fill="#ffffff" opacity="0.9" />
-          <!-- nav LEDs: front magenta, rear cyan -->
-          <circle class="led" cx="-13" cy="-9" r="1.5" fill="var(--cosmos-glint, #ff8ad9)" opacity="0.9" />
-          <circle class="led" cx="13" cy="-9" r="1.5" fill="var(--cosmos-glint, #ff8ad9)" opacity="0.9" />
-          <circle class="led" cx="-13" cy="9" r="1.5" fill="var(--accent, #7fd4ff)" opacity="0.9" />
-          <circle class="led" cx="13" cy="9" r="1.5" fill="var(--accent, #7fd4ff)" opacity="0.9" />
+          <!-- nav LEDs: front warm, rear cool -->
+          <circle class="led" cx="-13" cy="-9" r="1.5" fill="var(--cosmos-glint, #ffab7a)" opacity="0.9" />
+          <circle class="led" cx="13" cy="-9" r="1.5" fill="var(--cosmos-glint, #ffab7a)" opacity="0.9" />
+          <circle class="led" cx="-13" cy="9" r="1.5" fill="var(--cosmos-star, #cfe6ff)" opacity="0.9" />
+          <circle class="led" cx="13" cy="9" r="1.5" fill="var(--cosmos-star, #cfe6ff)" opacity="0.9" />
         </g>
       </g>
 
@@ -623,8 +623,8 @@
             <path d="M 0 2 L 0 -16" stroke-width="2" opacity="0.65" />
           </g>
           <!-- mount head + tension knob -->
-          <rect x="-7" y="-26" width="14" height="12" rx="3" fill="var(--bg, #0b0b2a)" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="1" opacity="0.85" />
-          <circle cx="10" cy="-20" r="3" fill="none" stroke="var(--cosmos-glint, #ff8ad9)" stroke-width="0.9" opacity="0.6" />
+          <rect x="-7" y="-26" width="14" height="12" rx="3" fill="var(--bg, #090c1c)" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="1" opacity="0.85" />
+          <circle cx="10" cy="-20" r="3" fill="none" stroke="var(--cosmos-glint, #ffab7a)" stroke-width="0.9" opacity="0.6" />
           <!-- optical tube assembly, aimed up-right -->
           <g transform="translate(0 -22) rotate(-36)">
             <!-- dotted sight-line to a waiting star -->
@@ -634,7 +634,7 @@
               y1="0"
               x2="215"
               y2="0"
-              stroke="var(--accent, #7fd4ff)"
+              stroke="var(--accent, #ff7a67)"
               stroke-width="1"
               stroke-dasharray="2 7"
               opacity="0.5"
@@ -649,26 +649,26 @@
             <!-- glow at the objective -->
             <circle class="scope-glow" cx="126" cy="0" r="18" fill="url(#cdl-halo)" />
             <!-- back cell -->
-            <rect x="-72" y="-10" width="12" height="20" rx="3" fill="var(--bg, #0b0b2a)" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.9" opacity="0.8" />
+            <rect x="-72" y="-10" width="12" height="20" rx="3" fill="var(--bg, #090c1c)" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.9" opacity="0.8" />
             <!-- main tube -->
             <rect x="-62" y="-12" width="146" height="24" rx="6" fill="url(#cdl-tube)" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="1" opacity="0.9" />
             <path d="M -18 -12 L -18 12 M 34 -12 L 34 12" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.6" opacity="0.25" />
             <!-- dew shield + objective -->
             <rect x="76" y="-15.5" width="46" height="31" rx="5" fill="url(#cdl-tube)" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="1" opacity="0.9" />
             <path d="M 84 -15.5 L 84 15.5" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.7" opacity="0.35" />
-            <ellipse cx="122" cy="0" rx="3" ry="15.5" fill="var(--accent, #7fd4ff)" opacity="0.18" />
-            <ellipse cx="122" cy="0" rx="3" ry="15.5" fill="none" stroke="var(--accent, #7fd4ff)" stroke-width="0.8" opacity="0.55" />
+            <ellipse cx="122" cy="0" rx="3" ry="15.5" fill="var(--accent, #ff7a67)" opacity="0.18" />
+            <ellipse cx="122" cy="0" rx="3" ry="15.5" fill="none" stroke="var(--accent, #ff7a67)" stroke-width="0.8" opacity="0.55" />
             <!-- finder scope on top -->
-            <rect x="14" y="-27" width="40" height="9" rx="4" fill="var(--bg, #0b0b2a)" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.8" opacity="0.8" />
+            <rect x="14" y="-27" width="40" height="9" rx="4" fill="var(--bg, #090c1c)" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.8" opacity="0.8" />
             <path d="M 22 -18 L 22 -12 M 46 -18 L 46 -12" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="1" opacity="0.5" />
-            <circle cx="54.5" cy="-22.5" r="1.6" fill="var(--accent, #7fd4ff)" opacity="0.7" />
+            <circle cx="54.5" cy="-22.5" r="1.6" fill="var(--accent, #ff7a67)" opacity="0.7" />
             <!-- focuser + eyepiece hanging back down -->
             <g transform="translate(-66 6) rotate(36)">
-              <rect x="-3.5" y="0" width="7" height="14" rx="2" fill="var(--bg, #0b0b2a)" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.8" opacity="0.8" />
+              <rect x="-3.5" y="0" width="7" height="14" rx="2" fill="var(--bg, #090c1c)" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.8" opacity="0.8" />
               <circle cx="-6" cy="7" r="2.6" fill="none" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.7" opacity="0.5" />
               <circle cx="6" cy="7" r="2.6" fill="none" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.7" opacity="0.5" />
-              <circle cx="0" cy="17" r="4" fill="var(--bg, #0b0b2a)" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.9" opacity="0.85" />
-              <circle cx="0" cy="17" r="1.6" fill="var(--accent, #7fd4ff)" opacity="0.75" />
+              <circle cx="0" cy="17" r="4" fill="var(--bg, #090c1c)" stroke="var(--cosmos-star, #cfe6ff)" stroke-width="0.9" opacity="0.85" />
+              <circle cx="0" cy="17" r="1.6" fill="var(--accent, #ff7a67)" opacity="0.75" />
             </g>
           </g>
         </g>
@@ -680,7 +680,7 @@
           class="glint"
           d="M 0 -7 L 1.6 -1.6 L 7 0 L 1.6 1.6 L 0 7 L -1.6 1.6 L -7 0 L -1.6 -1.6 Z"
           transform={`translate(${p.x} ${p.y}) scale(${p.s})`}
-          fill="var(--cosmos-glint, #ff8ad9)"
+          fill="var(--cosmos-glint, #ffab7a)"
           opacity="0.55"
         />
       {/each}

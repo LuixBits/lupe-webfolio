@@ -92,24 +92,26 @@
 	--heading-spacing: 0.06em;
 }
 
-/* 🌌 Hobbies — cosmos: deep indigo, cyan + magenta glints. */
+/* 🌌 Hobbies — cosmos: astrophotography night — near-black navy sky,
+ * H-alpha nebula reds, cool white-blue stars, violet only as a hint. */
 [data-theme='cosmos'] {
-	--bg: #0b0b2a;
-	--fg: #e7ebff;
-	--fg-muted: #9aa0d6;
-	--accent: #7fd4ff;
-	--slice-bg: #2a2a5a;
-	--slice-active: #7fd4ff;
-	--sub-bg: #ff8ad9;
-	--sub-active: #ff5ec4;
-	--hub-bg: #14143c;
-	--label-fg: #e7ebff;
-	--label-sub-fg: #2a0f2a;
+	--bg: #090c1c;
+	--fg: #e8ecf8;
+	--fg-muted: #9aa4c4;
+	--accent: #ff7a67;
+	--slice-bg: #2b3050;
+	--slice-active: #ff7a67;
+	--sub-bg: #ffab7a;
+	--sub-active: #ff8e55;
+	--hub-bg: #0e1226;
+	--label-fg: #e8ecf8;
+	--label-sub-fg: #2a1206;
 	--cosmos-star: #cfe6ff;
-	--cosmos-nebula: #7c5cff;
-	--cosmos-glint: #ff8ad9;
-	--label-active-fg: #05102a;
-	--on-hub: #e7ebff;
+	--cosmos-nebula: #d14e4e;
+	--cosmos-glint: #ffab7a;
+	--cosmos-dust: #7668c4;
+	--label-active-fg: #1c0a06;
+	--on-hub: #e8ecf8;
 	--font-display: 'Space Grotesk', system-ui, sans-serif;
 	--font-body: 'Sora', system-ui, sans-serif;
 	--heading-transform: none;
