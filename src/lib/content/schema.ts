@@ -54,6 +54,35 @@ export const projectSchema = z.object({
 });
 export type Project = z.infer<typeof projectSchema>;
 
+/** A year span: either a plain string ("2015 – 2019") or a localized one when
+ *  it contains words ({ en: "2022 – today", de: "2022 – heute" }). */
+export const yearSpan = z.union([z.string(), localizedString]);
+export type YearSpan = z.infer<typeof yearSpan>;
+
+/** Resolve a YearSpan for display. */
+export function resolveSpan(span: YearSpan, locale: string): string {
+	return typeof span === 'string' ? span : resolveLocalized(span, locale);
+}
+
+/** A CV education stage — degree + institution over a span of years.
+ *  Rendered as the "bedrock" strata at the bottom of the CV pond. */
+export const educationSchema = z.object({
+	span: yearSpan,
+	degree: localizedString,
+	institution: z.string(),
+	note: localizedString.optional()
+});
+export type Education = z.infer<typeof educationSchema>;
+
+/** A CV position/appointment — role + organisation over a span of years. */
+export const positionSchema = z.object({
+	span: yearSpan,
+	role: localizedString,
+	org: z.string(),
+	note: localizedString.optional()
+});
+export type Position = z.infer<typeof positionSchema>;
+
 /** A single item in a hobby gallery — a photo or an embedded/hosted video. */
 export const mediaItemSchema = z.object({
 	id: z.string(),
@@ -107,6 +136,16 @@ export function defineProjects(input: unknown[]): Project[] {
 /** Parse + validate hobby albums. */
 export function defineAlbums(input: unknown[]): Album[] {
 	return z.array(albumSchema).parse(input);
+}
+
+/** Parse + validate CV education stages (authored newest-first). */
+export function defineEducation(input: unknown[]): Education[] {
+	return z.array(educationSchema).parse(input);
+}
+
+/** Parse + validate CV positions (authored newest-first). */
+export function definePositions(input: unknown[]): Position[] {
+	return z.array(positionSchema).parse(input);
 }
 
 /** Parse + validate the About record. */

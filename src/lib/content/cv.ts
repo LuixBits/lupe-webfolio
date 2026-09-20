@@ -1,4 +1,11 @@
-import { defineProjects, type Project } from './schema';
+import {
+	defineEducation,
+	definePositions,
+	defineProjects,
+	type Education,
+	type Position,
+	type Project
+} from './schema';
 
 /** CV / Lebenslauf — research work and publications. Placeholder-but-plausible
  *  copy; replace with the real thing. */
@@ -94,6 +101,60 @@ export const publications: Project[] = defineProjects([
 		tags: ['publication', 'open-source'],
 		year: 2024,
 		links: [{ label: 'PDF', url: 'https://example.com/oss-infra.pdf', rel: 'writeup' }]
+	}
+]);
+
+/** Education — the bedrock strata at the bottom of the CV pond.
+ *  PLACEHOLDER content (clearly marked); replace with the real degrees. */
+export const education: Education[] = defineEducation([
+	{
+		span: '2019 – 2021',
+		degree: {
+			en: 'M.Sc. Computer Science — placeholder',
+			de: 'M.Sc. Informatik — Platzhalter'
+		},
+		institution: 'Sample University of Technology',
+		note: {
+			en: 'Thesis title goes here — replace with the real one.',
+			de: 'Titel der Abschlussarbeit hier — durch den echten ersetzen.'
+		}
+	},
+	{
+		span: '2015 – 2019',
+		degree: {
+			en: 'B.Sc. Computer Science — placeholder',
+			de: 'B.Sc. Informatik — Platzhalter'
+		},
+		institution: 'Sample University',
+		note: {
+			en: 'Focus areas / minor go here.',
+			de: 'Schwerpunkte / Nebenfach hier eintragen.'
+		}
+	}
+]);
+
+/** Positions — appointments and roles, newest first.
+ *  PLACEHOLDER content (clearly marked); replace with the real stations. */
+export const positions: Position[] = definePositions([
+	{
+		span: { en: '2022 – today', de: '2022 – heute' },
+		role: {
+			en: 'Research Engineer — placeholder',
+			de: 'Research Engineer — Platzhalter'
+		},
+		org: 'Example Institute for Applied Research',
+		note: {
+			en: 'One line on what the role actually covers.',
+			de: 'Eine Zeile dazu, was die Rolle tatsächlich umfasst.'
+		}
+	},
+	{
+		span: '2021 – 2022',
+		role: {
+			en: 'Software Developer — placeholder',
+			de: 'Softwareentwickler — Platzhalter'
+		},
+		org: 'Example Company GmbH'
 	}
 ]);
 

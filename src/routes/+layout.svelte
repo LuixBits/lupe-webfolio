@@ -15,6 +15,7 @@
 	import LocaleSwitcher from '$lib/components/LocaleSwitcher.svelte';
 	import { menu, sectionIdForPath } from '$lib/radial-menu/menu';
 	import { getThemeForSection, dataThemeForSection } from '$lib/themes';
+	import { deLocalizeUrl } from '$lib/paraglide/runtime';
 	import type { LayoutData } from './$types';
 
 	let { children, data }: { children?: import('svelte').Snippet; data: LayoutData } = $props();
@@ -23,7 +24,9 @@
 	// single navigation: centered on `/` (hub), glided to the section's corner on
 	// a section route. Opening a section is one smooth motion — the theme cross-
 	// fades, the menu glides to its corner, and the content flies in (no swap).
-	const section = $derived(sectionIdForPath(page.url.pathname));
+	// Strip the locale prefix (/de/...) before matching, like hooks.server does —
+	// otherwise German section pages would render in hub mode.
+	const section = $derived(sectionIdForPath(deLocalizeUrl(page.url).pathname));
 	const dataTheme = $derived(dataThemeForSection(section));
 	const showContent = $derived(section !== null);
 

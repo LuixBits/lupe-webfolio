@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { deLocalizeUrl } from '$lib/paraglide/runtime';
 	import { wedge, labelArc, radialPath, polarToCartesian, annularSector } from './geometry';
 	import { menuState } from '$lib/dock.svelte';
 	import { colorForSection } from '$lib/themes';
@@ -74,7 +75,7 @@
 	// State is derived from the route: home ('/') = hub (centered); a section
 	// path = docked to that section's corner. Initialised from the path so
 	// SSR/refresh render the right state with no flash.
-	const initIdx = sectionIndexFor(page.url.pathname);
+	const initIdx = sectionIndexFor(deLocalizeUrl(page.url).pathname);
 	let mode = $state<'hub' | 'docked'>(initIdx >= 0 ? 'docked' : 'hub');
 	let selected = $state<number | null>(initIdx >= 0 ? initIdx : null);
 	let corner = $state<DockPosition>(initIdx >= 0 ? cornerFor(midAngleFor(initIdx)) : 'bottom-left');
@@ -94,7 +95,7 @@
 	}
 
 	$effect(() => {
-		const idx = sectionIndexFor(page.url.pathname);
+		const idx = sectionIndexFor(deLocalizeUrl(page.url).pathname);
 		if (idx >= 0) {
 			selected = idx;
 			corner = cornerFor(midAngleFor(idx));
