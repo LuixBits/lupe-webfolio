@@ -1,0 +1,29 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"site_title": "Lupe",
+	"tagline": "A living portfolio that grows around you.",
+	"menu_label": "Main navigation",
+	"menu_back": "Back",
+	"skip_to_content": "Skip to content",
+	"home_welcome": "Luiz Perren",
+	"home_intro": "Spin the dial. Every branch is a part of my world — research, projects, and the things I chase for fun.",
+
+	"nav_about": "About",
+	"nav_academia": "Academia",
+	"nav_projects": "Projects",
+	"nav_hobbies": "Hobbies",
+
+	"nav_about_bio": "Bio",
+	"nav_about_contact": "Contact",
+
+	"nav_academia_research": "Research",
+	"nav_academia_publications": "Publications",
+
+	"nav_projects_youtube": "YouTube",
+	"nav_projects_opensource": "Open Source",
+	"nav_projects_web": "Web",
+
+	"nav_hobbies_astro": "Astrophotography",
+	"nav_hobbies_drone": "Drone",
+	"nav_hobbies_wildlife": "Wildlife"
+}

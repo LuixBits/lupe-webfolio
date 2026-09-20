@@ -1,58 +1,57 @@
-# Svelte library
+# Lupe — a living webfolio
 
-Everything you need to build a Svelte library, powered by [`sv`](https://npmjs.com/package/sv).
+A frontend-first portfolio built around a **radial menu** that behaves like a
+living organism: it sits centered as a hub, then docks to a corner and *melts*
+in while a generative garden of leaves and roots grows around it.
 
-Read more about creating a library [in the docs](https://svelte.dev/docs/kit/packaging).
+Built with **Svelte 5 (runes)** + SvelteKit.
 
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Run
 
 ```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+npm install
+npm run dev        # http://localhost:5173
+npm run check      # type-check
+npm run build      # production build
 ```
 
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
+## Architecture (three layers)
 
-## Building
+The design deliberately separates the accessible navigation from the spectacle,
+so the site fully works even if the GPU layer never loads. See `docs/adr/`.
 
-To build your library:
+1. **SVG nav** — `src/lib/radial-menu/`
+   Real ARIA menu: annular-sector slices, submenu ring, hover/focus/keyboard
+   nav, SSR, themed via CSS custom properties. Pure geometry in `geometry.ts`.
+2. **SVG effects**
+   - `effects/GooeyFilter.svelte` — blur→alpha-contrast filter that fuses
+     slices into a liquid **melt** as they dock.
+   - `garden/` — a seeded **L-system** (`lsystem.ts`) generates branches + leaf
+     anchors; `Garden.svelte` animates a growth frontier (branches draw on,
+     leaves unfurl). Seeded per page → deterministic, unique per section.
+3. **WebGL decorative layer** — `effects/EffectsCanvas.svelte` (Pixi.js)
+   A metaball melt field behind everything. `aria-hidden`, feature-detected,
+   dynamically imported, skipped under `prefers-reduced-motion`.
+   _Upgrade seam:_ swap the blur+ColorMatrix approximation for a raymarched
+   metaball fragment shader.
 
-```bash
-npm run package
-```
+Placement is driven by `dock.svelte.ts` (a runes module store); the layout maps
+routes → dock position and the CSS transition + gooey filter produce the melt.
 
-To create a production version of your showcase app:
+## Internationalization
 
-```bash
-npm run build
-```
+**Paraglide JS** (`@inlang/paraglide-js`). UI strings live in
+`messages/{en,de}.json`, compiled to typed getters under `src/lib/paraglide/`
+(git-ignored, regenerated on dev/build). Locale resolves URL → cookie → base via
+`src/hooks.server.ts` and `src/hooks.ts`.
 
-You can preview the production build with `npm run preview`.
+## Content
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+Typed TS validated with **Zod** — `src/lib/content/`. Projects carry localized
+`title`/`tagline`/`body` plus first-class typed `sources`, `videos`, and `links`.
+Malformed content fails at build/dev, not runtime.
 
-## Publishing
+## Decisions
 
-Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
-
-To publish your library to [npm](https://www.npmjs.com):
-
-```bash
-npm publish
-```
+Architecture decision records live in [`docs/adr/`](docs/adr/) — runes,
+app-not-library, hybrid rendering, Paraglide, typed content, generative garden.

@@ -1,0 +1,97 @@
+/* Per-corner theme palettes. A [data-theme] wrapper (set from the active route)
+ * swaps these vars; they cascade to the whole page + the fixed radial menu.
+ * garden is also the :root default (hub / home). */
+
+/* Hub / home — neutral ground so the colourful centered wheel is the hero. */
+:root,
+[data-theme='hub'] {
+	--bg: #10131b;
+	--fg: #e8ebf3;
+	--fg-muted: #9aa1b4;
+	--accent: #8b94a8;
+	--slice-bg: #7f88a0;
+	--slice-active: #aab2c6;
+	--sub-bg: #d9a441;
+	--sub-active: #c48f2f;
+	--hub-bg: #1a1f2b;
+	--label-fg: #10131a;
+	--label-sub-fg: #10131a;
+	--label-active-fg: #10131a;
+	--on-hub: #e8ebf3;
+}
+
+[data-theme='garden'] {
+	--bg: #eef5ef;
+	--fg: #12251a;
+	--fg-muted: #3c5346;
+	--accent: #4f8a63;
+	--slice-bg: #7fb08a;
+	--slice-active: #4f8a63;
+	--sub-bg: #d9a441;
+	--sub-active: #c48f2f;
+	--hub-bg: #2f4f3a;
+	--label-fg: #12251a;
+	--label-sub-fg: #3a2a09;
+	--garden-stem: #3f6d4e;
+	--garden-leaf: #6bbf7b;
+	--label-active-fg: #081109;
+	--on-hub: #eaf4ee;
+}
+
+/* 💧 Academia — calm aqua. */
+[data-theme='water'] {
+	--bg: #e8f4f8;
+	--fg: #0d3b47;
+	--fg-muted: #1e5f6f;
+	--accent: #2b9cba;
+	--slice-bg: #6cc3d6;
+	--slice-active: #2b9cba;
+	--sub-bg: #8fe0ef;
+	--sub-active: #4fb8d0;
+	--hub-bg: #1e5f6f;
+	--label-fg: #08313b;
+	--label-sub-fg: #0d3b47;
+	--water-deep: #2b9cba;
+	--water-foam: #cdeef6;
+	--label-active-fg: #04181d;
+	--on-hub: #e6f4f9;
+}
+
+/* 🌆 Projects — vaporwave neon on deep purple. */
+[data-theme='vaporwave'] {
+	--bg: #241046;
+	--fg: #ffe9ff;
+	--fg-muted: #c8a6ef;
+	--accent: #ff5ed1;
+	--slice-bg: #7b4bd6;
+	--slice-active: #ff5ed1;
+	--sub-bg: #35e6e6;
+	--sub-active: #00d9ff;
+	--hub-bg: #160a30;
+	--label-fg: #ffffff;
+	--label-sub-fg: #06232a;
+	--vapor-grid: #ff5ed1;
+	--vapor-sun: #ffd36e;
+	--label-active-fg: #180317;
+	--on-hub: #ffe9ff;
+}
+
+/* 🌌 Hobbies — cosmos: deep indigo, cyan + magenta glints. */
+[data-theme='cosmos'] {
+	--bg: #0b0b2a;
+	--fg: #e7ebff;
+	--fg-muted: #9aa0d6;
+	--accent: #7fd4ff;
+	--slice-bg: #2a2a5a;
+	--slice-active: #7fd4ff;
+	--sub-bg: #ff8ad9;
+	--sub-active: #ff5ec4;
+	--hub-bg: #14143c;
+	--label-fg: #e7ebff;
+	--label-sub-fg: #2a0f2a;
+	--cosmos-star: #cfe6ff;
+	--cosmos-nebula: #7c5cff;
+	--cosmos-glint: #ff8ad9;
+	--label-active-fg: #05102a;
+	--on-hub: #e7ebff;
+}
