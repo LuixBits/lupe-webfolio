@@ -81,6 +81,26 @@
           });
         });
 
+        // Slow continuous spin (laserdisc).
+        root!.querySelectorAll<HTMLElement>('[data-spin]').forEach((el) => {
+          gsap.to(el, {
+            rotation: 360,
+            duration: parseFloat(el.dataset.spin ?? '60'),
+            ease: 'none',
+            repeat: -1,
+            transformOrigin: '50% 50%'
+          });
+        });
+
+        // Occasional glitch twitch on the retro window slices.
+        root!.querySelectorAll<HTMLElement>('.glitch-jitter').forEach((el, i) => {
+          gsap
+            .timeline({ repeat: -1, repeatDelay: 3.6 + i * 1.35, delay: 1.2 + i * 0.7 })
+            .to(el, { x: 3, duration: 0.09, ease: 'steps(1)' })
+            .to(el, { x: -2.5, duration: 0.09, ease: 'steps(1)' })
+            .to(el, { x: 0, duration: 0.09, ease: 'steps(1)' });
+        });
+
         // Grid breathes faintly.
         gsap.to(root!.querySelectorAll('.grid-glow'), {
           opacity: 0.24,
@@ -101,8 +121,8 @@
           const nx = e.clientX / window.innerWidth - 0.5;
           const ny = e.clientY / window.innerHeight - 0.5;
           for (const l of layers) {
-            l.qx(nx * l.d * 900);
-            l.qy(ny * l.d * 900);
+            l.qx(nx * l.d * 500);
+            l.qy(ny * l.d * 500);
           }
         };
         window.addEventListener('mousemove', onMove, { passive: true });
@@ -213,6 +233,208 @@
     </div>
   </div>
 
+  <!-- marble bust, RGB-split linework — mid left -->
+  <div class="px item bust-pos" data-depth="0.028">
+    <div class="drift" data-drift="9">
+      <svg viewBox="0 0 150 196" fill="none">
+        <defs>
+          <g id="vw-bust" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <!-- hair crown silhouette -->
+            <path d="M 66 40 C 58 30 64 18 76 16 C 84 8 100 8 108 18 C 118 22 122 34 118 44 C 122 56 120 70 112 78" />
+            <!-- face profile -->
+            <path d="M 66 40 C 62 47 61 53 62 58 L 52 76 L 60 79 C 57 82 57 85 61 87 C 57 90 57 93 61 95 C 57 99 58 103 63 105 C 68 107 70 111 68 116 C 72 121 78 124 85 126" />
+            <!-- jaw, neck front, chest -->
+            <path d="M 85 126 C 88 132 88 138 84 146 C 76 158 60 166 44 169" />
+            <!-- back of neck and shoulder -->
+            <path d="M 112 78 C 112 88 108 94 104 98 C 104 108 108 116 116 122 C 124 130 130 142 131 154" />
+            <!-- bust cut -->
+            <path d="M 44 169 C 66 176 106 172 131 154" />
+            <path d="M 70 150 C 78 156 92 158 104 154" opacity="0.4" />
+            <!-- brow, eye, lips -->
+            <path d="M 64 56 C 68 53 74 53 78 55" />
+            <path d="M 67 63 C 70 61 75 61 78 63" opacity="0.8" />
+            <path d="M 61 91 C 64 90 66 90 68 91" opacity="0.7" />
+            <!-- hair waves -->
+            <path d="M 70 30 C 78 24 90 24 97 30" opacity="0.75" />
+            <path d="M 74 40 C 82 33 94 34 101 41" opacity="0.6" />
+            <path d="M 80 50 C 87 44 97 45 103 51" opacity="0.45" />
+            <!-- bun -->
+            <path d="M 104 84 C 112 80 120 86 118 95 C 116 103 106 105 101 99" opacity="0.8" />
+            <path d="M 107 90 C 111 87 115 91 112 96" opacity="0.5" />
+            <!-- socle -->
+            <path d="M 62 178 L 112 178" />
+            <path d="M 52 186 L 122 186 M 52 192 L 122 192" opacity="0.7" />
+            <path d="M 52 186 L 52 192 M 122 186 L 122 192" opacity="0.7" />
+          </g>
+        </defs>
+        <use href="#vw-bust" stroke="var(--vw-cyan)" stroke-width="1.1" transform="translate(-2 0)" opacity="0.4" />
+        <use href="#vw-bust" stroke="var(--vapor-grid, #ff5ed1)" stroke-width="1.1" transform="translate(2 1)" opacity="0.4" />
+        <use href="#vw-bust" stroke="#f2e9ff" stroke-width="1.15" opacity="0.9" />
+      </svg>
+    </div>
+  </div>
+
+  <!-- cracked laserdisc with rainbow sheen — upper right -->
+  <div class="px item disc-pos" data-depth="0.042">
+    <div class="drift" data-drift="8">
+      <svg viewBox="0 0 140 140" fill="none" data-spin="72">
+        <mask id="vw-disc-ring">
+          <circle cx="70" cy="70" r="61" fill="white" />
+          <circle cx="70" cy="70" r="17" fill="black" />
+        </mask>
+        <circle cx="70" cy="70" r="62" fill="#31175e" fill-opacity="0.45" stroke="#e6dbff" stroke-width="1.2" opacity="0.95" />
+        <!-- iridescent sheen sectors, masked to the annulus -->
+        <g mask="url(#vw-disc-ring)">
+          <path d="M 70 70 L 70 9 A 61 61 0 0 1 95.8 14.7 Z" fill="var(--vapor-grid, #ff5ed1)" opacity="0.26" />
+          <path d="M 70 70 L 95.8 14.7 A 61 61 0 0 1 120 35 Z" fill="var(--vapor-sun, #ffd36e)" opacity="0.18" />
+          <path d="M 70 70 L 120 35 A 61 61 0 0 1 130.1 59.4 Z" fill="var(--vw-cyan)" opacity="0.24" />
+          <path d="M 70 70 L 116.7 109.2 A 61 61 0 0 1 100.5 122.8 Z" fill="var(--vapor-grid, #ff5ed1)" opacity="0.16" />
+          <path d="M 70 70 L 100.5 122.8 A 61 61 0 0 1 44.2 125.3 Z" fill="var(--vw-cyan)" opacity="0.2" />
+          <path d="M 70 70 L 44.2 125.3 A 61 61 0 0 1 23.3 109.2 Z" fill="var(--vapor-sun, #ffd36e)" opacity="0.16" />
+          <path d="M 70 70 L 9.2 64.7 A 61 61 0 0 1 17.2 39.5 Z" fill="var(--vapor-grid, #ff5ed1)" opacity="0.18" />
+          <path d="M 70 70 L 17.2 39.5 A 61 61 0 0 1 44.2 14.7 Z" fill="var(--vw-cyan)" opacity="0.15" />
+        </g>
+        <!-- grooves -->
+        <circle cx="70" cy="70" r="56" stroke="#d9c9ff" stroke-width="0.6" opacity="0.25" />
+        <circle cx="70" cy="70" r="50" stroke="#d9c9ff" stroke-width="0.6" opacity="0.2" />
+        <circle cx="70" cy="70" r="44" stroke="#d9c9ff" stroke-width="0.5" stroke-dasharray="1.5 3" opacity="0.25" />
+        <circle cx="70" cy="70" r="37" stroke="#d9c9ff" stroke-width="0.6" opacity="0.16" />
+        <circle cx="70" cy="70" r="30" stroke="#d9c9ff" stroke-width="0.5" stroke-dasharray="1 2.5" opacity="0.2" />
+        <circle cx="70" cy="70" r="23" stroke="#d9c9ff" stroke-width="0.6" opacity="0.25" />
+        <!-- hub -->
+        <circle cx="70" cy="70" r="15" stroke="var(--vapor-sun, #ffd36e)" stroke-width="1" opacity="0.8" />
+        <circle cx="70" cy="70" r="6.5" fill="#180a33" stroke="#d9c9ff" stroke-width="0.9" opacity="0.95" />
+        <!-- specular arcs -->
+        <path d="M 28 46 A 49 49 0 0 1 46 28" stroke="#ffffff" stroke-width="1.4" opacity="0.5" stroke-linecap="round" />
+        <path d="M 112 92 A 49 49 0 0 1 96 110" stroke="#ffffff" stroke-width="1.2" opacity="0.35" stroke-linecap="round" />
+        <!-- crack + glint -->
+        <path d="M 116 36 L 101 50 L 106 57 L 90 64 L 84 70" stroke="#ffffff" stroke-width="1" opacity="0.85" />
+        <path d="M 101 50 L 96 43" stroke="#ffffff" stroke-width="0.8" opacity="0.6" />
+        <path d="M 90 64 L 92 72" stroke="#ffffff" stroke-width="0.7" opacity="0.5" />
+        <path d="M 113 33 l 5 5 M 118 33 l -5 5" stroke="var(--vw-cyan)" stroke-width="0.8" opacity="0.9" />
+      </svg>
+    </div>
+  </div>
+
+  <!-- glitchy retro window with striped sunset — mid right -->
+  <div class="px item win-pos" data-depth="0.03">
+    <div class="drift" data-drift="8">
+      <svg viewBox="0 0 150 122" fill="none">
+        <defs>
+          <linearGradient id="vw-winsun" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="var(--vapor-sun, #ffd36e)" />
+            <stop offset="1" stop-color="var(--vapor-grid, #ff5ed1)" />
+          </linearGradient>
+          <clipPath id="vw-winclip"><rect x="9" y="33" width="128" height="72" /></clipPath>
+        </defs>
+        <!-- ghost frame (pink offset, twitches) -->
+        <g class="glitch-jitter" opacity="0.35">
+          <rect x="12" y="18" width="130" height="92" stroke="var(--vapor-grid, #ff5ed1)" stroke-width="1.1" />
+        </g>
+        <rect x="8" y="14" width="130" height="92" rx="2" stroke="var(--vw-cyan)" stroke-width="1.2" fill="#1d0d40" fill-opacity="0.6" />
+        <line x1="8" y1="32" x2="138" y2="32" stroke="var(--vw-cyan)" stroke-width="1" />
+        <!-- close box + title stripes -->
+        <rect x="14" y="19" width="9" height="9" stroke="var(--vw-cyan)" stroke-width="0.9" />
+        <path d="M 30 21 H 132 M 30 24.5 H 132 M 30 28 H 132" stroke="var(--vw-cyan)" stroke-width="0.7" opacity="0.5" />
+        <!-- inside: striped sun on a horizon grid -->
+        <g clip-path="url(#vw-winclip)">
+          <circle cx="73" cy="88" r="26" fill="url(#vw-winsun)" opacity="0.85" />
+          <rect x="45" y="72" width="56" height="2" fill="#1d0d40" opacity="0.9" />
+          <rect x="44" y="78" width="58" height="2.6" fill="#1d0d40" opacity="0.9" />
+          <rect x="44" y="83.5" width="58" height="3.2" fill="#1d0d40" opacity="0.9" />
+          <rect x="9" y="88" width="128" height="20" fill="#1d0d40" opacity="0.88" />
+          <line x1="9" y1="88" x2="137" y2="88" stroke="var(--vapor-grid, #ff5ed1)" stroke-width="0.9" opacity="0.85" />
+          <path d="M 73 88 L 38 106 M 73 88 L 108 106 M 73 88 L 73 106 M 73 88 L 20 100 M 73 88 L 126 100" stroke="var(--vapor-grid, #ff5ed1)" stroke-width="0.6" opacity="0.4" />
+          <path d="M 9 94 H 137 M 9 100 H 137" stroke="var(--vapor-grid, #ff5ed1)" stroke-width="0.5" opacity="0.3" />
+        </g>
+        <!-- glitch slice bars -->
+        <rect class="glitch-jitter" x="26" y="50" width="52" height="2.4" fill="var(--vw-cyan)" opacity="0.35" />
+        <rect class="glitch-jitter" x="70" y="62" width="48" height="2" fill="var(--vapor-grid, #ff5ed1)" opacity="0.35" />
+        <!-- cursor -->
+        <path d="M 112 84 l 0 12 3 -3 2.6 5 2.4 -1.2 -2.6 -5 4 -0.6 Z" fill="#efe6ff" opacity="0.9" />
+      </svg>
+    </div>
+  </div>
+
+  <!-- low-poly dolphin leap — mid left -->
+  <div class="px item dolph-pos" data-depth="0.03">
+    <div class="drift" data-drift="12">
+      <svg viewBox="0 0 140 124" fill="none" stroke-linejoin="round">
+        <defs>
+          <path id="vw-dolphin" d="M 128 102 L 112 88 L 98 80 L 86 76 L 72 94 L 76 72 L 56 64 L 38 58 L 26 50 L 8 60 L 14 48 L 6 34 L 24 46 L 44 42 L 60 38 L 76 20 L 78 38 L 94 48 L 106 62 L 118 84 Z" />
+        </defs>
+        <!-- filled facets -->
+        <path d="M 60 38 L 76 20 L 78 38 Z" fill="var(--vapor-grid, #ff5ed1)" opacity="0.14" />
+        <path d="M 78 38 L 94 48 L 86 76 Z" fill="var(--vw-cyan)" opacity="0.14" />
+        <path d="M 94 48 L 106 62 L 98 80 Z" fill="var(--vw-cyan)" opacity="0.1" />
+        <path d="M 6 34 L 14 48 L 8 60 L 24 46 Z" fill="var(--vw-cyan)" opacity="0.1" />
+        <!-- facet linework -->
+        <path d="M 60 38 L 56 64 M 78 38 L 86 76 M 94 48 L 98 80 M 44 42 L 38 58 M 106 62 L 112 88 M 60 38 L 78 38 M 76 72 L 86 76" stroke="var(--vw-cyan)" stroke-width="0.7" opacity="0.45" />
+        <!-- outline: pink ghost + cyan main -->
+        <use href="#vw-dolphin" stroke="var(--vapor-grid, #ff5ed1)" stroke-width="1" transform="translate(1.6 1.2)" opacity="0.3" />
+        <use href="#vw-dolphin" stroke="var(--vw-cyan)" stroke-width="1.2" opacity="0.9" />
+        <circle cx="106" cy="74" r="1.6" fill="var(--vw-cyan)" opacity="0.9" />
+        <!-- splash arcs where it will strike the water -->
+        <path d="M 104 114 q 14 3 28 -2" stroke="var(--vw-cyan)" stroke-width="0.9" opacity="0.4" stroke-linecap="round" />
+        <path d="M 92 108 q 9 3 18 1" stroke="var(--vw-cyan)" stroke-width="0.8" opacity="0.3" stroke-linecap="round" />
+      </svg>
+    </div>
+  </div>
+
+  <!-- cassette tape — faint, floats above the title band -->
+  <div class="px item mid cass-pos" data-depth="0.015">
+    <div class="drift" data-drift="7">
+      <svg viewBox="0 0 122 80" fill="none">
+        <rect x="3" y="5" width="116" height="70" rx="7" stroke="var(--vapor-sun, #ffd36e)" stroke-width="1.2" fill="#2a1254" fill-opacity="0.55" />
+        <rect x="13" y="13" width="96" height="30" rx="3.5" stroke="var(--vapor-grid, #ff5ed1)" stroke-width="0.9" opacity="0.8" />
+        <rect x="13.5" y="13.5" width="95" height="6" fill="var(--vapor-grid, #ff5ed1)" opacity="0.3" />
+        <path d="M 20 24 H 56 M 20 27.5 H 42" stroke="#d9c9ff" stroke-width="1.4" opacity="0.3" />
+        <rect x="32" y="24" width="58" height="16" rx="8" stroke="#d9c9ff" stroke-width="0.8" opacity="0.7" />
+        <circle cx="46" cy="32" r="5.5" stroke="var(--vapor-sun, #ffd36e)" stroke-width="1" opacity="0.9" />
+        <circle cx="76" cy="32" r="5.5" stroke="var(--vapor-sun, #ffd36e)" stroke-width="1" opacity="0.9" />
+        <path d="M 46 28.5 v 2 M 43 33.8 l 1.7 -1 M 49 33.8 l -1.7 -1 M 76 28.5 v 2 M 73 33.8 l 1.7 -1 M 79 33.8 l -1.7 -1" stroke="var(--vapor-sun, #ffd36e)" stroke-width="0.8" opacity="0.8" />
+        <path d="M 26 75 L 33 58 L 89 58 L 96 75" stroke="var(--vapor-sun, #ffd36e)" stroke-width="0.9" opacity="0.7" />
+        <circle cx="41" cy="66" r="1.8" stroke="#d9c9ff" stroke-width="0.7" opacity="0.6" />
+        <circle cx="61" cy="66" r="2.4" stroke="#d9c9ff" stroke-width="0.7" opacity="0.6" />
+        <circle cx="81" cy="66" r="1.8" stroke="#d9c9ff" stroke-width="0.7" opacity="0.6" />
+        <circle cx="9" cy="11" r="1.7" stroke="#d9c9ff" stroke-width="0.7" opacity="0.55" />
+        <circle cx="113" cy="11" r="1.7" stroke="#d9c9ff" stroke-width="0.7" opacity="0.55" />
+        <circle cx="9" cy="69" r="1.7" stroke="#d9c9ff" stroke-width="0.7" opacity="0.55" />
+        <circle cx="113" cy="69" r="1.7" stroke="#d9c9ff" stroke-width="0.7" opacity="0.55" />
+      </svg>
+    </div>
+  </div>
+
+  <!-- palm silhouettes — bottom right, rim-lit -->
+  <div class="px item palm-pos" data-depth="0.05">
+    <div class="drift" data-drift="5">
+      <svg viewBox="0 0 190 210" stroke-linejoin="round">
+        <g fill="#1b0c3a" stroke="var(--vapor-grid, #ff5ed1)" stroke-width="1" opacity="0.92" stroke-opacity="0.5">
+          <!-- tall palm -->
+          <path d="M 98 210 C 100 160 104 120 114 82 L 124 84 C 112 122 110 162 112 210 Z" />
+          <path d="M 119 78 C 100 58 70 50 44 56 C 72 58 96 68 116 84 Z" />
+          <path d="M 119 78 C 96 74 68 80 52 96 C 76 86 100 84 118 88 Z" />
+          <path d="M 119 78 C 112 56 116 34 130 20 C 122 40 122 60 126 78 Z" />
+          <path d="M 119 78 C 136 58 160 50 182 56 C 158 60 138 70 124 86 Z" />
+          <path d="M 121 80 C 144 76 168 84 182 100 C 160 90 138 88 122 90 Z" />
+          <path d="M 121 82 C 136 92 146 108 148 126 C 138 108 128 96 116 90 Z" />
+          <path d="M 117 82 C 102 90 92 104 88 120 C 96 104 106 94 118 90 Z" />
+          <circle cx="113" cy="87" r="4" />
+          <circle cx="122" cy="90" r="3.4" />
+          <!-- short palm -->
+          <path d="M 30 210 C 32 184 36 162 46 144 L 54 146 C 44 164 42 186 42 210 Z" />
+          <path d="M 50 141 C 36 128 18 122 2 126 C 20 128 36 136 48 146 Z" />
+          <path d="M 50 140 C 46 124 50 108 60 98 C 54 112 54 128 56 140 Z" />
+          <path d="M 51 141 C 62 128 78 122 94 126 C 78 128 64 136 54 146 Z" />
+          <path d="M 52 143 C 64 146 74 154 78 166 C 70 156 62 150 52 148 Z" />
+          <path d="M 48 143 C 38 148 32 156 30 168 C 36 158 42 150 50 147 Z" />
+        </g>
+        <!-- trunk ridges -->
+        <path d="M 103 192 l 9 -2 M 104 176 l 9 -2 M 106 158 l 9 -2 M 108 140 l 9 -2 M 110 122 l 9 -2 M 35 196 l 8 -2 M 37 180 l 8 -2 M 40 164 l 8 -2" stroke="var(--vapor-grid, #ff5ed1)" stroke-width="0.7" opacity="0.35" fill="none" />
+      </svg>
+    </div>
+  </div>
+
   <!-- celestial sparkles -->
   <div class="px item mid sp1" data-depth="0.05">
     <svg class="sparkle" viewBox="0 0 16 16"><path d="M8 0 Q9.3 6.7 16 8 Q9.3 9.3 8 16 Q6.7 9.3 0 8 Q6.7 6.7 8 0 Z" fill="var(--vapor-sun, #ffd36e)" /></svg>
@@ -243,6 +465,7 @@
     pointer-events: none;
     overflow: hidden;
     contain: strict;
+    --vw-cyan: #67e8f9;
   }
 
   .px {
@@ -292,6 +515,47 @@
     right: 2%;
     width: clamp(2rem, 3vw, 3rem);
     opacity: 0.6;
+  }
+  .bust-pos {
+    top: 36%;
+    left: 3%;
+    width: clamp(6rem, 10vw, 8.75rem);
+    opacity: 0.7;
+  }
+  .disc-pos {
+    top: 28%;
+    right: 3.5%;
+    width: clamp(5.5rem, 8.5vw, 8rem);
+    opacity: 0.75;
+  }
+  .win-pos {
+    top: 54%;
+    right: 9%;
+    width: clamp(6rem, 9.5vw, 9rem);
+    opacity: 0.6;
+  }
+  .dolph-pos {
+    top: 61%;
+    left: 5.5%;
+    width: clamp(5.5rem, 8vw, 7.75rem);
+    opacity: 0.75;
+  }
+  .cass-pos {
+    top: 4%;
+    left: 53%;
+    width: clamp(4.5rem, 6.5vw, 6.25rem);
+    opacity: 0.4;
+    filter: blur(0.4px);
+  }
+  .palm-pos {
+    bottom: -2%;
+    right: 13%;
+    width: clamp(8rem, 13vw, 12rem);
+    opacity: 0.75;
+    filter: drop-shadow(0 0 9px rgba(255, 94, 209, 0.2));
+  }
+  .palm-pos .drift {
+    transform-origin: 50% 100%;
   }
   .sp1 { top: 30%; left: 8.5%; width: 0.9rem; opacity: 0.85; }
   .sp2 { bottom: 30%; right: 3%; width: 0.75rem; opacity: 0.8; }
@@ -374,10 +638,16 @@
     .planet-pos { width: 12vw; opacity: 0.5; }
     .globe-pos, .pyr-pos, .cube-pos { opacity: 0.35; }
     .sp1, .sp3 { display: none; }
+    .win-pos { display: none; }
+    .bust-pos, .dolph-pos { opacity: 0.35; }
+    .disc-pos { width: 9vw; opacity: 0.5; }
+    .palm-pos { width: 13vw; opacity: 0.5; }
   }
   @media (max-width: 48rem) {
     .item { opacity: 0.3; }
     .grid-glow { height: 18vh; opacity: 0.1; }
     .side-glow { display: none; }
+    .bust-pos, .dolph-pos, .disc-pos { display: none; }
+    .palm-pos { width: 5.75rem; right: 4%; opacity: 0.35; filter: none; }
   }
 </style>
