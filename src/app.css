@@ -1,6 +1,31 @@
-/* App shell + structure. Color tokens live in themes.css (per-corner palettes). */
+/* App shell + structure. Color + font tokens live in themes.css (per theme). */
 :root {
 	--font-ui: system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+	/* Shared type scale — the fonts (--font-display / --font-body) swap per
+	   theme via data-theme, the sizes stay consistent. This is the "CI":
+	   hero → section hero, h1 → page title, h2 → section title, h3 → card
+	   title, body → prose, small → meta/labels. */
+	--fs-hero: clamp(2.4rem, 6vw, 4.25rem);
+	--fs-h1: clamp(1.85rem, 4.2vw, 2.9rem);
+	--fs-h2: clamp(1.25rem, 2.6vw, 1.8rem);
+	--fs-h3: 1.15rem;
+	--fs-body: 1.06rem;
+	--fs-small: 0.85rem;
+	--lh-tight: 1.12;
+	--lh-body: 1.62;
+}
+
+/* Headings use the theme's display face; body uses its body face. */
+h1,
+h2,
+h3,
+.display {
+	font-family: var(--font-display, var(--font-ui));
+	line-height: var(--lh-tight);
+	text-transform: var(--heading-transform, none);
+	letter-spacing: var(--heading-spacing, normal);
+	font-weight: 700;
 }
 
 * {
@@ -18,7 +43,9 @@ body {
 body {
 	background: var(--bg);
 	color: var(--fg);
-	font-family: var(--font-ui);
+	font-family: var(--font-body, var(--font-ui));
+	font-size: var(--fs-body);
+	line-height: var(--lh-body);
 }
 
 main {
@@ -46,7 +73,7 @@ main {
 	padding: 5.5rem 1.5rem 4rem;
 }
 .page h1 {
-	font-size: clamp(1.75rem, 5vw, 2.75rem);
+	font-size: var(--fs-h1);
 	margin: 0 0 1.5rem;
 }
 .section {
@@ -55,6 +82,7 @@ main {
 	margin-bottom: 3rem;
 }
 .section h2 {
+	font-size: var(--fs-h2);
 	margin: 0 0 1rem;
 	border-bottom: 1px solid color-mix(in srgb, var(--slice-bg) 45%, transparent);
 	padding-bottom: 0.4rem;

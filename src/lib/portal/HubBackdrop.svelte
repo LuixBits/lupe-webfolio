@@ -34,7 +34,7 @@
 <div class="hub-backdrop" aria-hidden="true">
 	{#each quadrants as q (q.section)}
 		{@const Scene = q.Scene}
-		<div class="quad" data-theme={q.theme}>
+		<div class="quad" data-theme={q.theme} data-corner={q.corner}>
 			<Scene corner={q.corner} sectionId={q.section} />
 		</div>
 	{/each}
@@ -56,5 +56,23 @@
 		position: relative;
 		overflow: hidden;
 		background: var(--bg);
+	}
+	/* Fade each scene toward the inner edges (the centre cross) so no hard
+	   canvas boundary shows — the panel dissolves into its own background. */
+	.quad[data-corner='top-left'] {
+		-webkit-mask-image: radial-gradient(150% 150% at 0% 0%, #000 58%, transparent 92%);
+		mask-image: radial-gradient(150% 150% at 0% 0%, #000 58%, transparent 92%);
+	}
+	.quad[data-corner='top-right'] {
+		-webkit-mask-image: radial-gradient(150% 150% at 100% 0%, #000 58%, transparent 92%);
+		mask-image: radial-gradient(150% 150% at 100% 0%, #000 58%, transparent 92%);
+	}
+	.quad[data-corner='bottom-left'] {
+		-webkit-mask-image: radial-gradient(150% 150% at 0% 100%, #000 58%, transparent 92%);
+		mask-image: radial-gradient(150% 150% at 0% 100%, #000 58%, transparent 92%);
+	}
+	.quad[data-corner='bottom-right'] {
+		-webkit-mask-image: radial-gradient(150% 150% at 100% 100%, #000 58%, transparent 92%);
+		mask-image: radial-gradient(150% 150% at 100% 100%, #000 58%, transparent 92%);
 	}
 </style>

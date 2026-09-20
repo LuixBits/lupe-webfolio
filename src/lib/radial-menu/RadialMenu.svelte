@@ -194,8 +194,8 @@
 
 <div class="menu-root" data-mode={mode} data-corner={corner} style="--size:{size}px">
 	<svg
-		width={size}
-		height={size}
+		width="100%"
+		height="100%"
 		viewBox="0 0 {size} {size}"
 		role="menu"
 		aria-label={label}
@@ -340,7 +340,7 @@
 	}
 
 	.label {
-		font-family: var(--font-ui, system-ui, sans-serif);
+		font-family: var(--font-display, var(--font-ui, system-ui, sans-serif));
 		font-size: 0.92rem;
 		font-weight: 600;
 		fill: #10131a;
@@ -379,6 +379,13 @@
 		user-select: none;
 	}
 
+	/* Shrink the wheel on small screens so it never overflows. */
+	@media (max-width: 560px) {
+		.menu-root {
+			width: min(86vw, 400px);
+			height: min(86vw, 400px);
+		}
+	}
 	@media (prefers-reduced-motion: reduce) {
 		.menu-root {
 			transition: none;
