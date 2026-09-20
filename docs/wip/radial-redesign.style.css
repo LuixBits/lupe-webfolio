@@ -1,0 +1,190 @@
+	.menu-root {
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		width: var(--size);
+		height: var(--size);
+		transform: translate(-50%, -50%);
+		transition: transform 700ms linear;
+		z-index: 20;
+	}
+	.menu-root[data-mode='docked'][data-corner='bottom-left'] {
+		transform: translate(-50%, -50%) translate(-50vw, 50vh);
+	}
+	.menu-root[data-mode='docked'][data-corner='top-left'] {
+		transform: translate(-50%, -50%) translate(-50vw, -50vh);
+	}
+	.menu-root[data-mode='docked'][data-corner='top-right'] {
+		transform: translate(-50%, -50%) translate(50vw, -50vh);
+	}
+	.menu-root[data-mode='docked'][data-corner='bottom-right'] {
+		transform: translate(-50%, -50%) translate(50vw, 50vh);
+	}
+
+	svg {
+		overflow: visible;
+		outline: none;
+		/* Whole-wheel ambient shadow: a soft floating ring under the disk. */
+		filter: drop-shadow(0 24px 48px rgba(16, 19, 26, 0.18))
+			drop-shadow(0 2px 8px rgba(16, 19, 26, 0.1));
+		touch-action: manipulation;
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	.slice {
+		fill: var(--slice-fill, var(--slice-bg, #7fb08a));
+		stroke: var(--bg, #eef5ef);
+		stroke-width: 1.5;
+		stroke-linejoin: round;
+		cursor: pointer;
+		/* Per-wedge sheen + inset vignette; the light inside sways slowly
+		   for idle life (reduced-motion swaps in the still twin below). */
+		filter: url(#rm-sheen);
+		transform-box: fill-box;
+		transform-origin: center;
+		transition:
+			transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+			fill 200ms ease,
+			opacity 0.9s ease-out;
+	}
+	.slice:hover,
+	.slice.active,
+	.slice:focus-visible {
+		/* Themed halo (derived from the slice's own colour) + brighter sheen;
+		   the smooth part of the lift is the interpolated scale. */
+		filter: url(#rm-glow);
+		transform: scale(1.035);
+		outline: none;
+	}
+	/* Tap/press feedback so touch gets the same life as hover. */
+	.slice:active {
+		filter: url(#rm-glow);
+		transform: scale(1.015);
+	}
+	.slice.faded {
+		opacity: 0;
+		pointer-events: none;
+	}
+	.slice.sub {
+		fill: var(--sub-bg, #d9a441);
+	}
+	.slice.sub:hover,
+	.slice.sub:focus-visible {
+		fill: var(--sub-active, #c48f2f);
+	}
+
+	.label {
+		font-family: var(--font-display, var(--font-ui, system-ui, sans-serif));
+		font-size: 0.92rem;
+		font-weight: 600;
+		fill: #10131a;
+		letter-spacing: 0.02em;
+		text-rendering: optimizeLegibility;
+		pointer-events: none;
+		user-select: none;
+		transition:
+			opacity 0.9s ease-out,
+			fill 200ms ease,
+			letter-spacing 240ms ease;
+	}
+	.label.active {
+		fill: var(--label-active-fg, #10131a);
+		letter-spacing: 0.05em;
+	}
+	.label.faded {
+		opacity: 0;
+	}
+	.label.sub {
+		font-size: 0.8rem;
+		fill: var(--label-sub-fg, #3a2a09);
+		opacity: 1;
+	}
+
+	.hub-back {
+		fill: var(--hub-bg, #2f4f3a);
+		/* Hairline accent ring: the jewel's setting. */
+		stroke: var(--accent, #d9a441);
+		stroke-width: 1.25;
+		cursor: pointer;
+		filter: url(#rm-hub);
+		transform-box: fill-box;
+		transform-origin: center;
+		transition:
+			transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+			stroke-width 200ms ease;
+	}
+	/* Gentle breathing while at rest (kept off the interactive states so the
+	   hover/press transforms are not fought by the animation). */
+	.hub-back:not(:hover):not(:focus-visible):not(:active) {
+		animation: rm-breathe 7s ease-in-out infinite;
+	}
+	.hub-back:hover,
+	.hub-back:focus-visible {
+		filter: url(#rm-hub-glow);
+		transform: scale(1.045);
+		stroke-width: 2;
+		outline: none;
+	}
+	.hub-back:active {
+		filter: url(#rm-hub-glow);
+		transform: scale(1.01);
+	}
+	@keyframes rm-breathe {
+		0%,
+		100% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.018);
+		}
+	}
+
+	.back-label {
+		font-family: var(--font-display, var(--font-ui, system-ui, sans-serif));
+		font-size: 0.82rem;
+		font-weight: 700;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		fill: var(--on-hub, #eaf4ee);
+		pointer-events: none;
+		user-select: none;
+	}
+
+	/* Shrink the wheel on small screens so it never overflows. */
+	@media (max-width: 560px) {
+		.menu-root {
+			width: min(86vw, 400px);
+			height: min(86vw, 400px);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.menu-root,
+		.slice,
+		.label,
+		.hub-back {
+			transition: none;
+		}
+		/* Still sheen (no SMIL light sway), no breathing, no scale — the glow
+		   states remain as static feedback. */
+		.slice {
+			filter: url(#rm-sheen-still);
+		}
+		.slice:hover,
+		.slice.active,
+		.slice:focus-visible,
+		.slice:active {
+			transform: none;
+		}
+		.hub-back {
+			animation: none;
+		}
+		.hub-back:not(:hover):not(:focus-visible):not(:active) {
+			animation: none;
+		}
+		.hub-back:hover,
+		.hub-back:focus-visible,
+		.hub-back:active {
+			transform: none;
+		}
+	}

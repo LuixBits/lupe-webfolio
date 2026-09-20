@@ -1,0 +1,146 @@
+<!-- ===== Premium wheel finish (visual layer only) =====================
+     Wedge finish: a blurred-alpha bump map drives a soft specular sheen
+     along each wedge's edges, plus an inset vignette ring for depth.
+     Colour is untouched: everything composites over SourceGraphic, so the
+     per-slice --slice-fill shows through. The distant light sways very
+     slowly for a quiet idle shimmer; the stylesheet swaps in the still
+     variant under prefers-reduced-motion. -->
+<filter id="rm-sheen" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+	<feGaussianBlur in="SourceAlpha" stdDeviation="5" result="bump" />
+	<feSpecularLighting in="bump" surfaceScale="1.7" specularConstant="0.42" specularExponent="15" lighting-color="#ffffff" result="spec">
+		<feDistantLight azimuth="235" elevation="56">
+			<animate
+				attributeName="azimuth"
+				values="205;295;205"
+				keyTimes="0;0.5;1"
+				calcMode="spline"
+				keySplines="0.42 0 0.58 1;0.42 0 0.58 1"
+				dur="26s"
+				repeatCount="indefinite"
+			/>
+		</feDistantLight>
+	</feSpecularLighting>
+	<feComposite in="spec" in2="SourceAlpha" operator="in" result="sheen" />
+	<feComposite in="SourceAlpha" in2="bump" operator="arithmetic" k1="0" k2="1" k3="-1" k4="0" result="ring0" />
+	<feComponentTransfer in="ring0" result="ring">
+		<feFuncA type="linear" slope="0.3" />
+	</feComponentTransfer>
+	<feMerge>
+		<feMergeNode in="SourceGraphic" />
+		<feMergeNode in="ring" />
+		<feMergeNode in="sheen" />
+	</feMerge>
+</filter>
+
+<!-- Still twin of #rm-sheen, used when the user prefers reduced motion. -->
+<filter id="rm-sheen-still" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+	<feGaussianBlur in="SourceAlpha" stdDeviation="5" result="bump" />
+	<feSpecularLighting in="bump" surfaceScale="1.7" specularConstant="0.42" specularExponent="15" lighting-color="#ffffff" result="spec">
+		<feDistantLight azimuth="235" elevation="56" />
+	</feSpecularLighting>
+	<feComposite in="spec" in2="SourceAlpha" operator="in" result="sheen" />
+	<feComposite in="SourceAlpha" in2="bump" operator="arithmetic" k1="0" k2="1" k3="-1" k4="0" result="ring0" />
+	<feComponentTransfer in="ring0" result="ring">
+		<feFuncA type="linear" slope="0.3" />
+	</feComponentTransfer>
+	<feMerge>
+		<feMergeNode in="SourceGraphic" />
+		<feMergeNode in="ring" />
+		<feMergeNode in="sheen" />
+	</feMerge>
+</filter>
+
+<!-- Hover / active / focus: the halo is made by blurring + saturating the
+     slice itself, so the glow is automatically themed per wedge colour.
+     Adds a grounding lift-shadow and a brighter sheen. -->
+<filter id="rm-glow" x="-45%" y="-45%" width="190%" height="190%" color-interpolation-filters="sRGB">
+	<feGaussianBlur in="SourceGraphic" stdDeviation="10" result="h0" />
+	<feColorMatrix in="h0" type="saturate" values="1.6" result="h1" />
+	<feComponentTransfer in="h1" result="halo">
+		<feFuncA type="linear" slope="0.8" />
+	</feComponentTransfer>
+	<feGaussianBlur in="SourceAlpha" stdDeviation="6" result="d0" />
+	<feOffset in="d0" dy="5" result="d1" />
+	<feFlood flood-color="#10131a" flood-opacity="0.25" result="dc" />
+	<feComposite in="dc" in2="d1" operator="in" result="lift" />
+	<feGaussianBlur in="SourceAlpha" stdDeviation="5" result="bump" />
+	<feSpecularLighting in="bump" surfaceScale="2" specularConstant="0.65" specularExponent="17" lighting-color="#ffffff" result="spec">
+		<feDistantLight azimuth="235" elevation="60" />
+	</feSpecularLighting>
+	<feComposite in="spec" in2="SourceAlpha" operator="in" result="sheen" />
+	<feComposite in="SourceAlpha" in2="bump" operator="arithmetic" k1="0" k2="1" k3="-1" k4="0" result="ring0" />
+	<feComponentTransfer in="ring0" result="ring">
+		<feFuncA type="linear" slope="0.2" />
+	</feComponentTransfer>
+	<feMerge>
+		<feMergeNode in="halo" />
+		<feMergeNode in="lift" />
+		<feMergeNode in="SourceGraphic" />
+		<feMergeNode in="ring" />
+		<feMergeNode in="sheen" />
+	</feMerge>
+</filter>
+
+<!-- Back hub as a jewel: heavy dome bump map -> tight top gleam + a low,
+     cool rim light opposite it, an inner vignette for the cabochon curve,
+     and a grounding shadow. Base colour still comes from --hub-bg. -->
+<filter id="rm-hub" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+	<feGaussianBlur in="SourceAlpha" stdDeviation="7" result="d0" />
+	<feOffset in="d0" dy="4" result="d1" />
+	<feFlood flood-color="#10131a" flood-opacity="0.3" result="dc" />
+	<feComposite in="dc" in2="d1" operator="in" result="ground" />
+	<feGaussianBlur in="SourceAlpha" stdDeviation="13" result="dome" />
+	<feSpecularLighting in="dome" surfaceScale="3.2" specularConstant="0.8" specularExponent="24" lighting-color="#ffffff" result="g0">
+		<feDistantLight azimuth="235" elevation="62" />
+	</feSpecularLighting>
+	<feComposite in="g0" in2="SourceAlpha" operator="in" result="gleam" />
+	<feSpecularLighting in="dome" surfaceScale="2.2" specularConstant="0.3" specularExponent="8" lighting-color="#ffffff" result="r0">
+		<feDistantLight azimuth="55" elevation="16" />
+	</feSpecularLighting>
+	<feComposite in="r0" in2="SourceAlpha" operator="in" result="rimlight" />
+	<feComposite in="SourceAlpha" in2="dome" operator="arithmetic" k1="0" k2="1" k3="-1" k4="0" result="v0" />
+	<feComponentTransfer in="v0" result="vignette">
+		<feFuncA type="linear" slope="0.35" />
+	</feComponentTransfer>
+	<feMerge>
+		<feMergeNode in="ground" />
+		<feMergeNode in="SourceGraphic" />
+		<feMergeNode in="vignette" />
+		<feMergeNode in="rimlight" />
+		<feMergeNode in="gleam" />
+	</feMerge>
+</filter>
+
+<!-- Hub on hover/focus: same jewel plus a self-coloured halo. -->
+<filter id="rm-hub-glow" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+	<feGaussianBlur in="SourceGraphic" stdDeviation="12" result="h0" />
+	<feColorMatrix in="h0" type="saturate" values="1.5" result="h1" />
+	<feComponentTransfer in="h1" result="halo">
+		<feFuncA type="linear" slope="0.75" />
+	</feComponentTransfer>
+	<feGaussianBlur in="SourceAlpha" stdDeviation="8" result="d0" />
+	<feOffset in="d0" dy="5" result="d1" />
+	<feFlood flood-color="#10131a" flood-opacity="0.32" result="dc" />
+	<feComposite in="dc" in2="d1" operator="in" result="ground" />
+	<feGaussianBlur in="SourceAlpha" stdDeviation="13" result="dome" />
+	<feSpecularLighting in="dome" surfaceScale="3.4" specularConstant="0.95" specularExponent="24" lighting-color="#ffffff" result="g0">
+		<feDistantLight azimuth="235" elevation="62" />
+	</feSpecularLighting>
+	<feComposite in="g0" in2="SourceAlpha" operator="in" result="gleam" />
+	<feSpecularLighting in="dome" surfaceScale="2.2" specularConstant="0.4" specularExponent="8" lighting-color="#ffffff" result="r0">
+		<feDistantLight azimuth="55" elevation="16" />
+	</feSpecularLighting>
+	<feComposite in="r0" in2="SourceAlpha" operator="in" result="rimlight" />
+	<feComposite in="SourceAlpha" in2="dome" operator="arithmetic" k1="0" k2="1" k3="-1" k4="0" result="v0" />
+	<feComponentTransfer in="v0" result="vignette">
+		<feFuncA type="linear" slope="0.3" />
+	</feComponentTransfer>
+	<feMerge>
+		<feMergeNode in="halo" />
+		<feMergeNode in="ground" />
+		<feMergeNode in="SourceGraphic" />
+		<feMergeNode in="vignette" />
+		<feMergeNode in="rimlight" />
+		<feMergeNode in="gleam" />
+	</feMerge>
+</filter>

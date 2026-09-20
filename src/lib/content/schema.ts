@@ -75,11 +75,14 @@ export const albumSchema = z.object({
 });
 export type Album = z.infer<typeof albumSchema>;
 
-/** The About section — who I am plus contact links. */
+/** The About section — who I am, a few highlights, plus contact links. */
 export const aboutSchema = z.object({
 	name: z.string(),
 	role: localizedString,
 	bio: localizedString,
+	highlights: z
+		.array(z.object({ title: localizedString, body: localizedString }))
+		.default([]),
 	links: z.array(linkSchema).default([])
 });
 export type About = z.infer<typeof aboutSchema>;
