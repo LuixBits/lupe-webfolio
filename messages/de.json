@@ -68,5 +68,7 @@
 	"meta_location": "Ort",
 	"meta_date": "Datum",
 	"meta_gear": "Ausrüstung",
-	"meta_exposure": "Belichtung"
+	"meta_exposure": "Belichtung",
+	"paper_status_preprint": "Preprint",
+	"meta_radec": "Koordinaten"
 }
