@@ -52,27 +52,24 @@
 		background: rgba(255, 255, 255, 0.14); /* the dividing cross */
 		pointer-events: none;
 	}
+	/* Each panel is filled with a soft themed wash — a gentle glow near its outer
+	   corner easing into the theme background. No mask/vignette, so the square
+	   reads as fully filled (the scene detail sits on top, near the corner). */
 	.quad {
 		position: relative;
 		overflow: hidden;
 		background: var(--bg);
 	}
-	/* Fade each scene toward the inner edges (the centre cross) so no hard
-	   canvas boundary shows — the panel dissolves into its own background. */
 	.quad[data-corner='top-left'] {
-		-webkit-mask-image: radial-gradient(150% 150% at 0% 0%, #000 58%, transparent 92%);
-		mask-image: radial-gradient(150% 150% at 0% 0%, #000 58%, transparent 92%);
+		background: radial-gradient(150% 150% at 0% 0%, color-mix(in srgb, var(--accent) 26%, var(--bg)), var(--bg) 82%);
 	}
 	.quad[data-corner='top-right'] {
-		-webkit-mask-image: radial-gradient(150% 150% at 100% 0%, #000 58%, transparent 92%);
-		mask-image: radial-gradient(150% 150% at 100% 0%, #000 58%, transparent 92%);
+		background: radial-gradient(150% 150% at 100% 0%, color-mix(in srgb, var(--accent) 26%, var(--bg)), var(--bg) 82%);
 	}
 	.quad[data-corner='bottom-left'] {
-		-webkit-mask-image: radial-gradient(150% 150% at 0% 100%, #000 58%, transparent 92%);
-		mask-image: radial-gradient(150% 150% at 0% 100%, #000 58%, transparent 92%);
+		background: radial-gradient(150% 150% at 0% 100%, color-mix(in srgb, var(--accent) 26%, var(--bg)), var(--bg) 82%);
 	}
 	.quad[data-corner='bottom-right'] {
-		-webkit-mask-image: radial-gradient(150% 150% at 100% 100%, #000 58%, transparent 92%);
-		mask-image: radial-gradient(150% 150% at 100% 100%, #000 58%, transparent 92%);
+		background: radial-gradient(150% 150% at 100% 100%, color-mix(in srgb, var(--accent) 26%, var(--bg)), var(--bg) 82%);
 	}
 </style>
