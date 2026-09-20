@@ -38,6 +38,94 @@ export const linkSchema = z.object({
 });
 export type Link = z.infer<typeof linkSchema>;
 
+/** A locally-hosted image under static/media/… . Intrinsic width/height are
+ *  REQUIRED so every rendered <img> reserves its box (zero CLS); `thumb` is a
+ *  smaller variant for grids/contact sheets. Convention:
+ *  /media/<section>/<slug>/<name>-1600.webp with a sibling <name>-480.webp. */
+export const imageRefSchema = z.object({
+	src: z.string(),
+	width: z.number().int(),
+	height: z.number().int(),
+	alt: localizedString,
+	thumb: z.string().optional()
+});
+export type ImageRef = z.infer<typeof imageRefSchema>;
+
+/** A captioned figure — used by paper readers and project screenshot reels. */
+export const figureSchema = z.object({
+	id: z.string(),
+	image: imageRefSchema,
+	caption: localizedString.optional()
+});
+export type Figure = z.infer<typeof figureSchema>;
+
+/** An embeddable interactive demo — a same-origin iframe page or a hosted
+ *  Unity WebGL build. `src` should be same-origin (/media/…/index.html) for
+ *  sandboxed embedding; external demos belong in `demo.url` instead. */
+export const embedSchema = z.object({
+	kind: z.enum(['iframe', 'unity']),
+	src: z.string(),
+	/** CSS aspect-ratio value, e.g. '16 / 9'. */
+	aspect: z.string().default('16 / 9'),
+	title: localizedString
+});
+export type Embed = z.infer<typeof embedSchema>;
+
+/** Scholarly artefact links — each renders as its own affordance (no pills). */
+export const paperLinksSchema = z.object({
+	pdf: z.url().optional(),
+	doi: z.url().optional(),
+	code: z.url().optional(),
+	talk: z.url().optional()
+});
+
+export const paperSectionSchema = z.object({
+	id: z.string(),
+	heading: localizedString,
+	/** Paragraphs, split on blank lines at render time. */
+	body: localizedString,
+	/** Figure ids (from paper.figures) placed after this section's prose. */
+	figures: z.array(z.string()).default([])
+});
+export type PaperSection = z.infer<typeof paperSectionSchema>;
+
+/** A full paper attached to a CV entry. `status: 'sample'` marks dummy
+ *  content and MUST render a visible sample note — invented citations
+ *  presented as real damage trust (see the AI-tells audit). */
+export const paperSchema = z.object({
+	authors: z.array(z.string()),
+	venue: localizedString,
+	status: z.enum(['published', 'preprint', 'sample']).default('sample'),
+	abstract: localizedString,
+	sections: z.array(paperSectionSchema).default([]),
+	figures: z.array(figureSchema).default([]),
+	/** Headline results, e.g. { value: '4.2×', label: { en: 'faster … ' } }. */
+	results: z.array(z.object({ value: z.string(), label: localizedString })).default([]),
+	links: paperLinksSchema.default({}),
+	bibtex: z.string().optional()
+});
+export type Paper = z.infer<typeof paperSchema>;
+
+/** Real capture metadata for a hobby shot. Every field optional — the UI
+ *  renders nothing for absent fields (never invent coordinates or gear). */
+export const captureMetaSchema = z.object({
+	/** What was shot — 'M31 · Andromeda Galaxy', 'Red kite'. */
+	object: localizedString.optional(),
+	location: localizedString.optional(),
+	/** ISO date, formatted per-locale at render. */
+	date: z
+		.string()
+		.regex(/^\d{4}-\d{2}-\d{2}$/)
+		.optional(),
+	/** Body/optics/aircraft — 'ASI533MC · 72ED apo'. */
+	gear: z.string().optional(),
+	/** '30×120s @ f/5.6, ISO 800' */
+	exposure: z.string().optional(),
+	/** Only when truly known — 'RA 00h 42m · DEC +41° 16′'. */
+	radec: z.string().optional()
+});
+export type CaptureMeta = z.infer<typeof captureMetaSchema>;
+
 export const projectSchema = z.object({
 	slug: z.string(),
 	title: localizedString,
@@ -50,7 +138,20 @@ export const projectSchema = z.object({
 	category: z.enum(['youtube', 'opensource', 'web']).optional(),
 	sources: z.array(sourceSchema).default([]),
 	videos: z.array(videoSchema).default([]),
-	links: z.array(linkSchema).default([])
+	links: z.array(linkSchema).default([]),
+	/** Screenshot reel for the detail page's playback screen. */
+	screenshots: z.array(figureSchema).default([]),
+	/** Tech stack, displayed as plain printed text (not chips). */
+	stack: z.array(z.string()).default([]),
+	/** A live demo: external URL and/or a same-origin embeddable build. */
+	demo: z
+		.object({
+			url: z.url().optional(),
+			embed: embedSchema.optional()
+		})
+		.optional(),
+	/** Full paper attached to CV research/publication entries. */
+	paper: paperSchema.optional()
 });
 export type Project = z.infer<typeof projectSchema>;
 
@@ -87,11 +188,17 @@ export type Position = z.infer<typeof positionSchema>;
 export const mediaItemSchema = z.object({
 	id: z.string(),
 	kind: z.enum(['image', 'video']),
-	/** Image URL, or video id/URL (see `provider`). */
+	/** Image URL, or video id/URL (see `provider`). Prefer `image` for photos. */
 	src: z.string(),
 	provider: z.enum(['youtube', 'vimeo', 'file']).optional(),
 	caption: localizedString.optional(),
-	poster: z.string().optional()
+	poster: z.string().optional(),
+	/** Sized local image (preferred over bare `src` for photos — zero CLS). */
+	image: imageRefSchema.optional(),
+	/** Real capture data; absent fields render nothing. */
+	meta: captureMetaSchema.optional(),
+	/** Featured shots span wider in the contact sheet. */
+	featured: z.boolean().default(false)
 });
 export type MediaItem = z.infer<typeof mediaItemSchema>;
 
