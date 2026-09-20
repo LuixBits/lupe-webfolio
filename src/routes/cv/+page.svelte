@@ -60,6 +60,52 @@
 	</svg>
 {/snippet}
 
+<!-- Vermilion myōjin torii standing in the water: kasagi with upturned ends
+     over a straight shimaki, nuki through two inward-leaning pillars, small
+     gakuzuka strut. A mirrored, gradient-masked copy below the waterline is
+     its reflection; foam rings settle the pillars into the surface. -->
+{#snippet torii(pid: string)}
+	<svg class="torii-svg" viewBox="0 0 140 186" aria-hidden="true">
+		<defs>
+			<linearGradient id="{pid}-fade" x1="0" y1="120" x2="0" y2="182" gradientUnits="userSpaceOnUse">
+				<stop offset="0" stop-color="#fff" stop-opacity="0.62" />
+				<stop offset="1" stop-color="#fff" stop-opacity="0" />
+			</linearGradient>
+			<mask id="{pid}-mask">
+				<rect x="0" y="116" width="140" height="70" fill="url(#{pid}-fade)" />
+				<!-- thin slits: the surface chop breaking the mirror image -->
+				<rect x="0" y="128" width="140" height="2" fill="#000" opacity="0.9" />
+				<rect x="0" y="139" width="140" height="2.6" fill="#000" opacity="0.8" />
+				<rect x="0" y="153" width="140" height="3" fill="#000" opacity="0.7" />
+			</mask>
+			<g id="{pid}-gate">
+				<path class="t-main" d="M25.6 24L34.4 24L29.2 118L19.4 118Z" />
+				<path class="t-main" d="M105.6 24L114.4 24L120.6 118L110.8 118Z" />
+				<path class="t-main" d="M66.4 24.5H73.6V47H66.4Z" />
+				<path class="t-main" d="M7.5 47H132.5V55.5H7.5Z" />
+				<path class="t-dark" d="M10.5 15.5H129.5V24.5H10.5Z" />
+				<path class="t-dark" d="M1 2C36 9 104 9 139 2L136.5 14.5C104 20 36 20 3.5 14.5Z" />
+			</g>
+		</defs>
+		<use href="#{pid}-gate" />
+		<!-- mask on the outer group, mirror on the inner: keeps the fade
+		     anchored to the waterline instead of flipping with the copy -->
+		<g mask="url(#{pid}-mask)">
+			<g transform="translate(0 182.9) scale(1 -0.55)">
+				<use href="#{pid}-gate" />
+			</g>
+		</g>
+		<g class="t-ring" fill="none">
+			<ellipse cx="24.3" cy="119" rx="17" ry="3.2" />
+			<ellipse cx="115.7" cy="119" rx="17" ry="3.2" />
+		</g>
+		<g class="t-collar">
+			<ellipse cx="24.3" cy="118" rx="10" ry="2.5" />
+			<ellipse cx="115.7" cy="118" rx="10" ry="2.5" />
+		</g>
+	</svg>
+{/snippet}
+
 <!-- Notched lily-pad disc peeking from behind a card corner. -->
 {#snippet lilypad(rot: number)}
 	<svg class="pad-svg" viewBox="-56 -56 112 112" aria-hidden="true">
@@ -88,6 +134,10 @@
 			<svg class="band band--surface">
 				<rect class="band-tile" x="-48" y="0" width="150%" height="88" fill="url(#{uid}-sg)" />
 			</svg>
+		</div>
+		<!-- the floating gate, standing out in the open water to the right -->
+		<div class="torii torii--surface" aria-hidden="true">
+			{@render torii(`${uid}-tg`)}
 		</div>
 	</header>
 
@@ -154,6 +204,10 @@
 			<svg class="band band--thermo">
 				<rect class="band-tile still" x="-48" y="0" width="150%" height="26" fill="url(#{uid}-sg)" />
 			</svg>
+			<!-- a second gate far off on the thermocline: small and washed pale -->
+			<div class="torii torii--far">
+				{@render torii(`${uid}-tf`)}
+			</div>
 		</div>
 
 		<section id="publications" class="section zone zone--bed">
@@ -271,6 +325,46 @@
 		stroke: var(--water-deep);
 		stroke-opacity: 0.5;
 		stroke-width: 1.3;
+	}
+
+	/* ---- torii gates ------------------------------------------------------ */
+	.torii {
+		position: absolute;
+		pointer-events: none;
+	}
+	.torii-svg {
+		display: block;
+		width: 100%;
+		height: auto;
+	}
+	/* Standing in the surface band's open water; the reflection runs on
+	   below the header into the top of the water column. */
+	.torii--surface {
+		width: 9.5rem;
+		right: calc(var(--bleed) + 4.5rem);
+		bottom: -2.6rem;
+	}
+	/* Far-off echo on the thermocline: small, washed toward the water. */
+	.torii--far {
+		width: 3.9rem;
+		right: calc(var(--bleed) + 8.5rem);
+		bottom: -1.05rem;
+		opacity: 0.34;
+	}
+	.t-main {
+		fill: #e04530;
+	}
+	.t-dark {
+		fill: #c4321f;
+	}
+	.t-ring ellipse {
+		stroke: color-mix(in srgb, var(--water-deep) 45%, transparent);
+		stroke-width: 1.4;
+	}
+	.t-collar ellipse {
+		fill: var(--water-foam);
+		stroke: color-mix(in srgb, var(--water-deep) 35%, transparent);
+		stroke-width: 1;
 	}
 
 	/* ---- the water column ------------------------------------------------ */
@@ -706,6 +800,14 @@
 		}
 		.band--surface {
 			height: 46px;
+		}
+		.torii--surface {
+			width: 5.25rem;
+			right: 0.25rem;
+			bottom: -1.4rem;
+		}
+		.torii--far {
+			display: none;
 		}
 		.zone--bed h2 {
 			justify-content: flex-start;

@@ -28,7 +28,7 @@ export const SECTION_COLORS: Record<string, string> = {
 	about: '#7fb08a', // garden
 	cv: '#6cc3d6', // water
 	projects: '#ff8ad9', // vaporwave
-	hobbies: '#7fd4ff' // cosmos
+	hobbies: '#ff7a67' // cosmos
 };
 
 export function colorForSection(sectionId: string): string {

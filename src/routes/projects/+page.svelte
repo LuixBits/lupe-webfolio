@@ -25,11 +25,17 @@
 				<p>{resolveLocalized(p.tagline, locale)}</p>
 			</div>
 			<span class="window" aria-hidden="true"></span>
-			<div class="stickers">
-				{#each p.tags as t (t)}<span class="sticker">{t}</span>{/each}
+			<div class="printline">
+				<span class="genre">
+					{#each p.tags as t, i (t)}{#if i > 0}<span class="sep" aria-hidden="true">/</span>{/if}<span
+							class="word">{t}</span
+						>{/each}
+				</span>
 				<span class="copy">© {p.year}</span>
 			</div>
-			{#if p.featured}<span class="holo">★ {m.projects_featured()}</span>{/if}
+			{#if p.featured}
+				<span class="foil"><span class="band">★ {m.projects_featured()}</span></span>
+			{/if}
 		</a>
 	</li>
 {/snippet}
@@ -120,16 +126,13 @@
 		border-bottom: none;
 		padding-bottom: 0;
 	}
+	/* Broadcast channel bug — flat mono print, no box. */
 	.ch {
 		font-family: var(--font-body);
-		font-weight: 400;
-		font-size: 0.7rem;
-		letter-spacing: 0.14em;
+		font-weight: 700;
+		font-size: 0.72rem;
+		letter-spacing: 0.22em;
 		color: var(--sub-bg);
-		background: color-mix(in srgb, var(--sub-bg) 12%, transparent);
-		border: 1px solid color-mix(in srgb, var(--sub-bg) 45%, transparent);
-		border-radius: 3px;
-		padding: 0.1rem 0.5rem;
 		transform: translateY(-0.1em);
 	}
 	.rec {
@@ -252,40 +255,33 @@
 			),
 			color-mix(in srgb, var(--hub-bg) 78%, black);
 	}
-	/* Hand-slapped tag stickers + © imprint. */
-	.stickers {
+	/* Genre side-print + © imprint — flat ink on the shell, like the small
+	   print along the bottom edge of a rental sleeve. */
+	.printline {
 		grid-column: 2;
 		grid-row: 3;
-		margin: 0 0.85rem 0.8rem;
+		margin: 0 0.85rem 0.75rem;
+		padding-top: 0.45rem;
+		border-top: 1px dashed color-mix(in srgb, var(--fg) 24%, transparent);
 		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0.4rem;
+		align-items: baseline;
+		gap: 0.6rem;
 	}
-	.sticker {
+	.genre {
 		font-family: var(--font-body);
-		font-size: 0.68rem;
-		letter-spacing: 0.04em;
-		padding: 0.1rem 0.5rem;
-		border-radius: 3px;
-	}
-	.sticker:nth-of-type(3n + 1) {
+		font-size: 0.62rem;
+		font-weight: 700;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
 		color: var(--sub-bg);
-		background: color-mix(in srgb, var(--sub-bg) 16%, transparent);
-		border: 1px solid color-mix(in srgb, var(--sub-bg) 45%, transparent);
-		rotate: -2deg;
 	}
-	.sticker:nth-of-type(3n + 2) {
-		color: var(--vapor-sun);
-		background: color-mix(in srgb, var(--vapor-sun) 14%, transparent);
-		border: 1px solid color-mix(in srgb, var(--vapor-sun) 45%, transparent);
-		rotate: 2deg;
+	.genre .word {
+		white-space: nowrap;
 	}
-	.sticker:nth-of-type(3n) {
-		color: color-mix(in srgb, var(--accent) 75%, white);
-		background: color-mix(in srgb, var(--accent) 16%, transparent);
-		border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
-		rotate: -1.5deg;
+	.sep {
+		margin: 0 0.35em;
+		color: var(--accent);
+		font-weight: 400;
 	}
 	.copy {
 		margin-left: auto;
@@ -293,17 +289,29 @@
 		font-size: 0.7rem;
 		letter-spacing: 0.06em;
 		color: var(--vapor-sun);
+		white-space: nowrap;
 	}
-	/* Holographic "Featured" corner sticker, overhanging the shell. */
-	.holo {
+	/* Holographic "Featured" foil — a diagonal banner printed across the
+	   top-right corner of the shell, clipped to the cassette edge. */
+	.foil {
 		position: absolute;
-		top: -0.4rem;
-		right: -0.4rem;
-		padding: 0.16rem 0.45rem;
+		inset: 0;
+		overflow: hidden;
+		border-radius: inherit;
+		pointer-events: none;
+	}
+	.band {
+		position: absolute;
+		top: 1.3rem;
+		right: -2.55rem;
+		width: 9rem;
+		rotate: 45deg;
+		text-align: center;
+		padding: 0.18rem 0;
 		font-family: var(--font-body);
-		font-size: 0.62rem;
+		font-size: 0.6rem;
 		font-weight: 700;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.12em;
 		text-transform: uppercase;
 		color: var(--hub-bg);
 		background: conic-gradient(
@@ -313,9 +321,7 @@
 			var(--sub-bg),
 			var(--vapor-sun)
 		);
-		border-radius: 3px;
-		rotate: 3deg;
-		box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 45%, transparent);
+		box-shadow: 0 2px 10px color-mix(in srgb, var(--accent) 45%, transparent);
 	}
 
 	/* Hover / focus: pull the tape off the shelf. */
@@ -369,7 +375,7 @@
 			opacity: 1;
 			animation: rec-blink 1.6s steps(2, jump-none) infinite;
 		}
-		.holo {
+		.band {
 			animation: holo-spin 8s linear infinite;
 		}
 		.tape:hover,
@@ -469,14 +475,17 @@
 		.window {
 			display: none;
 		}
-		.stickers {
+		.printline {
 			grid-column: 1;
 			grid-row: 3;
-			margin: 0 0.8rem 0.7rem;
+			margin: 0 0.8rem 0.65rem;
 		}
-		.holo {
-			top: -0.35rem;
-			right: 0.5rem;
+		/* Narrow shells: tuck the foil band tighter into the corner so it
+		   clears the label text. */
+		.band {
+			top: 0.85rem;
+			right: -3.1rem;
+			font-size: 0.56rem;
 		}
 	}
 </style>

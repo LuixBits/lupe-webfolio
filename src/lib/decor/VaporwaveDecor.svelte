@@ -192,6 +192,15 @@
   <div class="px item globe-pos" data-depth="0.02">
     <div class="drift" data-drift="10">
       <svg viewBox="0 0 120 120" fill="none">
+        <defs>
+          <radialGradient id="vw-globe" cx="0.35" cy="0.3" r="0.85">
+            <stop offset="0" stop-color="var(--vw-cyan)" stop-opacity="0.26" />
+            <stop offset="0.5" stop-color="var(--vapor-grid, #ff5ed1)" stop-opacity="0.1" />
+            <stop offset="1" stop-color="var(--slice-bg, #7b4bd6)" stop-opacity="0.24" />
+          </radialGradient>
+        </defs>
+        <circle cx="60" cy="60" r="46" fill="url(#vw-globe)" />
+        <ellipse cx="44" cy="38" rx="13" ry="7" fill="#ffffff" opacity="0.12" transform="rotate(-28 44 38)" />
         <circle cx="60" cy="60" r="46" stroke="var(--vapor-grid, #ff5ed1)" stroke-width="1.2" />
         <ellipse cx="60" cy="60" rx="16" ry="46" stroke="var(--vapor-grid, #ff5ed1)" stroke-width="0.8" opacity="0.55" />
         <ellipse cx="60" cy="60" rx="33" ry="46" stroke="var(--vapor-grid, #ff5ed1)" stroke-width="0.8" opacity="0.4" />
@@ -207,6 +216,8 @@
   <div class="px item pyr-pos" data-depth="0.045">
     <div class="drift" data-drift="12">
       <svg viewBox="0 0 120 115" fill="none" stroke-linejoin="round">
+        <path d="M 14 86 L 60 10 L 72 104 Z" fill="var(--vapor-grid, #ff5ed1)" opacity="0.09" />
+        <path d="M 60 10 L 106 80 L 72 104 Z" fill="var(--vapor-sun, #ffd36e)" opacity="0.14" />
         <path d="M 14 86 L 60 10 L 106 80 M 60 10 L 72 104 M 14 86 L 72 104 L 106 80" stroke="var(--vapor-grid, #ff5ed1)" stroke-width="1.2" />
         <path d="M 14 86 L 48 62 L 106 80 M 48 62 L 60 10" stroke="var(--vapor-grid, #ff5ed1)" stroke-width="0.8" stroke-dasharray="3 4" opacity="0.45" />
         <circle cx="60" cy="10" r="2" fill="var(--vapor-sun, #ffd36e)" stroke="none" opacity="0.9" />
@@ -218,6 +229,9 @@
   <div class="px item cube-pos" data-depth="0.035">
     <div class="drift" data-drift="10">
       <svg viewBox="0 0 110 100" fill="none" stroke-linejoin="round">
+        <path d="M 18 38 L 44 20 L 96 20 L 70 38 Z" fill="var(--vapor-sun, #ffd36e)" opacity="0.12" />
+        <path d="M 70 38 L 96 20 L 96 72 L 70 90 Z" fill="var(--vapor-sun, #ffd36e)" opacity="0.05" />
+        <rect x="18" y="38" width="52" height="52" fill="var(--vapor-grid, #ff5ed1)" opacity="0.05" />
         <path d="M 18 38 L 70 38 L 70 90 L 18 90 Z M 18 38 L 44 20 L 96 20 L 70 38 M 96 20 L 96 72 L 70 90" stroke="var(--vapor-sun, #ffd36e)" stroke-width="1.1" />
         <path d="M 44 20 L 44 72 L 96 72 M 44 72 L 18 90" stroke="var(--vapor-sun, #ffd36e)" stroke-width="0.7" stroke-dasharray="3 4" opacity="0.45" />
       </svg>
@@ -233,43 +247,75 @@
     </div>
   </div>
 
-  <!-- marble bust, RGB-split linework — mid left -->
+  <!-- marble bust with laurel + plinth, RGB-split rim — mid left -->
   <div class="px item bust-pos" data-depth="0.028">
     <div class="drift" data-drift="9">
       <svg viewBox="0 0 150 196" fill="none">
         <defs>
-          <g id="vw-bust" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <!-- hair crown silhouette -->
-            <path d="M 66 40 C 58 30 64 18 76 16 C 84 8 100 8 108 18 C 118 22 122 34 118 44 C 122 56 120 70 112 78" />
-            <!-- face profile -->
-            <path d="M 66 40 C 62 47 61 53 62 58 L 52 76 L 60 79 C 57 82 57 85 61 87 C 57 90 57 93 61 95 C 57 99 58 103 63 105 C 68 107 70 111 68 116 C 72 121 78 124 85 126" />
-            <!-- jaw, neck front, chest -->
-            <path d="M 85 126 C 88 132 88 138 84 146 C 76 158 60 166 44 169" />
-            <!-- back of neck and shoulder -->
-            <path d="M 112 78 C 112 88 108 94 104 98 C 104 108 108 116 116 122 C 124 130 130 142 131 154" />
-            <!-- bust cut -->
-            <path d="M 44 169 C 66 176 106 172 131 154" />
-            <path d="M 70 150 C 78 156 92 158 104 154" opacity="0.4" />
-            <!-- brow, eye, lips -->
-            <path d="M 64 56 C 68 53 74 53 78 55" />
-            <path d="M 67 63 C 70 61 75 61 78 63" opacity="0.8" />
-            <path d="M 61 91 C 64 90 66 90 68 91" opacity="0.7" />
-            <!-- hair waves -->
-            <path d="M 70 30 C 78 24 90 24 97 30" opacity="0.75" />
-            <path d="M 74 40 C 82 33 94 34 101 41" opacity="0.6" />
-            <path d="M 80 50 C 87 44 97 45 103 51" opacity="0.45" />
-            <!-- bun -->
-            <path d="M 104 84 C 112 80 120 86 118 95 C 116 103 106 105 101 99" opacity="0.8" />
-            <path d="M 107 90 C 111 87 115 91 112 96" opacity="0.5" />
-            <!-- socle -->
-            <path d="M 62 178 L 112 178" />
-            <path d="M 52 186 L 122 186 M 52 192 L 122 192" opacity="0.7" />
-            <path d="M 52 186 L 52 192 M 122 186 L 122 192" opacity="0.7" />
+          <linearGradient id="vw-marble" x1="0" y1="0" x2="0.7" y2="1">
+            <stop offset="0" stop-color="#f8f2ff" />
+            <stop offset="0.5" stop-color="#cbb4ee" />
+            <stop offset="1" stop-color="#6a48ad" />
+          </linearGradient>
+          <linearGradient id="vw-plinth" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#cbb4ee" />
+            <stop offset="1" stop-color="#472573" />
+          </linearGradient>
+          <!-- closed silhouette: crown → nape → shoulder → bust cut → chest → profile -->
+          <g id="vw-bust-solid">
+            <path d="M 66 40 C 58 30 64 18 76 16 C 84 8 100 8 108 18 C 118 22 122 34 118 44 C 122 56 120 70 112 78 C 112 88 108 94 104 98 C 104 108 108 116 116 122 C 124 130 130 142 131 154 C 106 172 66 176 44 169 C 60 166 76 158 84 146 C 88 138 88 132 85 126 C 78 124 72 121 68 116 C 70 111 68 107 63 105 C 58 103 57 99 61 95 C 57 93 57 90 61 87 C 57 85 57 82 60 79 L 52 76 L 62 58 C 61 53 62 47 66 40 Z" />
+            <path d="M 104 84 C 112 80 120 86 118 95 C 116 103 106 105 101 99 Z" />
           </g>
+          <path id="vw-leaf" d="M 0 0 Q 4.5 -3.2 9 -0.5 Q 4.5 2.5 0 0 Z" />
         </defs>
-        <use href="#vw-bust" stroke="var(--vw-cyan)" stroke-width="1.1" transform="translate(-2 0)" opacity="0.4" />
-        <use href="#vw-bust" stroke="var(--vapor-grid, #ff5ed1)" stroke-width="1.1" transform="translate(2 1)" opacity="0.4" />
-        <use href="#vw-bust" stroke="#f2e9ff" stroke-width="1.15" opacity="0.9" />
+        <!-- RGB-split rim ghosts -->
+        <use href="#vw-bust-solid" fill="var(--vw-cyan)" transform="translate(-3 0)" opacity="0.5" />
+        <use href="#vw-bust-solid" fill="var(--vapor-grid, #ff5ed1)" transform="translate(3 1.5)" opacity="0.5" />
+        <!-- marble body -->
+        <use href="#vw-bust-solid" fill="url(#vw-marble)" fill-opacity="0.95" stroke="#efe4ff" stroke-width="1" stroke-opacity="0.85" stroke-linejoin="round" />
+        <!-- hair mass wash: crown band from the hairline back to the nape -->
+        <path d="M 66 40 C 58 30 64 18 76 16 C 84 8 100 8 108 18 C 118 22 122 34 118 44 C 122 56 120 70 112 78 C 112 84 110 90 106 94 C 102 88 100 78 100 68 C 94 58 86 52 78 48 C 72 45 68 42 66 40 Z" fill="#5a35a0" opacity="0.28" />
+        <!-- back-of-hair / nape shadow wash -->
+        <path d="M 106 20 C 114 24 118 34 115 44 C 118 56 117 68 110 77 C 110 86 107 92 103 97 C 104 88 104 80 102 72 C 106 62 107 50 104 40 C 106 32 106 25 106 20 Z" fill="#55309a" opacity="0.32" />
+        <!-- under-jaw / neck shadow -->
+        <path d="M 84 127 C 87 133 87 139 83 146 C 77 155 66 162 55 166 C 69 164 80 156 86 146 C 90 138 89 131 84 127 Z" fill="#4d2b8f" opacity="0.4" />
+        <!-- marble veins -->
+        <g stroke="#8f6fc8" stroke-width="0.6" opacity="0.45" fill="none" stroke-linecap="round">
+          <path d="M 98 128 C 102 138 100 150 92 158" />
+          <path d="M 64 150 C 70 154 74 159 75 164" />
+        </g>
+        <!-- carved details: brow, eye, lips, hair waves, bun swirl, drapery -->
+        <g fill="none" stroke="#6b46ab" stroke-linecap="round" stroke-linejoin="round" stroke-width="0.9" opacity="0.8">
+          <path d="M 64 56 C 68 53 74 53 78 55" stroke-width="1" />
+          <path d="M 67 63 C 70 61 75 61 78 63" opacity="0.8" />
+          <path d="M 61 91 C 64 90 66 90 68 91" opacity="0.7" />
+          <path d="M 70 30 C 78 24 90 24 97 30" opacity="0.75" />
+          <path d="M 74 40 C 82 33 94 34 101 41" opacity="0.6" />
+          <path d="M 80 50 C 87 44 97 45 103 51" opacity="0.45" />
+          <path d="M 107 90 C 111 87 115 91 112 96" opacity="0.6" />
+          <path d="M 70 150 C 78 156 92 158 104 154" opacity="0.45" />
+        </g>
+        <!-- gold laurel across the crown -->
+        <path d="M 64.5 37 C 68.5 21 85 11.5 99.5 13.5 C 110 15 115.5 23 116 34" stroke="var(--vapor-sun, #ffd36e)" stroke-width="0.8" opacity="0.55" />
+        <g fill="var(--vapor-sun, #ffd36e)" opacity="0.78">
+          <use href="#vw-leaf" transform="translate(65.5 32) rotate(-70)" />
+          <use href="#vw-leaf" transform="translate(69.5 23.5) rotate(-50)" />
+          <use href="#vw-leaf" transform="translate(76.5 17) rotate(-28)" />
+          <use href="#vw-leaf" transform="translate(86 13.4) rotate(-8)" />
+          <use href="#vw-leaf" transform="translate(95.5 13) rotate(8)" />
+          <use href="#vw-leaf" transform="translate(104 15.5) rotate(30)" />
+          <use href="#vw-leaf" transform="translate(110.5 21.5) rotate(52)" />
+          <use href="#vw-leaf" transform="translate(114 29) rotate(70)" />
+        </g>
+        <circle cx="91" cy="11" r="1.3" fill="var(--vapor-sun, #ffd36e)" opacity="0.9" />
+        <!-- stepped plinth with neon rim-light edges -->
+        <path d="M 59 172 L 115 172 L 118 180 L 56 180 Z" fill="url(#vw-plinth)" opacity="0.85" />
+        <path d="M 52 180 L 122 180 L 122 187 L 52 187 Z" fill="#221045" opacity="0.92" />
+        <path d="M 49 187 L 125 187 L 125 194 L 49 194 Z" fill="url(#vw-plinth)" opacity="0.7" />
+        <path d="M 59 172 L 115 172" stroke="var(--vapor-sun, #ffd36e)" stroke-width="0.9" opacity="0.75" />
+        <path d="M 49 187 L 125 187" stroke="var(--vw-cyan)" stroke-width="0.7" opacity="0.45" />
+        <path d="M 56 180 L 52 180 L 52 187 L 49 187 L 49 194" stroke="var(--vapor-grid, #ff5ed1)" stroke-width="0.8" opacity="0.5" />
+        <path d="M 118 180 L 122 180 L 122 187 L 125 187 L 125 194" stroke="var(--vw-cyan)" stroke-width="0.8" opacity="0.5" />
       </svg>
     </div>
   </div>
@@ -362,21 +408,51 @@
       <svg viewBox="0 0 140 124" fill="none" stroke-linejoin="round">
         <defs>
           <path id="vw-dolphin" d="M 128 102 L 112 88 L 98 80 L 86 76 L 72 94 L 76 72 L 56 64 L 38 58 L 26 50 L 8 60 L 14 48 L 6 34 L 24 46 L 44 42 L 60 38 L 76 20 L 78 38 L 94 48 L 106 62 L 118 84 Z" />
+          <linearGradient id="vw-dolphbody" x1="0" y1="0" x2="1" y2="0.7">
+            <stop offset="0" stop-color="var(--vw-cyan)" />
+            <stop offset="1" stop-color="var(--vapor-grid, #ff5ed1)" />
+          </linearGradient>
         </defs>
-        <!-- filled facets -->
-        <path d="M 60 38 L 76 20 L 78 38 Z" fill="var(--vapor-grid, #ff5ed1)" opacity="0.14" />
-        <path d="M 78 38 L 94 48 L 86 76 Z" fill="var(--vw-cyan)" opacity="0.14" />
-        <path d="M 94 48 L 106 62 L 98 80 Z" fill="var(--vw-cyan)" opacity="0.1" />
-        <path d="M 6 34 L 14 48 L 8 60 L 24 46 Z" fill="var(--vw-cyan)" opacity="0.1" />
+        <!-- pink ghost offset -->
+        <use href="#vw-dolphin" fill="var(--vapor-grid, #ff5ed1)" transform="translate(2.4 1.8)" opacity="0.3" />
+        <!-- gradient body wash under the facets -->
+        <use href="#vw-dolphin" fill="url(#vw-dolphbody)" fill-opacity="0.16" />
+        <!-- full faceted skin, lit from above -->
+        <g stroke="none">
+          <path d="M 6 34 L 24 46 L 14 48 Z" fill="var(--vw-cyan)" opacity="0.22" />
+          <path d="M 14 48 L 24 46 L 26 50 Z" fill="var(--vapor-grid, #ff5ed1)" opacity="0.16" />
+          <path d="M 14 48 L 26 50 L 8 60 Z" fill="var(--vw-cyan)" opacity="0.1" />
+          <path d="M 24 46 L 44 42 L 38 58 Z" fill="var(--vw-cyan)" opacity="0.18" />
+          <path d="M 24 46 L 38 58 L 26 50 Z" fill="var(--vapor-grid, #ff5ed1)" opacity="0.1" />
+          <path d="M 44 42 L 60 38 L 38 58 Z" fill="var(--vapor-sun, #ffd36e)" opacity="0.12" />
+          <path d="M 60 38 L 56 64 L 38 58 Z" fill="var(--vw-cyan)" opacity="0.12" />
+          <path d="M 60 38 L 76 20 L 78 38 Z" fill="var(--vapor-grid, #ff5ed1)" opacity="0.28" />
+          <path d="M 60 38 L 78 38 L 56 64 Z" fill="var(--vw-cyan)" opacity="0.2" />
+          <path d="M 78 38 L 76 72 L 56 64 Z" fill="var(--vapor-grid, #ff5ed1)" opacity="0.12" />
+          <path d="M 76 72 L 86 76 L 72 94 Z" fill="var(--vw-cyan)" opacity="0.16" />
+          <path d="M 78 38 L 86 76 L 76 72 Z" fill="var(--vapor-sun, #ffd36e)" opacity="0.1" />
+          <path d="M 78 38 L 94 48 L 86 76 Z" fill="var(--vw-cyan)" opacity="0.22" />
+          <path d="M 94 48 L 106 62 L 98 80 Z" fill="var(--vapor-grid, #ff5ed1)" opacity="0.15" />
+          <path d="M 94 48 L 98 80 L 86 76 Z" fill="var(--vw-cyan)" opacity="0.12" />
+          <path d="M 106 62 L 118 84 L 112 88 Z" fill="var(--vw-cyan)" opacity="0.24" />
+          <path d="M 106 62 L 112 88 L 98 80 Z" fill="var(--vapor-sun, #ffd36e)" opacity="0.12" />
+          <path d="M 118 84 L 128 102 L 112 88 Z" fill="var(--vapor-grid, #ff5ed1)" opacity="0.22" />
+        </g>
         <!-- facet linework -->
-        <path d="M 60 38 L 56 64 M 78 38 L 86 76 M 94 48 L 98 80 M 44 42 L 38 58 M 106 62 L 112 88 M 60 38 L 78 38 M 76 72 L 86 76" stroke="var(--vw-cyan)" stroke-width="0.7" opacity="0.45" />
-        <!-- outline: pink ghost + cyan main -->
-        <use href="#vw-dolphin" stroke="var(--vapor-grid, #ff5ed1)" stroke-width="1" transform="translate(1.6 1.2)" opacity="0.3" />
-        <use href="#vw-dolphin" stroke="var(--vw-cyan)" stroke-width="1.2" opacity="0.9" />
-        <circle cx="106" cy="74" r="1.6" fill="var(--vw-cyan)" opacity="0.9" />
-        <!-- splash arcs where it will strike the water -->
-        <path d="M 104 114 q 14 3 28 -2" stroke="var(--vw-cyan)" stroke-width="0.9" opacity="0.4" stroke-linecap="round" />
-        <path d="M 92 108 q 9 3 18 1" stroke="var(--vw-cyan)" stroke-width="0.8" opacity="0.3" stroke-linecap="round" />
+        <path d="M 24 46 L 14 48 M 14 48 L 26 50 M 24 46 L 26 50 M 24 46 L 38 58 M 44 42 L 38 58 M 60 38 L 38 58 M 60 38 L 56 64 M 60 38 L 78 38 M 78 38 L 56 64 M 78 38 L 76 72 M 78 38 L 86 76 M 94 48 L 86 76 M 94 48 L 98 80 M 106 62 L 98 80 M 106 62 L 112 88 M 76 72 L 86 76 M 112 88 L 118 84" stroke="var(--vw-cyan)" stroke-width="0.7" opacity="0.5" />
+        <!-- main outline -->
+        <use href="#vw-dolphin" stroke="var(--vw-cyan)" stroke-width="1.3" opacity="0.95" />
+        <!-- eye -->
+        <circle cx="105" cy="70.5" r="1.9" fill="#0d2b45" opacity="0.9" />
+        <circle cx="105.6" cy="69.9" r="0.7" fill="#eafcff" opacity="0.95" />
+        <!-- speed streaks off the flukes -->
+        <path d="M 2 27 l 9 -2 M 1 41 l 8 -1" stroke="var(--vw-cyan)" stroke-width="0.8" opacity="0.35" stroke-linecap="round" />
+        <!-- splash arcs + droplets where it will strike the water -->
+        <path d="M 104 114 q 14 3 28 -2" stroke="var(--vw-cyan)" stroke-width="1" opacity="0.5" stroke-linecap="round" />
+        <path d="M 92 108 q 9 3 18 1" stroke="var(--vw-cyan)" stroke-width="0.8" opacity="0.35" stroke-linecap="round" />
+        <circle cx="121" cy="107" r="1.2" fill="var(--vw-cyan)" opacity="0.55" />
+        <circle cx="133" cy="108" r="0.9" fill="var(--vw-cyan)" opacity="0.4" />
+        <circle cx="99" cy="103" r="0.9" fill="var(--vw-cyan)" opacity="0.35" />
       </svg>
     </div>
   </div>
@@ -519,8 +595,9 @@
   .bust-pos {
     top: 36%;
     left: 3%;
-    width: clamp(6rem, 10vw, 8.75rem);
-    opacity: 0.7;
+    width: clamp(6.5rem, 10.5vw, 9.5rem);
+    opacity: 0.78;
+    filter: drop-shadow(0 0 9px rgba(207, 180, 240, 0.25));
   }
   .disc-pos {
     top: 28%;
@@ -537,8 +614,9 @@
   .dolph-pos {
     top: 61%;
     left: 5.5%;
-    width: clamp(5.5rem, 8vw, 7.75rem);
-    opacity: 0.75;
+    width: clamp(5.75rem, 8.5vw, 8.25rem);
+    opacity: 0.8;
+    filter: drop-shadow(0 0 8px rgba(103, 232, 249, 0.28));
   }
   .cass-pos {
     top: 4%;

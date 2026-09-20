@@ -111,10 +111,10 @@
 	<svg class="terrain" viewBox="0 0 1440 156" preserveAspectRatio="none" role="presentation" focusable="false">
 		<defs>
 			<linearGradient id="fc-ground" x1="0" y1="0" x2="0" y2="1">
-				<stop offset="0" style="stop-color: color-mix(in srgb, var(--cosmos-nebula, #7c5cff) 58%, var(--hub-bg, #14143c))" />
-				<stop offset="0.3" style="stop-color: color-mix(in srgb, var(--cosmos-nebula, #7c5cff) 24%, var(--hub-bg, #14143c))" />
-				<stop offset="0.75" style="stop-color: var(--hub-bg, #14143c)" />
-				<stop offset="1" style="stop-color: var(--hub-bg, #14143c)" />
+				<stop offset="0" style="stop-color: color-mix(in srgb, var(--cosmos-nebula, #c94848) 58%, var(--hub-bg, #0e1226))" />
+				<stop offset="0.3" style="stop-color: color-mix(in srgb, var(--cosmos-nebula, #c94848) 24%, var(--hub-bg, #0e1226))" />
+				<stop offset="0.75" style="stop-color: var(--hub-bg, #0e1226)" />
+				<stop offset="1" style="stop-color: var(--hub-bg, #0e1226)" />
 			</linearGradient>
 		</defs>
 
@@ -141,9 +141,9 @@
 	<svg class="dome" viewBox="0 0 132 46" width="132" height="46" role="presentation" focusable="false">
 		<defs>
 			<linearGradient id="fc-beam" x1="0" y1="1" x2="0" y2="0">
-				<stop offset="0" style="stop-color: var(--accent, #7fd4ff); stop-opacity: 0.34" />
-				<stop offset="0.75" style="stop-color: var(--accent, #7fd4ff); stop-opacity: 0.05" />
-				<stop offset="1" style="stop-color: var(--accent, #7fd4ff); stop-opacity: 0" />
+				<stop offset="0" style="stop-color: var(--accent, #ff7a67); stop-opacity: 0.34" />
+				<stop offset="0.75" style="stop-color: var(--accent, #ff7a67); stop-opacity: 0.05" />
+				<stop offset="1" style="stop-color: var(--accent, #ff7a67); stop-opacity: 0" />
 			</linearGradient>
 		</defs>
 
@@ -233,7 +233,7 @@
 		height: 120px;
 		background: radial-gradient(
 			closest-side,
-			color-mix(in srgb, var(--cosmos-nebula, #7c5cff) 46%, transparent),
+			color-mix(in srgb, var(--cosmos-nebula, #c94848) 46%, transparent),
 			transparent 72%
 		);
 	}
@@ -244,7 +244,7 @@
 		height: 104px;
 		background: radial-gradient(
 			closest-side,
-			color-mix(in srgb, var(--cosmos-glint, #ff8ad9) 30%, transparent),
+			color-mix(in srgb, var(--cosmos-glint, #ffab7a) 30%, transparent),
 			transparent 72%
 		);
 		animation-duration: 46s;
@@ -257,7 +257,7 @@
 		height: 80px;
 		background: radial-gradient(
 			closest-side,
-			color-mix(in srgb, var(--accent, #7fd4ff) 26%, transparent),
+			color-mix(in srgb, var(--cosmos-dust, #7668c4) 26%, transparent),
 			transparent 72%
 		);
 		animation-duration: 30s;
@@ -286,10 +286,10 @@
 		animation: twinkle var(--d, 4s) ease-in-out var(--dl, 0s) infinite;
 	}
 	.star.accent {
-		fill: var(--accent, #7fd4ff);
+		fill: var(--accent, #ff7a67);
 	}
 	.star.glint {
-		fill: var(--cosmos-glint, #ff8ad9);
+		fill: var(--cosmos-glint, #ffab7a);
 	}
 	@keyframes twinkle {
 		0%,
@@ -315,14 +315,14 @@
 	.sp-b {
 		left: 44%;
 		top: 13px;
-		fill: var(--accent, #7fd4ff);
+		fill: var(--accent, #ff7a67);
 		animation-delay: -2.6s;
 		animation-duration: 9s;
 	}
 	.sp-c {
 		left: 86%;
 		top: 27px;
-		fill: var(--cosmos-glint, #ff8ad9);
+		fill: var(--cosmos-glint, #ffab7a);
 		animation-delay: -5s;
 		animation-duration: 8s;
 	}
@@ -351,7 +351,7 @@
 			color-mix(in srgb, var(--cosmos-star, #cfe6ff) 85%, transparent) 60%,
 			var(--cosmos-star, #cfe6ff)
 		);
-		filter: drop-shadow(0 0 6px var(--accent, #7fd4ff));
+		filter: drop-shadow(0 0 6px var(--accent, #ff7a67));
 		opacity: 0;
 		will-change: transform, opacity;
 	}
@@ -391,8 +391,8 @@
 		height: 104px;
 		background: radial-gradient(
 			52% 100% at 57% 100%,
-			color-mix(in srgb, var(--accent, #7fd4ff) 26%, transparent),
-			color-mix(in srgb, var(--cosmos-nebula, #7c5cff) 12%, transparent) 55%,
+			color-mix(in srgb, var(--accent, #ff7a67) 26%, transparent),
+			color-mix(in srgb, var(--cosmos-nebula, #c94848) 12%, transparent) 55%,
 			transparent 78%
 		);
 		animation: breathe 9s ease-in-out infinite;
@@ -430,7 +430,7 @@
 		fill: color-mix(in srgb, #050516 62%, transparent);
 	}
 	.crater-floor {
-		fill: color-mix(in srgb, var(--cosmos-nebula, #7c5cff) 16%, transparent);
+		fill: color-mix(in srgb, var(--cosmos-nebula, #c94848) 16%, transparent);
 	}
 	.edge-halo,
 	.edge-line,
@@ -439,18 +439,18 @@
 		stroke-linecap: round;
 	}
 	.edge-halo {
-		stroke: var(--cosmos-nebula, #7c5cff);
+		stroke: var(--cosmos-nebula, #c94848);
 		stroke-width: 6;
 		opacity: 0.42;
 		filter: blur(4px);
 	}
 	.edge-line {
-		stroke: var(--accent, #7fd4ff);
+		stroke: var(--accent, #ff7a67);
 		stroke-width: 1.5;
 		opacity: 0.8;
 	}
 	.edge-glint {
-		stroke: var(--cosmos-glint, #ff8ad9);
+		stroke: var(--cosmos-glint, #ffab7a);
 		stroke-width: 2;
 		opacity: 0.9;
 		stroke-dasharray: 12 1600;
@@ -478,19 +478,19 @@
 		top: 28px;
 	}
 	.sil {
-		fill: color-mix(in srgb, var(--hub-bg, #14143c) 36%, #030314);
+		fill: color-mix(in srgb, var(--hub-bg, #0e1226) 36%, #030314);
 	}
 	.slit {
-		fill: color-mix(in srgb, var(--accent, #7fd4ff) 30%, #0a0a2e);
+		fill: color-mix(in srgb, var(--accent, #ff7a67) 30%, #081020);
 	}
 	.slit-glow {
-		stroke: var(--accent, #7fd4ff);
+		stroke: var(--accent, #ff7a67);
 		stroke-width: 1.6;
 		stroke-linecap: round;
 		opacity: 0.8;
 	}
 	.lit {
-		fill: color-mix(in srgb, var(--cosmos-star, #cfe6ff) 20%, #0a0a2e);
+		fill: color-mix(in srgb, var(--cosmos-star, #cfe6ff) 20%, #081020);
 	}
 	.rim-light {
 		fill: none;
@@ -499,7 +499,7 @@
 		stroke-linecap: round;
 	}
 	.beacon {
-		fill: var(--cosmos-glint, #ff8ad9);
+		fill: var(--cosmos-glint, #ffab7a);
 		animation: beacon 5s ease-in-out infinite;
 	}
 	@keyframes beacon {
@@ -525,7 +525,7 @@
 		}
 	}
 	.win {
-		fill: var(--accent, #7fd4ff);
+		fill: var(--accent, #ff7a67);
 		opacity: 0.6;
 	}
 	.door {
@@ -533,16 +533,16 @@
 	}
 	.dish-rim {
 		fill: none;
-		stroke: color-mix(in srgb, var(--accent, #7fd4ff) 45%, transparent);
+		stroke: color-mix(in srgb, var(--accent, #ff7a67) 45%, transparent);
 		stroke-width: 0.8;
 	}
 	.feed {
-		stroke: color-mix(in srgb, var(--cosmos-star, #cfe6ff) 55%, #0a0a2e);
+		stroke: color-mix(in srgb, var(--cosmos-star, #cfe6ff) 55%, #081020);
 		stroke-width: 1.1;
 		stroke-linecap: round;
 	}
 	.feed-tip {
-		fill: var(--accent, #7fd4ff);
+		fill: var(--accent, #ff7a67);
 		opacity: 0.8;
 	}
 
@@ -563,7 +563,7 @@
 		}
 	}
 	.panel {
-		fill: color-mix(in srgb, var(--accent, #7fd4ff) 55%, #102a44);
+		fill: color-mix(in srgb, var(--cosmos-star, #cfe6ff) 55%, #102a44);
 		opacity: 0.85;
 	}
 	.cell {
@@ -584,7 +584,7 @@
 		opacity: 0.85;
 	}
 	.ping {
-		fill: var(--cosmos-glint, #ff8ad9);
+		fill: var(--cosmos-glint, #ffab7a);
 		animation: beacon 3s ease-in-out infinite;
 	}
 	/* Materialises inside the strip and dissolves before reaching the far side —

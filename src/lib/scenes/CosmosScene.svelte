@@ -125,29 +125,29 @@
     <svg viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
       <defs>
         <linearGradient id="{uid}-hsky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" style="stop-color: color-mix(in srgb, #020210 55%, var(--bg, #0b0b2a)); stop-opacity: 0.97" />
-          <stop offset="55%" style="stop-color: var(--bg, #0b0b2a); stop-opacity: 0.72" />
-          <stop offset="100%" style="stop-color: var(--bg, #0b0b2a); stop-opacity: 0.25" />
+          <stop offset="0%" style="stop-color: color-mix(in srgb, #020210 55%, var(--bg, #090c1c)); stop-opacity: 0.97" />
+          <stop offset="55%" style="stop-color: var(--bg, #090c1c); stop-opacity: 0.72" />
+          <stop offset="100%" style="stop-color: var(--bg, #090c1c); stop-opacity: 0.25" />
         </linearGradient>
         <radialGradient id="{uid}-hhalo" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" style="stop-color: var(--accent, #7fd4ff); stop-opacity: 0.16" />
-          <stop offset="55%" style="stop-color: var(--accent, #7fd4ff); stop-opacity: 0.05" />
-          <stop offset="100%" style="stop-color: var(--accent, #7fd4ff); stop-opacity: 0" />
+          <stop offset="0%" style="stop-color: var(--accent, #ff7a67); stop-opacity: 0.16" />
+          <stop offset="55%" style="stop-color: var(--accent, #ff7a67); stop-opacity: 0.05" />
+          <stop offset="100%" style="stop-color: var(--accent, #ff7a67); stop-opacity: 0" />
         </radialGradient>
         <radialGradient id="{uid}-hneb1" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" style="stop-color: var(--cosmos-nebula, #7c5cff); stop-opacity: 0.5" />
-          <stop offset="55%" style="stop-color: var(--cosmos-nebula, #7c5cff); stop-opacity: 0.18" />
-          <stop offset="100%" style="stop-color: var(--cosmos-nebula, #7c5cff); stop-opacity: 0" />
+          <stop offset="0%" style="stop-color: var(--cosmos-nebula, #c94848); stop-opacity: 0.5" />
+          <stop offset="55%" style="stop-color: var(--cosmos-nebula, #c94848); stop-opacity: 0.18" />
+          <stop offset="100%" style="stop-color: var(--cosmos-nebula, #c94848); stop-opacity: 0" />
         </radialGradient>
         <radialGradient id="{uid}-hneb2" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" style="stop-color: var(--cosmos-glint, #ff8ad9); stop-opacity: 0.34" />
-          <stop offset="60%" style="stop-color: var(--cosmos-glint, #ff8ad9); stop-opacity: 0.1" />
-          <stop offset="100%" style="stop-color: var(--cosmos-glint, #ff8ad9); stop-opacity: 0" />
+          <stop offset="0%" style="stop-color: var(--cosmos-glint, #ffab7a); stop-opacity: 0.34" />
+          <stop offset="60%" style="stop-color: var(--cosmos-glint, #ffab7a); stop-opacity: 0.1" />
+          <stop offset="100%" style="stop-color: var(--cosmos-glint, #ffab7a); stop-opacity: 0" />
         </radialGradient>
         <radialGradient id="{uid}-hneb3" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" style="stop-color: var(--accent, #7fd4ff); stop-opacity: 0.22" />
-          <stop offset="60%" style="stop-color: var(--accent, #7fd4ff); stop-opacity: 0.07" />
-          <stop offset="100%" style="stop-color: var(--accent, #7fd4ff); stop-opacity: 0" />
+          <stop offset="0%" style="stop-color: var(--cosmos-dust, #7668c4); stop-opacity: 0.22" />
+          <stop offset="60%" style="stop-color: var(--cosmos-dust, #7668c4); stop-opacity: 0.07" />
+          <stop offset="100%" style="stop-color: var(--cosmos-dust, #7668c4); stop-opacity: 0" />
         </radialGradient>
         <radialGradient id="{uid}-hnode" cx="50%" cy="50%" r="50%">
           <stop offset="0%" style="stop-color: var(--cosmos-star, #cfe6ff); stop-opacity: 0.9" />
@@ -156,18 +156,18 @@
         </radialGradient>
         <radialGradient id="{uid}-hgal" cx="50%" cy="50%" r="50%">
           <stop offset="0%" style="stop-color: var(--cosmos-star, #cfe6ff); stop-opacity: 0.55" />
-          <stop offset="45%" style="stop-color: var(--cosmos-nebula, #7c5cff); stop-opacity: 0.25" />
-          <stop offset="100%" style="stop-color: var(--cosmos-nebula, #7c5cff); stop-opacity: 0" />
+          <stop offset="45%" style="stop-color: var(--cosmos-dust, #7668c4); stop-opacity: 0.25" />
+          <stop offset="100%" style="stop-color: var(--cosmos-dust, #7668c4); stop-opacity: 0" />
         </radialGradient>
         <radialGradient id="{uid}-hplanetglow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" style="stop-color: var(--accent, #7fd4ff); stop-opacity: 0.18" />
-          <stop offset="55%" style="stop-color: var(--cosmos-nebula, #7c5cff); stop-opacity: 0.08" />
-          <stop offset="100%" style="stop-color: var(--cosmos-nebula, #7c5cff); stop-opacity: 0" />
+          <stop offset="0%" style="stop-color: var(--accent, #ff7a67); stop-opacity: 0.18" />
+          <stop offset="55%" style="stop-color: var(--cosmos-nebula, #c94848); stop-opacity: 0.08" />
+          <stop offset="100%" style="stop-color: var(--cosmos-nebula, #c94848); stop-opacity: 0" />
         </radialGradient>
         <radialGradient id="{uid}-hbody" cx="34%" cy="28%" r="82%">
-          <stop offset="0%" style="stop-color: color-mix(in srgb, var(--cosmos-star, #cfe6ff) 80%, var(--cosmos-nebula, #7c5cff))" />
-          <stop offset="45%" style="stop-color: color-mix(in srgb, var(--cosmos-nebula, #7c5cff) 72%, var(--cosmos-star, #cfe6ff))" />
-          <stop offset="100%" style="stop-color: color-mix(in srgb, var(--cosmos-nebula, #7c5cff) 42%, #05051a)" />
+          <stop offset="0%" style="stop-color: color-mix(in srgb, var(--cosmos-star, #cfe6ff) 80%, var(--cosmos-nebula, #c94848))" />
+          <stop offset="45%" style="stop-color: color-mix(in srgb, var(--cosmos-nebula, #c94848) 72%, var(--cosmos-star, #cfe6ff))" />
+          <stop offset="100%" style="stop-color: color-mix(in srgb, var(--cosmos-nebula, #c94848) 42%, #05051a)" />
         </radialGradient>
         <linearGradient id="{uid}-hshade" x1="0.12" y1="0.06" x2="0.88" y2="0.96">
           <stop offset="0%" style="stop-color: #03031a; stop-opacity: 0" />
@@ -175,14 +175,14 @@
           <stop offset="100%" style="stop-color: #03031a; stop-opacity: 0.72" />
         </linearGradient>
         <linearGradient id="{uid}-hring" gradientUnits="userSpaceOnUse" x1="-124" y1="0" x2="124" y2="0">
-          <stop offset="0%" style="stop-color: var(--accent, #7fd4ff)" />
+          <stop offset="0%" style="stop-color: var(--accent, #ff7a67)" />
           <stop offset="48%" style="stop-color: var(--cosmos-star, #cfe6ff)" />
-          <stop offset="100%" style="stop-color: var(--cosmos-glint, #ff8ad9)" />
+          <stop offset="100%" style="stop-color: var(--cosmos-glint, #ffab7a)" />
         </linearGradient>
         <linearGradient id="{uid}-htail" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="-84" y2="-25">
           <stop offset="0%" style="stop-color: var(--cosmos-star, #cfe6ff); stop-opacity: 0.95" />
-          <stop offset="35%" style="stop-color: var(--accent, #7fd4ff); stop-opacity: 0.4" />
-          <stop offset="100%" style="stop-color: var(--accent, #7fd4ff); stop-opacity: 0" />
+          <stop offset="35%" style="stop-color: var(--accent, #ff7a67); stop-opacity: 0.4" />
+          <stop offset="100%" style="stop-color: var(--accent, #ff7a67); stop-opacity: 0" />
         </linearGradient>
         <filter id="{uid}-hblur" x="-60%" y="-60%" width="220%" height="220%">
           <feGaussianBlur stdDeviation="22" />
@@ -202,7 +202,7 @@
       <rect x="0" y="0" width="800" height="500" fill="url(#{uid}-hsky)" />
       <circle cx="30" cy="500" r="320" fill="url(#{uid}-hhalo)" />
 
-      <!-- Nebula band sweeping the lower sky, violet with magenta + cyan pockets -->
+      <!-- Nebula band sweeping the lower sky, H-alpha crimson with warm + violet pockets -->
       <g class="hub-neb" filter="url(#{uid}-hblur)">
         <ellipse cx="380" cy="390" rx="420" ry="120" fill="url(#{uid}-hneb1)" opacity="0.5" transform="rotate(-14 380 390)" />
         <ellipse cx="290" cy="395" rx="240" ry="105" fill="url(#{uid}-hneb1)" transform="rotate(-18 290 395)" />
@@ -301,10 +301,10 @@
               <g class="hbands">
                 <rect x="-66" y="-54" width="132" height="13" fill="var(--cosmos-star, #cfe6ff)" opacity="0.1" />
                 <rect x="-66" y="-38" width="132" height="9" fill="#050518" opacity="0.22" />
-                <rect x="-66" y="-24" width="132" height="14" fill="var(--cosmos-glint, #ff8ad9)" opacity="0.15" />
+                <rect x="-66" y="-24" width="132" height="14" fill="var(--cosmos-glint, #ffab7a)" opacity="0.15" />
                 <rect x="-66" y="-6" width="132" height="9" fill="var(--cosmos-star, #cfe6ff)" opacity="0.13" />
                 <rect x="-66" y="8" width="132" height="12" fill="#050518" opacity="0.25" />
-                <rect x="-66" y="26" width="132" height="9" fill="var(--cosmos-glint, #ff8ad9)" opacity="0.1" />
+                <rect x="-66" y="26" width="132" height="9" fill="var(--cosmos-glint, #ffab7a)" opacity="0.1" />
                 <rect x="-66" y="40" width="132" height="12" fill="#050518" opacity="0.2" />
               </g>
               <ellipse class="hringshadow" rx="120" ry="32" transform="translate(0 -10)" />
@@ -322,7 +322,7 @@
       <!-- Slow shooting stars gliding across the upper sky -->
       <g class="meteor hm1">
         <line x1="0" y1="0" x2="-84" y2="-25" stroke="url(#{uid}-htail)" stroke-width="1.8" stroke-linecap="round" />
-        <circle cx="0" cy="0" r="1.6" style="fill: var(--cosmos-glint, #ff8ad9)" />
+        <circle cx="0" cy="0" r="1.6" style="fill: var(--cosmos-glint, #ffab7a)" />
       </g>
       <g class="meteor hm2">
         <line x1="0" y1="0" x2="-84" y2="-25" stroke="url(#{uid}-htail)" stroke-width="1.3" stroke-linecap="round" />
@@ -337,19 +337,24 @@
     <svg viewBox="0 0 340 340" preserveAspectRatio="xMidYMid slice">
       <defs>
         <radialGradient id="{uid}-halo" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" style="stop-color: var(--accent, #7fd4ff); stop-opacity: 0.22" />
-          <stop offset="45%" style="stop-color: var(--accent, #7fd4ff); stop-opacity: 0.08" />
-          <stop offset="100%" style="stop-color: var(--accent, #7fd4ff); stop-opacity: 0" />
+          <stop offset="0%" style="stop-color: var(--accent, #ff7a67); stop-opacity: 0.22" />
+          <stop offset="45%" style="stop-color: var(--accent, #ff7a67); stop-opacity: 0.08" />
+          <stop offset="100%" style="stop-color: var(--accent, #ff7a67); stop-opacity: 0" />
         </radialGradient>
         <radialGradient id="{uid}-neb1" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" style="stop-color: var(--cosmos-nebula, #7c5cff); stop-opacity: 0.55" />
-          <stop offset="55%" style="stop-color: var(--cosmos-nebula, #7c5cff); stop-opacity: 0.2" />
-          <stop offset="100%" style="stop-color: var(--cosmos-nebula, #7c5cff); stop-opacity: 0" />
+          <stop offset="0%" style="stop-color: var(--cosmos-nebula, #c94848); stop-opacity: 0.55" />
+          <stop offset="55%" style="stop-color: var(--cosmos-nebula, #c94848); stop-opacity: 0.2" />
+          <stop offset="100%" style="stop-color: var(--cosmos-nebula, #c94848); stop-opacity: 0" />
         </radialGradient>
         <radialGradient id="{uid}-neb2" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" style="stop-color: var(--cosmos-glint, #ff8ad9); stop-opacity: 0.4" />
-          <stop offset="60%" style="stop-color: var(--cosmos-glint, #ff8ad9); stop-opacity: 0.12" />
-          <stop offset="100%" style="stop-color: var(--cosmos-glint, #ff8ad9); stop-opacity: 0" />
+          <stop offset="0%" style="stop-color: var(--cosmos-glint, #ffab7a); stop-opacity: 0.4" />
+          <stop offset="60%" style="stop-color: var(--cosmos-glint, #ffab7a); stop-opacity: 0.12" />
+          <stop offset="100%" style="stop-color: var(--cosmos-glint, #ffab7a); stop-opacity: 0" />
+        </radialGradient>
+        <radialGradient id="{uid}-neb3" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" style="stop-color: var(--cosmos-dust, #7668c4); stop-opacity: 0.4" />
+          <stop offset="60%" style="stop-color: var(--cosmos-dust, #7668c4); stop-opacity: 0.12" />
+          <stop offset="100%" style="stop-color: var(--cosmos-dust, #7668c4); stop-opacity: 0" />
         </radialGradient>
         <radialGradient id="{uid}-node" cx="50%" cy="50%" r="50%">
           <stop offset="0%" style="stop-color: var(--cosmos-star, #cfe6ff); stop-opacity: 0.9" />
@@ -358,8 +363,8 @@
         </radialGradient>
         <linearGradient id="{uid}-tail" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="-70" y2="-44">
           <stop offset="0%" style="stop-color: var(--cosmos-star, #cfe6ff); stop-opacity: 0.95" />
-          <stop offset="35%" style="stop-color: var(--accent, #7fd4ff); stop-opacity: 0.45" />
-          <stop offset="100%" style="stop-color: var(--accent, #7fd4ff); stop-opacity: 0" />
+          <stop offset="35%" style="stop-color: var(--accent, #ff7a67); stop-opacity: 0.45" />
+          <stop offset="100%" style="stop-color: var(--accent, #ff7a67); stop-opacity: 0" />
         </linearGradient>
         <filter id="{uid}-blur" x="-60%" y="-60%" width="220%" height="220%">
           <feGaussianBlur stdDeviation="18" />
@@ -373,7 +378,7 @@
       <g class="neb" filter="url(#{uid}-blur)">
         <ellipse cx="252" cy="248" rx="118" ry="86" fill="url(#{uid}-neb1)" transform="rotate(-32 252 248)" />
         <ellipse cx="200" cy="292" rx="72" ry="46" fill="url(#{uid}-neb2)" transform="rotate(-20 200 292)" />
-        <ellipse cx="296" cy="196" rx="60" ry="40" fill="url(#{uid}-neb2)" opacity="0.5" transform="rotate(-40 296 196)" />
+        <ellipse cx="296" cy="196" rx="60" ry="40" fill="url(#{uid}-neb3)" opacity="0.5" transform="rotate(-40 296 196)" />
       </g>
 
       <!-- Three parallax star layers -->
@@ -439,7 +444,7 @@
       <!-- Shooting stars streaking toward the corner -->
       <g class="meteor m1">
         <line x1="0" y1="0" x2="-70" y2="-44" stroke="url(#{uid}-tail)" stroke-width="1.8" stroke-linecap="round" />
-        <circle cx="0" cy="0" r="1.6" style="fill: var(--cosmos-glint, #ff8ad9)" />
+        <circle cx="0" cy="0" r="1.6" style="fill: var(--cosmos-glint, #ffab7a)" />
       </g>
       <g class="meteor m2">
         <line x1="0" y1="0" x2="-70" y2="-44" stroke="url(#{uid}-tail)" stroke-width="1.3" stroke-linecap="round" />
@@ -465,14 +470,14 @@
     /* Deep-night vignette pooling from the corner (fallback first, color-mix override) */
     background: radial-gradient(
       320px 320px at 100% 100%,
-      rgba(11, 11, 42, 0.92) 0%,
-      rgba(11, 11, 42, 0.5) 45%,
-      rgba(11, 11, 42, 0) 72%
+      rgba(9, 12, 28, 0.92) 0%,
+      rgba(9, 12, 28, 0.5) 45%,
+      rgba(9, 12, 28, 0) 72%
     );
     background: radial-gradient(
       320px 320px at 100% 100%,
-      color-mix(in srgb, var(--bg, #0b0b2a) 92%, transparent) 0%,
-      color-mix(in srgb, var(--bg, #0b0b2a) 50%, transparent) 45%,
+      color-mix(in srgb, var(--bg, #090c1c) 92%, transparent) 0%,
+      color-mix(in srgb, var(--bg, #090c1c) 50%, transparent) 45%,
       transparent 72%
     );
   }
@@ -531,7 +536,7 @@
 
   /* ---- glints ---- */
   .glint {
-    fill: var(--cosmos-glint, #ff8ad9);
+    fill: var(--cosmos-glint, #ffab7a);
     transform-box: fill-box;
     transform-origin: center;
     animation: glint 6s ease-in-out infinite;
@@ -545,7 +550,7 @@
   /* ---- corner rings framing the menu ---- */
   .ring {
     fill: none;
-    stroke: var(--accent, #7fd4ff);
+    stroke: var(--accent, #ff7a67);
     transform-box: view-box;
     transform-origin: 100% 100%;
   }
@@ -633,9 +638,9 @@
   /* rings: three ringlets in the theme triad, gentle pulse */
   .ringline { fill: none; }
   .hrings { animation: ringpulse 14s ease-in-out infinite alternate; }
-  .hrings .rA { stroke: var(--accent, #7fd4ff); stroke-width: 5; stroke-opacity: 0.3; }
+  .hrings .rA { stroke: var(--accent, #ff7a67); stroke-width: 5; stroke-opacity: 0.3; }
   .hrings .rB { stroke: var(--cosmos-star, #cfe6ff); stroke-width: 2.6; stroke-opacity: 0.55; }
-  .hrings .rC { stroke: var(--cosmos-glint, #ff8ad9); stroke-width: 1.6; stroke-opacity: 0.4; }
+  .hrings .rC { stroke: var(--cosmos-glint, #ffab7a); stroke-width: 1.6; stroke-opacity: 0.4; }
   @keyframes ringpulse {
     from { opacity: 0.8; }
     to { opacity: 1; }
