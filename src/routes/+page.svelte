@@ -1,12 +1,26 @@
-<script>
-  // any page-specific data or imports
+<script lang="ts">
+	import * as m from '$lib/paraglide/messages';
 </script>
 
-<style>
-  h1 {
-    margin-top: 0;
-  }
-</style>
+<svelte:head>
+	<title>{m.site_title()} — {m.tagline()}</title>
+</svelte:head>
 
-<h1>Welcome!</h1>
-<p>This is the home page of my retro webfolio.</p>
+<!-- The hub (home) is the centered radial menu alone; page content only appears
+     once a section is docked. A visually-hidden heading keeps the page titled
+     for assistive tech and SEO. -->
+<h1 class="sr-only">{m.home_welcome()}</h1>
+
+<style>
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+</style>

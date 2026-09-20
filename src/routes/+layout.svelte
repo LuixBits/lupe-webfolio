@@ -1,52 +1,101 @@
-<!-- src/routes/+layout.svelte -->
 <script lang="ts">
-  import Header from '../components/Header.svelte';
-  import RadialMenu from '../components/RadialMenu.svelte';
+	import '../app.css';
+	import '$lib/themes.css';
+	import * as m from '$lib/paraglide/messages';
+	import { page } from '$app/state';
+	import { fly, fade } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
+	import RadialMenu from '$lib/radial-menu/RadialMenu.svelte';
+	import Decor from '$lib/decor/Decor.svelte';
+	import CornerScene from '$lib/scenes/CornerScene.svelte';
+	import GooeyFilter from '$lib/effects/GooeyFilter.svelte';
+	import Footer from '$lib/components/Footer.svelte';
+	import LocaleSwitcher from '$lib/components/LocaleSwitcher.svelte';
+	import { menu, sectionIdForPath } from '$lib/radial-menu/menu';
+	import { getThemeForSection, dataThemeForSection } from '$lib/themes';
+	import type { LayoutData } from './$types';
 
-  // Just a plain JS array—no need for MenuItem type here
-  const menuData = [
-    { label: 'Home',    link: '/' },
-    {
-      label: 'Projects',
-      children: [
-        { label: 'Alpha', link: '/projects/alpha' },
-        { label: 'Beta',  link: '/projects/beta' }
-      ]
-    },
-    { label: 'About',   link: '/about' },
-    { label: 'Contact', link: '/contact' }
-  ];
+	let { children, data }: { children?: import('svelte').Snippet; data: LayoutData } = $props();
+
+	// Everything follows the route (SSR-correct, no flash). The radial menu is the
+	// single navigation: centered on `/` (hub), glided to the section's corner on
+	// a section route. Opening a section is one smooth motion — the theme cross-
+	// fades, the menu glides to its corner, and the content flies in (no swap).
+	const section = $derived(sectionIdForPath(page.url.pathname));
+	const dataTheme = $derived(dataThemeForSection(section));
+	const showContent = $derived(section !== null);
+
+	// Which corner each section docks to (matches RadialMenu), so the footer can
+	// clear the menu quarter on the bottom corners.
+	const DOCK_CORNER: Record<string, string> = {
+		about: 'bottom-left',
+		academia: 'top-left',
+		projects: 'top-right',
+		hobbies: 'bottom-right'
+	};
+	const dockCorner = $derived(section ? (DOCK_CORNER[section] ?? null) : null);
+
+	// Mirror the theme onto <html> so background / overscroll is themed too.
+	$effect(() => {
+		document.documentElement.dataset.theme = dataTheme;
+	});
 </script>
 
-<style>
-  :global(body) {
-    margin: 0;
-    background-color: #e6f4ea;
-    font-family: system-ui, sans-serif;
-  }
-  .app-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-  main {
-    flex: 1;
-    padding: 1rem;
-  }
-</style>
+<div class="app" data-theme={dataTheme}>
+	<a href="#main" class="skip">{m.skip_to_content()}</a>
 
-<div class="app-container">
-  <Header title="Retro Webfolio" />
+	<GooeyFilter />
 
-  <!-- Pass the data via the `items` prop -->
-  <RadialMenu
-    items={menuData}
-    size={400}
-    innerRadius={120}
-    outerRadius={180}
-  />
+	{#if showContent && section}
+		<!-- Section ambience (behind content): botanical/celestial decor + scene. -->
+		<Decor theme={getThemeForSection(section)} />
+		<CornerScene />
+	{/if}
 
-  <main>
-    <slot />
-  </main>
+	<!-- The one navigation: centered on home, glides to the corner on a section. -->
+	<RadialMenu items={menu} label={m.menu_label()} backLabel={m.menu_back()} />
+
+	<main id="main">
+		{#key page.url.pathname}
+			<div
+				class="page-shell"
+				in:fly={{ y: 20, duration: 500, easing: cubicOut, delay: 120 }}
+				out:fade={{ duration: 180 }}
+			>
+				{@render children?.()}
+			</div>
+		{/key}
+	</main>
+
+	{#if showContent && section}
+		<Footer theme={getThemeForSection(section)} {dockCorner} year={data.year}>
+			{#snippet actions()}
+				<LocaleSwitcher />
+			{/snippet}
+		</Footer>
+	{/if}
 </div>
+
+<style>
+	.app {
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+		background: var(--bg);
+		color: var(--fg);
+		/* Theme cross-fade as you move between sections. */
+		transition:
+			background-color 600ms ease,
+			color 600ms ease;
+	}
+	main {
+		position: relative;
+		z-index: 10; /* content sits above the fixed decor layer (z-index 6) */
+		flex: 1;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.app {
+			transition: none;
+		}
+	}
+</style>
