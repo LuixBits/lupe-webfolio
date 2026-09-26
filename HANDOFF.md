@@ -70,6 +70,14 @@ on dev/build; if `$lib/paraglide/*` is missing run
   L-system is deterministic). SSR/no-JS/reduced-motion always get a fully
   grown page: the hidden `pending` state exists only client-side under
   `prefers-reduced-motion: no-preference`.
+- **Living structural lines** (`lib/garden/LivingLine.svelte`): the About
+  page's section rules, card/packet borders, note dividers, and soil lines
+  are grown wood — seeded wavy paths drawing via stroke-dashoffset with
+  twigs + leaves popping along them (variants: underline / frame / stem /
+  soil; self-observing or `grow`-gated; pure CSS transitions, no rAF). The
+  static CSS borders remain underneath as the SSR/no-JS fallback and are
+  hidden only once hydrated (`.living` class on the page). Frame radii are
+  authored in px and MUST match each box's CSS `border-radius`.
 - `lib/content/*` — typed + Zod-validated bilingual content.
 
 ## Owner to fill (placeholder content)
