@@ -1,97 +1,56 @@
 <script lang="ts">
-	/** THE COUNTER TV — the playback deck on the rental counter. One CRT screen
-	 *  shows whichever channel is tuned: STILLS (scroll-snap screenshot reel),
-	 *  VIDEO (poster → tap → embed), DEMO (test card → TUNE IN mounts the
-	 *  sandboxed build, EJECT tears it down). At most one heavy surface exists
-	 *  at a time; nothing third-party loads before an explicit tap.
-	 *  With no media at all the set idles on a themed test card. */
-	import { onMount , untrack } from 'svelte';
+	import { getContext, tick, untrack } from 'svelte';
 	import { resolveLocalized, type Project } from '$lib/content/schema';
 	import * as m from '$lib/paraglide/messages';
-	import VcrKey from './VcrKey.svelte';
-	import TestCard from './TestCard.svelte';
+	import CrtCabinet from './CrtCabinet.svelte';
+	import PowerOn from './PowerOn.svelte';
+	import TapeArtwork from './TapeArtwork.svelte';
+	import { projectNavigation, type ProjectNavigation } from './navigation';
 
 	let { project, locale }: { project: Project; locale: string } = $props();
-
+	const navigation = getContext<ProjectNavigation | undefined>(projectNavigation);
 	const shots = $derived(project.screenshots);
-	const video = $derived(project.videos[0]);
-	const demo = $derived(project.demo);
-	const titleText = $derived(resolveLocalized(project.title, locale));
-
-	type ChannelId = 'stills' | 'video' | 'demo';
-	/** Only channels with content exist on this set. */
+	const demo = $derived(project.demo?.embed);
+	const title = $derived(resolveLocalized(project.title, locale));
+	type Channel = 'stills' | 'video' | 'demo';
 	const channels = $derived.by(() => {
-		const list: { id: ChannelId; label: () => string }[] = [];
-		if (shots.length) list.push({ id: 'stills', label: m.tv_ch_stills });
-		if (video) list.push({ id: 'video', label: m.tv_ch_video });
-		if (demo && (demo.embed || demo.url)) list.push({ id: 'demo', label: m.tv_ch_demo });
+		const list: { id: Channel; label: string }[] = [];
+		if (shots.length) list.push({ id: 'stills', label: m.tv_ch_stills() });
+		if (project.videos.length) list.push({ id: 'video', label: m.tv_ch_video() });
+		if (demo) list.push({ id: 'demo', label: m.tv_ch_demo() });
 		return list;
 	});
-
-	/* Deterministic default channel: first available (self-hosted stills win).
-	   Set once at init, identical on SSR and client — no flash. */
-	let active = $state<ChannelId | 'none'>(
-		untrack(() => (channels.length ? channels[0].id : 'none'))
-	);
-
-	/** Heavy surfaces exist only after an explicit tap. */
-	let liveVideo = $state(false);
-	let liveDemo = $state(false);
+	let active = $state<Channel>(untrack(() => channels[0]?.id ?? 'video'));
+	let powered = $state(true);
+	let live = $state(false);
 	let stillIdx = $state(0);
-	let reelEl = $state<HTMLDivElement | null>(null);
-	let reduced = $state(false);
-	onMount(() => {
-		reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-	});
-
-	function tune(id: ChannelId) {
-		if (id === active) return;
-		active = id;
-		// Channel change is the kill switch: any live iframe is torn down.
-		liveVideo = false;
-		liveDemo = false;
-		stillIdx = 0;
-	}
-	function eject() {
-		liveVideo = false;
-		liveDemo = false;
-	}
-	function onReelScroll() {
-		if (!reelEl || reelEl.clientWidth === 0) return;
-		stillIdx = Math.min(
-			shots.length - 1,
-			Math.max(0, Math.round(reelEl.scrollLeft / reelEl.clientWidth))
-		);
-	}
-	function goTo(i: number) {
-		if (!reelEl) return;
-		const next = Math.min(shots.length - 1, Math.max(0, i));
-		reelEl.scrollTo({ left: next * reelEl.clientWidth, behavior: reduced ? 'auto' : 'smooth' });
-	}
-
-	const liveNow = $derived((active === 'video' && liveVideo) || (active === 'demo' && liveDemo));
-	const activeIdx = $derived(channels.findIndex((c) => c.id === active));
-	/* CRT OSD strings are diegetic hardware text (PLAY / STILL / CH-01), the
-	   same in every locale — like the burned-in OSD of a real deck. */
-	const chBug = $derived(activeIdx >= 0 ? `CH-0${activeIdx + 1}` : 'AV-1');
+	let videoIdx = $state(0);
+	let signalVersion = $state(0);
+	let revealDuration = $state(820);
+	let shell = $state<HTMLDivElement>();
+	let playButton = $state<HTMLButtonElement>();
+	let hintLabel = $state<HTMLSpanElement>();
+	let hintPath = $state('');
+	let hintViewBox = $state('0 0 660 510');
+	const video = $derived(project.videos[videoIdx]);
+	const showHint = $derived(powered && !live && active !== 'stills');
+	const feedTitle = $derived(
+		active === 'video'
+			? (video?.title ?? title)
+			: demo
+				? resolveLocalized(demo.title, locale)
+				: title
+	);
 	const transport = $derived(
-		active === 'stills'
-			? 'STILL ▸▸'
-			: active === 'demo' && liveDemo
-				? 'PLAY ▸ LIVE SIGNAL'
-				: liveNow
-					? 'PLAY ▸'
+		!powered
+			? 'OFF'
+			: live
+				? 'PLAY ▸'
+				: active === 'stills'
+					? `IMG ${stillIdx + 1}/${shots.length}`
 					: 'STANDBY'
 	);
-	const osdCaption = $derived.by(() => {
-		if (active === 'stills') {
-			const c = shots[stillIdx]?.caption;
-			return c ? resolveLocalized(c, locale) : '';
-		}
-		return '';
-	});
-
-	const videoEmbedSrc = $derived(
+	const videoSrc = $derived(
 		!video
 			? ''
 			: video.provider === 'youtube'
@@ -100,535 +59,632 @@
 					? `https://player.vimeo.com/video/${video.src}?autoplay=1`
 					: video.src
 	);
+	const demoRatio = $derived.by(() => {
+		const parts = (demo?.aspect ?? '16 / 9').split('/').map(Number);
+		const ratio = parts[0] / (parts[1] ?? 1);
+		return Number.isFinite(ratio) && ratio > 0 ? ratio : 16 / 9;
+	});
+
+	function measureHint() {
+		if (!shell || !playButton || !hintLabel) return;
+		const frame = shell.getBoundingClientRect();
+		const button = playButton.getBoundingClientRect();
+		const label = hintLabel.getBoundingClientRect();
+		if (!frame.width || !frame.height) return;
+		const x = label.left - frame.left + label.width / 2;
+		const y = label.bottom - frame.top + 5;
+		const endX = button.right - frame.left + 7;
+		const endY = button.top - frame.top + button.height / 2;
+		hintViewBox = `0 0 ${frame.width} ${frame.height}`;
+		hintPath = `M${x} ${y}C${x + 30} ${y + 50} ${endX + frame.width * 0.18} ${endY + 24} ${endX} ${endY}M${endX + 11} ${endY - 5}L${endX} ${endY}L${endX + 10} ${endY + 7}`;
+	}
+	$effect(() => {
+		if (!showHint || !shell || !playButton || !hintLabel) return;
+		const observer = new ResizeObserver(measureHint);
+		observer.observe(shell);
+		observer.observe(playButton);
+		observer.observe(hintLabel);
+		const frame = requestAnimationFrame(measureHint);
+		return () => {
+			observer.disconnect();
+			cancelAnimationFrame(frame);
+		};
+	});
+	function tune(channel: Channel) {
+		if (active === channel && powered) return;
+		active = channel;
+		powered = true;
+		live = false;
+		stillIdx = 0;
+		revealDuration = 460;
+		signalVersion += 1;
+	}
+	function power() {
+		powered = !powered;
+		live = false;
+		revealDuration = 820;
+		signalVersion += 1;
+	}
+	async function eject() {
+		live = false;
+		await tick();
+		playButton?.focus({ preventScroll: true });
+	}
+	function nextVideo(direction: number) {
+		videoIdx = (videoIdx + direction + project.videos.length) % project.videos.length;
+		live = false;
+		revealDuration = 460;
+		signalVersion += 1;
+	}
 </script>
 
-<section class="deck" aria-label={titleText}>
-	<div class="bezel">
-		<div class="screen">
-			{#key active + (liveNow ? '-live' : '')}
-				<div class="feed">
-					{#if active === 'stills'}
-						<div class="reel" bind:this={reelEl} onscroll={onReelScroll}>
-							{#each shots as f, i (f.id)}
-								<figure class="slide">
-									<img
-										src={f.image.src}
-										width={f.image.width}
-										height={f.image.height}
-										alt={resolveLocalized(f.image.alt, locale)}
-										loading={i === 0 ? 'eager' : 'lazy'}
-										decoding="async"
-										style:aspect-ratio="{f.image.width} / {f.image.height}"
-										draggable="false"
-									/>
-								</figure>
-							{/each}
-						</div>
-					{:else if active === 'video' && video}
-						{#if liveVideo}
-							{#if video.provider === 'file'}
-								<!-- svelte-ignore a11y_media_has_caption -->
-								<video class="signal" controls autoplay poster={video.poster}>
-									<source src={video.src} />
-								</video>
-							{:else}
-								<iframe
-									class="signal"
-									src={videoEmbedSrc}
-									title={video.title}
-									allow="autoplay; encrypted-media; picture-in-picture"
-									allowfullscreen
-								></iframe>
-							{/if}
-						{:else}
-							<TestCard title={video.title} />
-							<div class="actions">
-								<button class="cta" type="button" onclick={() => (liveVideo = true)}>
-									▶ {m.tv_tune_in()}
-								</button>
-							</div>
-						{/if}
-					{:else if active === 'demo' && demo}
-						{#if liveDemo && demo.embed}
-							<iframe
-								class="signal"
-								src={demo.embed.src}
-								title={resolveLocalized(demo.embed.title, locale)}
-								sandbox="allow-scripts allow-same-origin allow-pointer-lock"
-							></iframe>
-						{:else}
-							<TestCard title={demo.embed ? resolveLocalized(demo.embed.title, locale) : titleText} />
-							<div class="actions">
-								{#if demo.embed}
-									<button class="cta" type="button" onclick={() => (liveDemo = true)}>
-										▶ {m.tv_tune_in()}
-									</button>
-								{/if}
-								{#if demo.url}
-									<a class="cta ghost" href={demo.url} target="_blank" rel="noopener">
-										{m.tv_open_full()} ↗
-									</a>
-								{/if}
-							</div>
-						{/if}
-					{:else}
-						<TestCard title={titleText} line="NO SIGNAL" />
-					{/if}
-				</div>
-			{/key}
-
-			<span class="osd tl">{transport}</span>
-			<span class="osd tr">{chBug}</span>
-			{#if osdCaption}<span class="osd bl">{osdCaption}</span>{/if}
-			{#if active === 'stills' && shots.length > 1}
-				<span class="osd br">IMG {stillIdx + 1}/{shots.length}</span>
-			{/if}
-
-			<span class="glass" aria-hidden="true"></span>
-			<span class="insert-blue" aria-hidden="true"></span>
-			<span class="insert-noise" aria-hidden="true"></span>
-		</div>
-		<div class="chin">
-			<span class="brand">LUPE · CRT-2600</span>
-			<span class="power" aria-hidden="true"></span>
-		</div>
-	</div>
-
-	{#if channels.length}
-		<div class="panel" role="group" aria-label="CH-01 – CH-0{channels.length}">
-			{#each channels as c, i (c.id)}
-				<VcrKey
-					sub={`CH-0${i + 1}`}
-					label={c.label()}
-					latching
-					active={active === c.id}
-					onclick={() => tune(c.id)}
-				/>
-			{/each}
-			{#if active === 'stills' && shots.length > 1}
-				<span class="spacer" aria-hidden="true"></span>
-				<VcrKey tone="trk" sub="TRK" label="−" onclick={() => goTo(stillIdx - 1)} />
-				<VcrKey tone="trk" sub="TRK" label="+" onclick={() => goTo(stillIdx + 1)} />
-			{/if}
-			{#if liveNow}
-				<span class="spacer" aria-hidden="true"></span>
-				<VcrKey tone="eject" sub="⏏" label={m.tv_eject()} onclick={eject} />
-			{/if}
-		</div>
-	{/if}
-
-	{#if active === 'stills' && shots.length > 1}
-		<div class="thumbs">
-			{#each shots as f, i (f.id)}
-				<button
-					type="button"
-					class="thumb"
-					class:cur={i === stillIdx}
-					onclick={() => goTo(i)}
-					aria-label="IMG {i + 1}"
-				>
+<section class="deck" aria-label={title}>
+	<div class="shell" bind:this={shell}>
+		<div class="screen" class:idle={!live} class:off={!powered}>
+			{#if powered}
+				{#if active === 'stills' && shots[stillIdx]}
+					{@const shot = shots[stillIdx]}
 					<img
-						src={f.image.thumb ?? f.image.src}
-						width={f.image.width}
-						height={f.image.height}
-						alt=""
-						loading="lazy"
+						class="still"
+						src={shot.image.src}
+						width={shot.image.width}
+						height={shot.image.height}
+						alt={resolveLocalized(shot.image.alt, locale)}
 						decoding="async"
 					/>
-				</button>
-			{/each}
+					<span class="osd top">STILL · {stillIdx + 1}/{shots.length}</span>
+					{#if shot.caption}<span class="osd caption">{resolveLocalized(shot.caption, locale)}</span
+						>{/if}
+				{:else if active === 'video' && live && video}
+					{#if video.provider === 'file'}
+						<!-- svelte-ignore a11y_media_has_caption -->
+						<video class="file-video" controls autoplay poster={video.poster}
+							><source src={video.src} /></video
+						>
+					{:else}
+						<div class="signal-frame" style:--signal-ratio={16 / 9}>
+							<iframe
+								class="signal"
+								src={videoSrc}
+								title={video.title}
+								allow="autoplay; encrypted-media; picture-in-picture"
+								allowfullscreen
+							></iframe>
+						</div>
+					{/if}
+				{:else if active === 'demo' && live && demo}
+					<div class="signal-frame" style:--signal-ratio={demoRatio}>
+						<iframe
+							class="signal"
+							src={demo.src}
+							title={resolveLocalized(demo.title, locale)}
+							sandbox="allow-scripts allow-same-origin allow-pointer-lock"
+							allowfullscreen
+						></iframe>
+					</div>
+				{:else}
+					<span class="osd top">AV 1 · READY</span>
+					<div class="poster">
+						{#if active === 'video' && video?.poster}<img
+								class="poster-image"
+								src={video.poster}
+								alt=""
+							/>{/if}
+						<div class="poster-art"><TapeArtwork {project} /></div>
+						<p class="feed-title">{feedTitle}</p>
+						<button class="play" type="button" bind:this={playButton} onclick={() => (live = true)}
+							><span aria-hidden="true">▶</span>
+							{active === 'demo' ? m.tv_play_demo() : m.tv_play_video()}</button
+						>
+					</div>
+				{/if}
+				{#key signalVersion}
+					<PowerOn duration={revealDuration} delay={navigation?.moving ? 640 : 0} />
+				{/key}
+			{/if}
+			<span class="glass" aria-hidden="true"></span>
+		</div>
+		<CrtCabinet id={`crt-${project.slug}`} {powered} />
+		<button
+			class="power"
+			type="button"
+			onclick={power}
+			aria-label={powered ? m.tv_power_off() : m.tv_power_on()}
+			aria-pressed={powered}><span aria-hidden="true">⏻</span></button
+		>
+		{#if showHint}
+			<span class="play-hint" bind:this={hintLabel} aria-hidden="true">{m.tv_press_play()}</span>
+			<svg class="hint-line" viewBox={hintViewBox} fill="none" aria-hidden="true"
+				><path
+					d={hintPath}
+					stroke="currentColor"
+					stroke-width="1.5"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				/></svg
+			>
+		{/if}
+	</div>
+
+	<div class="recorder">
+		<span class="brand" aria-hidden="true">LUPE · VIDEO CASSETTE RECORDER</span>
+		<div class="transport">
+			<span class="slot" aria-hidden="true">VHS · HQ</span>
+			<output class="display" aria-live="polite">{transport}</output>
+			{#if active === 'stills' && shots.length > 1 && powered}
+				<button
+					type="button"
+					class="hardware small"
+					aria-label={m.tv_previous_image()}
+					onclick={() => (stillIdx = (stillIdx - 1 + shots.length) % shots.length)}
+					><span aria-hidden="true">◀</span></button
+				>
+				<button
+					type="button"
+					class="hardware small"
+					aria-label={m.tv_next_image()}
+					onclick={() => (stillIdx = (stillIdx + 1) % shots.length)}
+					><span aria-hidden="true">▶</span></button
+				>
+			{/if}
+			<button
+				type="button"
+				class="hardware small eject"
+				onclick={eject}
+				aria-label={m.tv_eject()}
+				disabled={!live}><span aria-hidden="true">⏏</span></button
+			>
+		</div>
+		{#if channels.length > 1}
+			<div class="channels" role="group" aria-label={m.tv_channels()}>
+				{#each channels as channel, i (channel.id)}
+					<button
+						type="button"
+						class="hardware channel"
+						aria-pressed={powered && active === channel.id}
+						onclick={() => tune(channel.id)}
+						><span class="channel-number" aria-hidden="true">0{i + 1}</span>{channel.label}<span
+							class="led"
+							aria-hidden="true"
+						></span></button
+					>
+				{/each}
+			</div>
+		{/if}
+	</div>
+	<div class="counter-top" aria-hidden="true"></div>
+	{#if active === 'stills' && shots.length > 1 && powered}
+		<div class="thumbs" role="group" aria-label={m.tv_ch_stills()}>
+			{#each shots as shot, i (shot.id)}<button
+					type="button"
+					class:current={stillIdx === i}
+					aria-label={m.tv_image_number({ number: i + 1 })}
+					aria-pressed={stillIdx === i}
+					onclick={() => (stillIdx = i)}
+					><img
+						src={shot.image.thumb ?? shot.image.src}
+						width={shot.image.width}
+						height={shot.image.height}
+						alt=""
+						loading="lazy"
+					/></button
+				>{/each}
+		</div>
+	{/if}
+	{#if active === 'video' && project.videos.length > 1 && powered}
+		<div class="video-selection">
+			<button
+				class="hardware"
+				type="button"
+				onclick={() => nextVideo(-1)}
+				aria-label={m.tv_previous_video()}>◀</button
+			><span>{videoIdx + 1} / {project.videos.length} · {video?.title}</span><button
+				class="hardware"
+				type="button"
+				onclick={() => nextVideo(1)}
+				aria-label={m.tv_next_video()}>▶</button
+			>
 		</div>
 	{/if}
 </section>
 
 <style>
-	/* ---------- Cabinet ---------- */
-	.bezel {
-		border-radius: 16px;
-		padding: clamp(0.7rem, 2.4vw, 1.1rem) clamp(0.7rem, 2.4vw, 1.1rem) 0.45rem;
-		border: 1px solid color-mix(in srgb, black 45%, var(--slice-bg));
-		background: linear-gradient(
-			165deg,
-			color-mix(in srgb, var(--slice-bg) 22%, var(--hub-bg)),
-			color-mix(in srgb, var(--hub-bg) 84%, black) 70%
-		);
-		box-shadow:
-			0 18px 38px rgba(0, 0, 0, 0.5),
-			0 0 0 1px rgba(0, 0, 0, 0.35),
-			inset 0 1px 0 rgba(255, 255, 255, 0.1);
+	.deck {
+		position: relative;
+		isolation: isolate;
+		min-width: 0;
+		padding-top: 2.8rem;
+	}
+	.shell {
+		position: relative;
+		aspect-ratio: 660 / 510;
+		filter: drop-shadow(0 20px 21px #0007);
 	}
 	.screen {
-		position: relative;
-		aspect-ratio: 16 / 10;
-		border-radius: 10px;
-		overflow: hidden;
-		background: #05010d;
-		border: 1px solid rgba(0, 0, 0, 0.8);
-	}
-	.chin {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 0.4rem 0.25rem 0.3rem;
-	}
-	.brand {
-		font-family: var(--font-body);
-		font-size: 0.56rem;
-		font-weight: 700;
-		letter-spacing: 0.3em;
-		color: color-mix(in srgb, var(--fg-muted) 60%, transparent);
-	}
-	.power {
-		width: 7px;
-		height: 7px;
-		border-radius: 50%;
-		background: var(--sub-bg);
-		box-shadow: 0 0 7px var(--sub-bg);
-	}
-
-	/* ---------- Feed layers ---------- */
-	.feed {
 		position: absolute;
-		inset: 0;
+		left: 13.3333%;
+		top: 13.3333%;
+		width: 67.4242%;
+		height: 65.4902%;
+		background: #080a10;
+		border-radius: 8% / 7%;
+		overflow: hidden;
 		z-index: 1;
+		display: grid;
+		place-items: center;
+		container-type: size;
 	}
-	.signal {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		border: 0;
-		background: #000;
+	.screen.off {
+		background: radial-gradient(ellipse, #242831, #070a0d 85%);
 	}
-
-	/* Stills reel: scroll-snap strip inside the CRT. */
-	.reel {
-		position: absolute;
-		inset: 0;
-		display: flex;
-		overflow-x: auto;
-		overflow-y: hidden;
-		scroll-snap-type: x mandatory;
-		scrollbar-width: none;
-		overscroll-behavior-x: contain;
-	}
-	.reel::-webkit-scrollbar {
-		display: none;
-	}
-	.slide {
-		flex: 0 0 100%;
-		margin: 0;
-		scroll-snap-align: center;
-	}
-	.slide img {
-		display: block;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		user-select: none;
-	}
-
-	/* Poster-state actions (over the test card, under the glass). */
-	.actions {
-		position: absolute;
-		inset: auto 0 6%;
-		z-index: 2;
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		justify-content: center;
-		gap: 0.6rem;
-		padding: 0 0.8rem;
-	}
-	.cta {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.4rem;
-		min-height: 44px;
-		padding: 0.5rem 1.15rem;
-		border-radius: 5px;
-		border: 1px solid color-mix(in srgb, var(--accent) 75%, black);
-		background: linear-gradient(
-			180deg,
-			color-mix(in srgb, var(--accent) 82%, white),
-			color-mix(in srgb, var(--accent) 78%, black)
-		);
-		color: #1c0316;
-		font-family: var(--font-body);
-		font-size: 0.72rem;
-		font-weight: 700;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		text-decoration: none;
-		cursor: pointer;
-		box-shadow:
-			0 3px 0 color-mix(in srgb, black 65%, var(--accent)),
-			0 6px 14px rgba(0, 0, 0, 0.5);
-	}
-	.cta:active {
-		transform: translateY(3px);
-		box-shadow: 0 0 0 color-mix(in srgb, black 65%, var(--accent));
-	}
-	.cta.ghost {
-		background: linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(0, 0, 0, 0.35));
-		border-color: color-mix(in srgb, var(--sub-bg) 65%, black);
-		color: var(--sub-bg);
-		box-shadow:
-			0 3px 0 rgba(0, 0, 0, 0.7),
-			0 6px 14px rgba(0, 0, 0, 0.5);
-	}
-	.cta:focus-visible {
-		outline: 2px solid var(--sub-bg);
-		outline-offset: 2px;
-	}
-
-	/* ---------- OSD ---------- */
-	.osd {
-		position: absolute;
-		z-index: 3;
-		font-family: var(--font-body);
-		font-size: 0.62rem;
-		font-weight: 700;
-		letter-spacing: 0.16em;
-		text-transform: uppercase;
-		color: var(--sub-bg);
-		text-shadow:
-			0 0 4px color-mix(in srgb, var(--sub-bg) 80%, transparent),
-			1px 1px 0 rgba(0, 0, 0, 0.8);
-		pointer-events: none;
-		max-width: 78%;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-	.osd.tl {
-		top: 0.55rem;
-		left: 0.7rem;
-	}
-	.osd.tr {
-		top: 0.55rem;
-		right: 0.7rem;
-		color: #7dff9a;
-		text-shadow:
-			0 0 4px rgba(125, 255, 154, 0.8),
-			1px 1px 0 rgba(0, 0, 0, 0.8);
-	}
-	.osd.bl {
-		bottom: 0.55rem;
-		left: 0.7rem;
-	}
-	.osd.br {
-		bottom: 0.55rem;
-		right: 0.7rem;
-	}
-
-	/* ---------- Glass: scanlines + vignette (static) ---------- */
 	.glass {
 		position: absolute;
 		inset: 0;
 		z-index: 4;
 		pointer-events: none;
 		border-radius: inherit;
-		background:
-			linear-gradient(160deg, rgba(255, 255, 255, 0.09), transparent 34%),
-			repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0 1px, transparent 1px 3px);
-		box-shadow: inset 0 0 3.2rem rgba(0, 0, 0, 0.55);
+		background: linear-gradient(130deg, #ffffff0b, transparent 24%, transparent 73%, #88c3d205);
+		box-shadow: inset 0 0 18px #0008;
 	}
-
-	/* ---------- One-shot tape-insert static (~600ms, CSS only) ----------
-	   Hidden at rest; the sequence only ever plays inside no-preference, so
-	   reduced-motion and SSR both land directly on the poster state. */
-	.insert-blue,
-	.insert-noise {
+	.idle .glass {
+		background:
+			linear-gradient(130deg, #ffffff0b, transparent 24%, transparent 73%, #88c3d205),
+			repeating-linear-gradient(transparent 0 3px, #0002 3px 4px);
+	}
+	.off .glass {
+		background: linear-gradient(130deg, #ffffff10, transparent 44%);
+	}
+	.still,
+	.file-video {
+		display: block;
+		width: 100%;
+		height: 100%;
+		min-height: 0;
+		object-fit: contain;
+	}
+	.signal-frame {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		width: 100%;
+		height: 100%;
+		width: min(100cqw, calc(100cqh * var(--signal-ratio)));
+		height: min(100cqh, calc(100cqw / var(--signal-ratio)));
+	}
+	.signal {
+		display: block;
+		border: 0;
+		width: 100%;
+		height: 100%;
+		background: #080a10;
+	}
+	.poster {
 		position: absolute;
 		inset: 0;
-		z-index: 6;
-		opacity: 0;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		gap: clamp(0.5rem, 2cqw, 1rem);
+		padding: 12%;
+		text-align: center;
+		background: radial-gradient(ellipse at 50% 70%, #4b2c5366, transparent 75%);
+	}
+	.poster-image {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		opacity: 0.25;
+	}
+	.poster-art {
+		position: relative;
+		flex: none;
+		width: clamp(2rem, 18cqw, 5rem);
+		height: clamp(2rem, 18cqw, 5rem);
+		color: var(--sub-bg);
+	}
+	.feed-title {
+		position: relative;
+		margin: 0;
+		font-family: var(--font-display);
+		font-size: clamp(0.8rem, 4.8cqw, 1.3rem);
+		line-height: 1.2;
+		color: #efe9f4;
+		max-width: 100%;
+	}
+	.play {
+		position: relative;
+		z-index: 5;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.65em;
+		min-height: 44px;
+		padding: 0.65em 1.3em;
+		border: 0;
+		border-radius: 3px;
+		background: #eaddc7;
+		box-shadow: 0 3px 0 #8f8374;
+		font-family: var(--font-body);
+		font-size: clamp(0.6rem, 2.8cqw, 0.8rem);
+		font-weight: 700;
+		color: #25232a;
+		cursor: pointer;
+	}
+	.play:active {
+		transform: translateY(2px);
+		box-shadow: 0 1px 0 #8f8374;
+	}
+	.osd {
+		position: absolute;
+		z-index: 3;
+		left: 5%;
+		color: #94eab1;
+		font-family: var(--font-body);
+		font-size: clamp(0.48rem, 2.3cqw, 0.65rem);
+		letter-spacing: 0.08em;
+		text-shadow: 0 0 4px #9eeaac6b;
 		pointer-events: none;
 	}
-	.insert-blue {
-		background: #1626d8;
+	.osd.top {
+		top: 5%;
 	}
-	.insert-noise {
-		background:
-			repeating-radial-gradient(
-				circle at 17% 31%,
-				rgba(255, 255, 255, 0.5) 0 1px,
-				transparent 1px 3px
-			),
-			repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.25) 0 1px, transparent 1px 3px),
-			#0b0b12;
+	.caption {
+		bottom: 5%;
+		max-width: 88%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		background: #0006;
+		padding: 0.12em 0.4em;
 	}
-
-	/* ---------- Front panel: channel keys ---------- */
-	.panel {
+	.power {
+		position: absolute;
+		z-index: 3;
+		left: 9.4%;
+		top: 86.3%;
+		transform: translate(-50%, -50%);
+		display: grid;
+		place-items: center;
+		width: 44px;
+		height: 44px;
+		border: 0;
+		background: transparent;
+		padding: 0;
+		cursor: pointer;
+	}
+	.power span {
+		display: grid;
+		place-items: center;
+		min-width: 22px;
+		width: 4.5cqw;
+		max-width: 32px;
+		height: 16px;
+		border-radius: 3px;
+		background: linear-gradient(#51545a, #292c30);
+		border: 1px solid #191a1c;
+		font:
+			10px Arial,
+			sans-serif;
+		color: #c9d1d4;
+	}
+	.power:active span {
+		background: #191b20;
+	}
+	.play-hint {
+		position: absolute;
+		right: 1.5%;
+		top: -2.5rem;
+		transform: rotate(-8deg);
+		font:
+			italic 1.05rem Georgia,
+			serif;
+		color: #f7d89c;
+		z-index: 5;
+		pointer-events: none;
+	}
+	.hint-line {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		overflow: visible;
+		pointer-events: none;
+		z-index: 5;
+		color: #f7d89c;
+	}
+	.recorder {
+		position: relative;
+		margin: -4% 5% 0 3%;
+		padding: 1.2rem 0.85rem 0.55rem;
+		border: 1px solid #51515d;
+		border-radius: 4px;
+		background: linear-gradient(#41434b, #252730 10%, #22242c 80%, #13151c);
+		box-shadow: 0 12px 20px #0006;
+	}
+	.brand {
+		position: absolute;
+		top: 0.3rem;
+		left: 0.85rem;
+		color: #aaa7b3;
+		font-size: 0.38rem;
+		letter-spacing: 0.15em;
+	}
+	.transport {
 		display: flex;
-		align-items: stretch;
-		gap: 0.55rem;
-		margin-top: 0.6rem;
-		padding: 0.55rem 0.6rem 0.65rem;
-		border-radius: 9px;
-		border: 1px solid color-mix(in srgb, black 45%, var(--slice-bg));
-		background: linear-gradient(
-			180deg,
-			color-mix(in srgb, var(--hub-bg) 88%, black),
-			color-mix(in srgb, var(--hub-bg) 70%, black)
-		);
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
-		overflow-x: auto;
-		scrollbar-width: none;
+		gap: 0.35rem;
+		align-items: center;
 	}
-	.panel::-webkit-scrollbar {
-		display: none;
+	.slot {
+		flex: 1;
+		background: #111319;
+		box-shadow: inset 0 2px 3px #0008;
+		border-bottom: 1px solid #4c4d55;
+		height: 22px;
+		color: #8c8695;
+		font-size: 0.4rem;
+		letter-spacing: 0.13em;
+		text-align: center;
+		padding: 5px;
 	}
-	.spacer {
-		flex: 1 0 0.4rem;
+	.display {
+		margin-left: auto;
+		padding: 0.4rem 0.6rem;
+		color: #a3ebc6;
+		background: #0c1716;
+		border: 1px solid #343e3d;
+		letter-spacing: 0.12em;
+		font-size: 0.6rem;
+		text-shadow: 0 0 8px #a3ebc633;
+		white-space: nowrap;
 	}
-
-	/* ---------- Desktop thumbnail strip (stills channel) ---------- */
+	.hardware {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.45rem;
+		min-height: 44px;
+		padding: 0.45rem 0.7rem;
+		border: 1px solid #11131c;
+		border-bottom: 3px solid #101018;
+		border-radius: 3px;
+		background: linear-gradient(#50515a, #2e2e39);
+		color: #e2dce7;
+		font: 700 0.65rem var(--font-body);
+		cursor: pointer;
+	}
+	.hardware.small {
+		width: 44px;
+		padding: 0;
+		flex: none;
+	}
+	.hardware:active,
+	.hardware[aria-pressed='true'] {
+		background: linear-gradient(#202129, #32333d);
+		box-shadow: inset 0 2px 5px #0008;
+	}
+	.hardware:disabled {
+		opacity: 0.35;
+		cursor: default;
+	}
+	.channels {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		margin-top: 0.65rem;
+		padding-top: 0.65rem;
+		border-top: 1px solid #51515b66;
+	}
+	.channel-number {
+		font-size: 0.48rem;
+		color: #9aadb7;
+	}
+	.led {
+		width: 5px;
+		height: 5px;
+		border-radius: 50%;
+		background: #1a272c;
+	}
+	.hardware[aria-pressed='true'] .led {
+		background: var(--sub-bg);
+		box-shadow: 0 0 6px var(--sub-bg);
+	}
+	.counter-top {
+		position: relative;
+		height: 13px;
+		margin: 0 0 0;
+		background: linear-gradient(#55545b, #282630 4px, #1b1924 5px);
+		box-shadow: 0 14px 26px #0008;
+		z-index: -1;
+	}
+	.counter-top::before {
+		content: '';
+		position: absolute;
+		top: 1px;
+		left: 0;
+		right: 0;
+		height: 1px;
+		background: linear-gradient(90deg, var(--sub-bg), #b5cad067, var(--accent));
+		box-shadow: 0 0 16px #96ced833;
+	}
 	.thumbs {
-		display: none;
+		display: flex;
+		gap: 0.6rem;
+		padding: 0.9rem 0.5rem 0.5rem;
+		overflow-x: auto;
 	}
-	@media (min-width: 65rem) {
-		.thumbs {
-			display: flex;
-			gap: 0.5rem;
-			margin-top: 0.6rem;
-		}
-		.thumb {
-			flex: 0 0 auto;
-			width: 5.4rem;
-			padding: 2px;
-			border-radius: 4px;
-			border: 1px solid color-mix(in srgb, var(--slice-bg) 45%, transparent);
-			background: color-mix(in srgb, var(--hub-bg) 80%, black);
-			cursor: pointer;
-			opacity: 0.6;
-			transition:
-				opacity 140ms ease-out,
-				border-color 140ms ease-out;
-		}
-		.thumb img {
-			display: block;
-			width: 100%;
-			height: auto;
-			border-radius: 2px;
-		}
-		.thumb.cur {
-			opacity: 1;
-			border-color: var(--accent);
-			box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 45%, transparent);
-		}
-		.thumb:hover {
-			opacity: 1;
-		}
-		.thumb:focus-visible {
-			outline: 2px solid var(--sub-bg);
-			outline-offset: 2px;
-			opacity: 1;
-		}
+	.thumbs button {
+		width: 5.4rem;
+		min-height: 44px;
+		flex: none;
+		padding: 3px;
+		border-radius: 4px;
+		border: 1px solid #82679a;
+		background: var(--hub-bg);
+		opacity: 0.65;
+		cursor: pointer;
 	}
-
-	/* ---------- Motion (entirely inside no-preference) ---------- */
-	@media (prefers-reduced-motion: no-preference) {
-		/* Insert sequence: blue screen → static burst → picture. Once per load. */
-		.insert-blue {
-			animation: tv-insert-blue 620ms steps(1, jump-none) both;
-		}
-		.insert-noise {
-			animation: tv-insert-noise 620ms steps(5, jump-none) both;
-		}
-		/* 220ms tracking glitch every time the channel (or live state) changes,
-		   then a slow 1px vertical tracking wobble on the tube content. */
-		.feed {
-			animation:
-				tv-glitch 220ms steps(3, jump-none) 1,
-				tv-wobble 8s steps(2, jump-none) 1s infinite;
-		}
-		.feed::after {
-			content: '';
-			position: absolute;
-			left: 0;
-			right: 0;
-			top: -30%;
-			height: 26%;
-			z-index: 2;
-			pointer-events: none;
-			background: repeating-linear-gradient(
-				0deg,
-				rgba(255, 255, 255, 0.2) 0 2px,
-				transparent 2px 5px
-			);
-			animation: tv-band 220ms linear both;
-		}
+	.thumbs button.current {
+		opacity: 1;
+		border-color: var(--accent);
+		box-shadow: 0 0 9px color-mix(in srgb, var(--accent) 35%, transparent);
 	}
-	@keyframes tv-insert-blue {
-		0%,
-		24% {
-			opacity: 1;
-		}
-		25%,
-		100% {
-			opacity: 0;
-		}
+	.thumbs img {
+		display: block;
+		width: 100%;
+		height: auto;
 	}
-	@keyframes tv-insert-noise {
-		0%,
-		24% {
-			opacity: 0;
-		}
-		25% {
-			opacity: 1;
-			background-position:
-				0 0,
-				0 0;
-		}
-		60% {
-			opacity: 1;
-			background-position:
-				7px 13px,
-				0 2px;
-		}
-		95% {
-			opacity: 1;
-			background-position:
-				-11px 5px,
-				0 1px;
-		}
-		100% {
-			opacity: 0;
-		}
+	.video-selection {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		margin: 1rem 0.5rem 0;
+		font-size: 0.7rem;
+		color: var(--fg-muted);
 	}
-	@keyframes tv-glitch {
-		0% {
-			transform: translateX(-4px);
-			filter: saturate(3) hue-rotate(14deg);
-		}
-		55% {
-			transform: translateX(3px);
-			filter: saturate(1.6);
-		}
-		100% {
-			transform: none;
-			filter: none;
-		}
+	.video-selection span {
+		flex: 1;
 	}
-	@keyframes tv-band {
-		from {
-			opacity: 0.75;
-		}
-		to {
-			top: 104%;
-			opacity: 0;
-		}
+	button:focus-visible {
+		outline: 2px solid var(--sub-bg);
+		outline-offset: 4px;
 	}
-	@keyframes tv-wobble {
-		0%,
-		100% {
-			translate: 0 0;
+	@media (max-width: 40rem) {
+		.recorder {
+			padding: 1.2rem 0.55rem 0.45rem;
 		}
-		50% {
-			translate: 0 1px;
+		.brand {
+			left: 0.55rem;
+			font-size: 0.33rem;
+		}
+		.transport {
+			gap: 0.2rem;
+		}
+		.display {
+			font-size: 0.5rem;
+			padding: 0.35rem;
+		}
+		.slot {
+			min-width: 0;
+			font-size: 0.3rem;
+		}
+		.hardware {
+			font-size: 0.58rem;
+			padding: 0.4rem;
+		}
+		.poster {
+			padding: 10%;
+			gap: 0.45rem;
+		}
+		.play {
+			padding: 0.4rem 0.7rem;
+		}
+		.play-hint {
+			right: 3%;
+			font-size: 0.95rem;
 		}
 	}
 </style>

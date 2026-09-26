@@ -3,6 +3,7 @@
 	import { resolveLocalized, type Project } from '$lib/content/schema';
 	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
 	import * as m from '$lib/paraglide/messages';
+	import TapeArtwork from '$lib/projects/TapeArtwork.svelte';
 
 	const locale = getLocale();
 
@@ -14,22 +15,33 @@
 	] as const;
 </script>
 
-<svelte:head><title>{m.nav_projects()} — Lupe</title><meta name="description" content={m.meta_desc_projects()} /></svelte:head>
+<svelte:head
+	><title>{m.nav_projects()} — Lupe</title><meta
+		name="description"
+		content={m.meta_desc_projects()}
+	/></svelte:head
+>
 
 {#snippet tape(p: Project)}
 	<li>
-		<a class="tape" href={localizeHref(`/projects/${p.slug}`)}>
+		<a
+			class="tape"
+			id={`tape-${p.slug}`}
+			data-project-tape={p.slug}
+			href={localizeHref(`/projects/${p.slug}`)}
+		>
 			<span class="spine" aria-hidden="true"></span>
 			<div class="label">
 				<h3>{resolveLocalized(p.title, locale)}</h3>
 				<p>{resolveLocalized(p.tagline, locale)}</p>
 			</div>
-			<span class="window" aria-hidden="true"></span>
+			<span class="window" aria-hidden="true"
+				><span class="artwork"><TapeArtwork project={p} /></span></span
+			>
 			<div class="printline">
 				<span class="genre">
-					{#each p.tags as t, i (t)}{#if i > 0}<span class="sep" aria-hidden="true">/</span>{/if}<span
-							class="word">{t}</span
-						>{/each}
+					{#each p.tags as t, i (t)}{#if i > 0}<span class="sep" aria-hidden="true">/</span
+							>{/if}<span class="word">{t}</span>{/each}
 				</span>
 				<span class="copy">© {p.year}</span>
 			</div>
@@ -48,7 +60,15 @@
 
 	{#each shelves as s (s.id)}
 		{@const items = projectsByCategory(s.id)}
-		<section id={s.id} class="section shelf-block">
+		<section
+			id={s.id}
+			class="section shelf-block"
+			style:--shelf-light={s.id === 'opensource'
+				? 'var(--sub-bg)'
+				: s.id === 'web'
+					? 'var(--vapor-sun)'
+					: 'var(--accent)'}
+		>
 			<h2 class="channel">
 				<span class="ch">CH-{s.no}</span>
 				{s.label()}
@@ -84,6 +104,22 @@
 		max-width: clamp(46rem, 86vw, 62rem);
 		padding-bottom: 7.5rem;
 	}
+	.shelf-block {
+		position: relative;
+		isolation: isolate;
+	}
+	.shelf-block::before {
+		content: '';
+		position: absolute;
+		inset: 2rem -1.5rem -1rem;
+		z-index: -1;
+		background: radial-gradient(
+			ellipse at 50% 95%,
+			color-mix(in srgb, var(--shelf-light) 17%, transparent),
+			transparent 70%
+		);
+		pointer-events: none;
+	}
 
 	/* ---------- The neon storefront sign ---------- */
 	.sign {
@@ -93,14 +129,11 @@
 	.neon {
 		/* Reusable glow states (full / dim) so the keyframes stay readable. */
 		--neon-full:
-			0 0 6px rgba(255, 255, 255, 0.6),
-			0 0 12px var(--accent),
-			0 0 32px var(--accent),
+			0 0 6px rgba(255, 255, 255, 0.6), 0 0 12px var(--accent), 0 0 32px var(--accent),
 			0 0 72px color-mix(in srgb, var(--accent) 55%, transparent),
 			1px 1px 0 color-mix(in srgb, var(--sub-bg) 85%, transparent);
 		--neon-dim:
-			0 0 4px rgba(255, 255, 255, 0.4),
-			0 0 9px color-mix(in srgb, var(--accent) 80%, transparent),
+			0 0 4px rgba(255, 255, 255, 0.4), 0 0 9px color-mix(in srgb, var(--accent) 80%, transparent),
 			0 0 24px color-mix(in srgb, var(--accent) 80%, transparent),
 			0 0 54px color-mix(in srgb, var(--accent) 35%, transparent),
 			1px 1px 0 color-mix(in srgb, var(--sub-bg) 65%, transparent);
@@ -171,6 +204,7 @@
 		}
 	}
 	.tape {
+		scroll-margin-top: 7rem;
 		height: 100%;
 		position: relative;
 		display: grid;
@@ -187,6 +221,10 @@
 		);
 		color: inherit;
 		text-decoration: none;
+		box-shadow:
+			5px 4px 0 color-mix(in srgb, var(--hub-bg) 90%, black),
+			9px 12px 20px #0003,
+			inset 1px 1px 0 #fff1;
 		transition:
 			transform 180ms ease-out,
 			border-color 180ms ease-out,
@@ -231,29 +269,30 @@
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 	}
-	/* Cassette window: the two spools showing through the shell. */
+	/* Each tape has its own cover art; the neon room stays visible around it. */
 	.window {
 		grid-column: 2;
 		grid-row: 2;
 		align-self: center;
-		height: 2.4rem;
-		margin: 0 1.1rem;
+		display: grid;
+		place-items: center;
+		height: 6.25rem;
+		margin: 0.5rem 1.1rem;
 		border-radius: 3px;
-		border: 1px solid color-mix(in srgb, var(--slice-bg) 35%, transparent);
+		border: 1px solid color-mix(in srgb, var(--shelf-light) 24%, transparent);
 		background:
 			radial-gradient(
-				circle at 30% 50%,
-				color-mix(in srgb, var(--fg) 30%, transparent) 0 3px,
-				color-mix(in srgb, var(--slice-bg) 55%, var(--bg)) 3px 10px,
-				transparent 10px
-			),
-			radial-gradient(
-				circle at 70% 50%,
-				color-mix(in srgb, var(--fg) 30%, transparent) 0 3px,
-				color-mix(in srgb, var(--slice-bg) 55%, var(--bg)) 3px 10px,
-				transparent 10px
+				ellipse at 50% 70%,
+				color-mix(in srgb, var(--shelf-light) 15%, transparent),
+				transparent 80%
 			),
 			color-mix(in srgb, var(--hub-bg) 78%, black);
+	}
+	.artwork {
+		width: 4.4rem;
+		height: 4.4rem;
+		color: var(--shelf-light);
+		filter: drop-shadow(0 0 10px color-mix(in srgb, var(--shelf-light) 40%, transparent));
 	}
 	/* Genre side-print + © imprint — flat ink on the shell, like the small
 	   print along the bottom edge of a rental sleeve. */
@@ -350,7 +389,7 @@
 		border-radius: 2px;
 		background: color-mix(in srgb, var(--hub-bg) 72%, var(--slice-bg));
 		box-shadow:
-			0 10px 26px color-mix(in srgb, var(--accent) 35%, transparent),
+			0 10px 30px color-mix(in srgb, var(--shelf-light) 40%, transparent),
 			0 3px 8px color-mix(in srgb, var(--vapor-sun) 22%, transparent);
 	}
 	.board::before {
@@ -360,6 +399,19 @@
 		height: 2px;
 		border-radius: 2px 2px 0 0;
 		background: linear-gradient(90deg, var(--vapor-sun), var(--accent));
+		box-shadow: 0 0 9px var(--shelf-light);
+	}
+	.board::after {
+		content: '';
+		position: absolute;
+		inset: 10px 2.5% auto;
+		height: 8px;
+		background: linear-gradient(
+			90deg,
+			var(--hub-bg) 0 8px,
+			transparent 8px calc(100% - 8px),
+			var(--hub-bg) calc(100% - 8px)
+		);
 	}
 
 	/* ---------- Motion (stilled entirely under prefers-reduced-motion) ---------- */

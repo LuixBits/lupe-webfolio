@@ -3,6 +3,7 @@
 	// on the rental counter plus the tape's printed sleeve sheet below/beside it.
 	// (ProjectDetail.svelte remains untouched for the CV route.)
 	import CounterTv from '$lib/projects/CounterTv.svelte';
+	import TapeJacket from '$lib/projects/TapeJacket.svelte';
 	import { resolveLocalized } from '$lib/content/schema';
 	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
 	import * as m from '$lib/paraglide/messages';
@@ -15,6 +16,9 @@
 	const title = $derived(resolveLocalized(project.title, locale));
 	const tagline = $derived(resolveLocalized(project.tagline, locale));
 	const body = $derived(resolveLocalized(project.body, locale));
+	const hasMedia = $derived(
+		Boolean(project.screenshots.length || project.videos.length || project.demo?.embed)
+	);
 	/* Sample marker: the authored base-locale body self-identifies stand-in
 	   entries ("Sample entry — …"). Quiet note rendered on the sleeve; it
 	   disappears the moment real copy replaces the sample text. */
@@ -36,29 +40,34 @@
 	<meta name="description" content={tagline} />
 </svelte:head>
 
-<article class="page vhs-detail">
+<article class="page vhs-detail" class:no-media={!hasMedia}>
 	<!-- The one exit: rewind this tape back to the shelf. -->
-	<a class="rewind" href={localizeHref('/projects')}>
+	<a class="rewind" href={localizeHref(`/projects#tape-${project.slug}`)}>
 		<span class="rw-glyph" aria-hidden="true">◀◀</span>
 		<span class="rw-word" aria-hidden="true">REWIND</span>
 		<span class="rw-dest">{m.nav_projects()}</span>
 	</a>
 
 	<div class="counter">
-		<div class="deckcol">
-			<CounterTv {project} {locale} />
-		</div>
+		{#if hasMedia}
+			<div class="deckcol">
+				{#key project.slug}<CounterTv {project} {locale} />{/key}
+			</div>
+		{/if}
 
 		<section class="sleeve">
 			<header class="masthead">
-				<h1>{title}</h1>
-				<p class="tagline">{tagline}</p>
+				<div class="jacket"><TapeJacket {project} {locale} /></div>
+				<div class="heading">
+					<h1>{title}</h1>
+					<p class="tagline">{tagline}</p>
+				</div>
 			</header>
 
 			<p class="printline">
 				<span class="genre">
 					{#each project.tags as t, i (t)}{#if i > 0}<span class="sep" aria-hidden="true">/</span
-						>{/if}<span class="word">{t}</span>{/each}
+							>{/if}<span class="word">{t}</span>{/each}
 				</span>
 				<span class="copy">© {project.year}</span>
 			</p>
@@ -76,8 +85,8 @@
 						<span class="k">{m.tv_stack()}</span>
 						<span class="v"
 							>{#each project.stack as s, i (s)}{#if i > 0}<span class="sep" aria-hidden="true"
-									>/</span
-								>{/if}{s}{/each}</span
+										>/</span
+									>{/if}{s}{/each}</span
 						>
 					</p>
 				</section>
@@ -126,7 +135,7 @@
 	   wheel lives bottom-left on /projects, so nothing fixed sits there and the
 	   page ends well clear of it. */
 	.page.vhs-detail {
-		max-width: clamp(46rem, 86vw, 62rem);
+		max-width: 78rem;
 		padding-bottom: 7.5rem;
 	}
 
@@ -189,16 +198,35 @@
 		margin-top: 2rem;
 		padding: 1.3rem 1.2rem 1.1rem;
 		border-radius: 4px;
+		background: color-mix(in srgb, var(--hub-bg) 34%, transparent);
+	}
+	.masthead {
+		display: flex;
+		align-items: flex-start;
+		gap: 1.35rem;
+	}
+	.jacket {
+		width: 6.6rem;
+		flex: none;
+	}
+	.heading {
+		min-width: 0;
+	}
+	.no-media .counter {
+		display: block;
+		max-width: 46rem;
+		margin: 1.5rem auto 0;
+	}
+	.no-media .sleeve {
+		padding: 2rem;
 		border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-		background: linear-gradient(
-			168deg,
-			color-mix(in srgb, var(--slice-bg) 22%, var(--bg)),
-			var(--bg) 62%
-		);
+	}
+	.no-media .jacket {
+		width: 8rem;
 	}
 	.masthead h1 {
 		margin: 0 0 0.35rem;
-		font-size: clamp(1.5rem, 5vw, 2.2rem);
+		font-size: clamp(1.4rem, 3vw, 2.2rem);
 		text-shadow:
 			-1px 0 0 var(--sub-bg),
 			1px 0 0 var(--accent);
@@ -363,16 +391,15 @@
 	.barcode {
 		width: 7.5rem;
 		height: 1.6rem;
-		background:
-			repeating-linear-gradient(
-				90deg,
-				var(--fg) 0 2px,
-				transparent 2px 5px,
-				var(--fg) 5px 6px,
-				transparent 6px 11px,
-				var(--fg) 11px 14px,
-				transparent 14px 16px
-			);
+		background: repeating-linear-gradient(
+			90deg,
+			var(--fg) 0 2px,
+			transparent 2px 5px,
+			var(--fg) 5px 6px,
+			transparent 6px 11px,
+			var(--fg) 11px 14px,
+			transparent 14px 16px
+		);
 		opacity: 0.75;
 	}
 	.serial {
@@ -386,9 +413,9 @@
 	@media (min-width: 65rem) {
 		.counter {
 			display: grid;
-			grid-template-columns: 57% 1fr;
-			gap: 2.4rem;
-			align-items: start;
+			grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+			gap: 2.5rem;
+			align-items: center;
 		}
 		.deckcol {
 			position: sticky;
@@ -396,6 +423,29 @@
 		}
 		.sleeve {
 			margin-top: 0;
+		}
+	}
+	@media (max-width: 40rem) {
+		.page.vhs-detail {
+			padding-inline: 0;
+		}
+		.masthead {
+			gap: 1rem;
+		}
+		.jacket {
+			width: 5.8rem;
+		}
+		.sleeve {
+			padding: 1.2rem 0.8rem;
+		}
+		.no-media .sleeve {
+			padding: 1.5rem 1rem;
+		}
+		.no-media .jacket {
+			width: 5.8rem;
+		}
+		.tagline {
+			font-size: 0.9rem;
 		}
 	}
 </style>
