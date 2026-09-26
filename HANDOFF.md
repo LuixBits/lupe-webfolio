@@ -10,6 +10,11 @@ it, iterate. Never push CSS you haven't looked at. On the owner's machine the
 setup quirks (NixOS Playwright → system chromium, ports) are in the assistant's
 project memory. `npm run check` must stay at 0 errors.
 
+Projects UI text uses only the shared `--fs-*` scale in `src/app.css`.
+Keep useful content and metadata; omit decorative micro-labels, status chips,
+channel codes, repeated tags, and serial-number copy. Let the shelves, CRT,
+paper textures, and remote-control back link carry the theme.
+
 ## Run it
 
 ```bash

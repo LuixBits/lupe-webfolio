@@ -9,9 +9,9 @@
 
 	// BACKSTREET VIDEO — each category is a lit rental shelf, each project a tape.
 	const shelves = [
-		{ id: 'youtube', no: '01', label: m.nav_projects_youtube },
-		{ id: 'opensource', no: '02', label: m.nav_projects_opensource },
-		{ id: 'web', no: '03', label: m.nav_projects_web }
+		{ id: 'youtube', label: m.nav_projects_youtube },
+		{ id: 'opensource', label: m.nav_projects_opensource },
+		{ id: 'web', label: m.nav_projects_web }
 	] as const;
 </script>
 
@@ -38,16 +38,6 @@
 			<span class="window" aria-hidden="true"
 				><span class="artwork"><TapeArtwork project={p} /></span></span
 			>
-			<div class="printline">
-				<span class="genre">
-					{#each p.tags as t, i (t)}{#if i > 0}<span class="sep" aria-hidden="true">/</span
-							>{/if}<span class="word">{t}</span>{/each}
-				</span>
-				<span class="copy">© {p.year}</span>
-			</div>
-			{#if p.featured}
-				<span class="foil"><span class="band">★ {m.projects_featured()}</span></span>
-			{/if}
 		</a>
 	</li>
 {/snippet}
@@ -70,9 +60,7 @@
 					: 'var(--accent)'}
 		>
 			<h2 class="channel">
-				<span class="ch">CH-{s.no}</span>
 				{s.label()}
-				<span class="rec" aria-hidden="true"></span>
 			</h2>
 			<ul class="shelf">
 				{#each items as p (p.slug)}
@@ -90,13 +78,6 @@
 </div>
 
 <style>
-	/* Holo-sticker sheen angle (typed so it animates; static where unsupported). */
-	@property --vhs-holo {
-		syntax: '<angle>';
-		inherits: false;
-		initial-value: 210deg;
-	}
-
 	/* Use the dead right space at 1440px; decor edge bands (z6) stay under z10
 	   content. Deep bottom padding keeps the last shelf clear of the bottom-left
 	   docked wheel + corner scene haze on short viewports. */
@@ -145,7 +126,7 @@
 	}
 	.strap {
 		margin: 0;
-		font-size: 0.9rem;
+		font-size: var(--fs-body);
 		letter-spacing: 0.08em;
 		color: var(--fg-muted);
 	}
@@ -159,24 +140,6 @@
 		border-bottom: none;
 		padding-bottom: 0;
 	}
-	/* Broadcast channel bug — flat mono print, no box. */
-	.ch {
-		font-family: var(--font-body);
-		font-weight: 700;
-		font-size: 0.72rem;
-		letter-spacing: 0.22em;
-		color: var(--sub-bg);
-		transform: translateY(-0.1em);
-	}
-	.rec {
-		width: 8px;
-		height: 8px;
-		border-radius: 50%;
-		background: var(--accent);
-		box-shadow: 0 0 8px var(--accent);
-		opacity: 0.5;
-	}
-
 	/* ---------- The shelf of tapes ---------- */
 	.shelf {
 		list-style: none;
@@ -187,13 +150,12 @@
 		gap: 1.25rem;
 	}
 	.shelf li {
-		display: block;
+		display: grid;
 	}
 	/* Empty rental slot — most tapes are out on loan tonight. Only rendered
 	   visible when the shelf actually fits 4 columns (see media query below). */
 	.shelf li.slot {
 		display: none;
-		aspect-ratio: 3 / 4;
 		border-radius: 4px;
 		border: 1px dashed color-mix(in srgb, var(--slice-bg) 38%, transparent);
 		background: color-mix(in srgb, var(--slice-bg) 7%, transparent);
@@ -205,12 +167,12 @@
 	}
 	.tape {
 		scroll-margin-top: 7rem;
-		height: 100%;
+		height: auto;
+		min-height: 20rem;
 		position: relative;
 		display: grid;
 		grid-template-columns: 9px 1fr;
-		grid-template-rows: auto 1fr auto;
-		aspect-ratio: 3 / 4;
+		grid-template-rows: auto minmax(8rem, 1fr);
 		/* Boxy like a cassette, not the site's soft 12px cards. */
 		border-radius: 4px;
 		border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
@@ -233,7 +195,7 @@
 	/* Ribbed grip edge, like the spine of a VHS shell. */
 	.spine {
 		grid-column: 1;
-		grid-row: 1 / 4;
+		grid-row: 1 / 3;
 		border-radius: 3px 0 0 3px;
 		background: repeating-linear-gradient(
 			180deg,
@@ -260,14 +222,9 @@
 	.label p {
 		margin: 0;
 		font-family: var(--font-body);
-		font-size: 0.85rem;
-		line-height: 1.45;
+		font-size: var(--fs-body);
+		line-height: var(--lh-body);
 		color: var(--fg-muted);
-		display: -webkit-box;
-		-webkit-line-clamp: 2;
-		line-clamp: 2;
-		-webkit-box-orient: vertical;
-		overflow: hidden;
 	}
 	/* Each tape has its own cover art; the neon room stays visible around it. */
 	.window {
@@ -294,75 +251,6 @@
 		color: var(--shelf-light);
 		filter: drop-shadow(0 0 10px color-mix(in srgb, var(--shelf-light) 40%, transparent));
 	}
-	/* Genre side-print + © imprint — flat ink on the shell, like the small
-	   print along the bottom edge of a rental sleeve. */
-	.printline {
-		grid-column: 2;
-		grid-row: 3;
-		margin: 0 0.85rem 0.75rem;
-		padding-top: 0.45rem;
-		border-top: 1px dashed color-mix(in srgb, var(--fg) 24%, transparent);
-		display: flex;
-		align-items: baseline;
-		gap: 0.6rem;
-	}
-	.genre {
-		font-family: var(--font-body);
-		font-size: 0.62rem;
-		font-weight: 700;
-		letter-spacing: 0.16em;
-		text-transform: uppercase;
-		color: var(--sub-bg);
-	}
-	.genre .word {
-		white-space: nowrap;
-	}
-	.sep {
-		margin: 0 0.35em;
-		color: var(--accent);
-		font-weight: 400;
-	}
-	.copy {
-		margin-left: auto;
-		font-family: var(--font-body);
-		font-size: 0.7rem;
-		letter-spacing: 0.06em;
-		color: var(--vapor-sun);
-		white-space: nowrap;
-	}
-	/* Holographic "Featured" foil — a diagonal banner printed across the
-	   top-right corner of the shell, clipped to the cassette edge. */
-	.foil {
-		position: absolute;
-		inset: 0;
-		overflow: hidden;
-		border-radius: inherit;
-		pointer-events: none;
-	}
-	.band {
-		position: absolute;
-		top: 1.3rem;
-		right: -2.55rem;
-		width: 9rem;
-		rotate: 45deg;
-		text-align: center;
-		padding: 0.18rem 0;
-		font-family: var(--font-body);
-		font-size: 0.6rem;
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-		color: var(--hub-bg);
-		background: conic-gradient(
-			from var(--vhs-holo, 210deg),
-			var(--vapor-sun),
-			var(--accent),
-			var(--sub-bg),
-			var(--vapor-sun)
-		);
-		box-shadow: 0 2px 10px color-mix(in srgb, var(--accent) 45%, transparent);
-	}
-
 	/* Hover / focus: pull the tape off the shelf. */
 	.tape:hover,
 	.tape:focus-visible {
@@ -423,13 +311,6 @@
 				neon-flicker 1.1s linear 0.5s both,
 				neon-hum 6s ease-in-out 1.7s infinite alternate;
 		}
-		.rec {
-			opacity: 1;
-			animation: rec-blink 1.6s steps(2, jump-none) infinite;
-		}
-		.band {
-			animation: holo-spin 8s linear infinite;
-		}
 		.tape:hover,
 		.tape:focus-visible {
 			transform: translateY(-6px);
@@ -478,19 +359,6 @@
 			text-shadow: var(--neon-dim);
 		}
 	}
-	@keyframes rec-blink {
-		from {
-			opacity: 1;
-		}
-		to {
-			opacity: 0.15;
-		}
-	}
-	@keyframes holo-spin {
-		to {
-			--vhs-holo: 570deg;
-		}
-	}
 
 	/* ---------- Mobile: tapes stacked as a pile of spines ---------- */
 	@media (max-width: 40rem) {
@@ -499,9 +367,9 @@
 			gap: 0.9rem;
 		}
 		.tape {
-			aspect-ratio: auto;
+			min-height: 0;
 			grid-template-columns: 1fr;
-			grid-template-rows: 8px auto auto;
+			grid-template-rows: 8px auto;
 		}
 		.spine {
 			grid-column: 1;
@@ -520,24 +388,8 @@
 			grid-row: 2;
 			margin: 0.7rem 0.8rem 0.45rem;
 		}
-		.label p {
-			-webkit-line-clamp: 1;
-			line-clamp: 1;
-		}
 		.window {
 			display: none;
-		}
-		.printline {
-			grid-column: 1;
-			grid-row: 3;
-			margin: 0 0.8rem 0.65rem;
-		}
-		/* Narrow shells: nudge the foil band off the corner far enough that the
-		   whole word clears both clip edges, while staying above the label. */
-		.band {
-			top: 1.15rem;
-			right: -2.5rem;
-			font-size: 0.56rem;
 		}
 	}
 </style>

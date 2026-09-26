@@ -61,16 +61,9 @@
 						/>
 					</div>
 				{/if}
-				<div>
-					<p class="eyebrow">YOUTUBE · {channel.handle}</p>
-					<h1 id="channel-title">{title}</h1>
-				</div>
+				<h1 id="channel-title">{title}</h1>
 			</header>
 			<p class="tagline">{resolveLocalized(project.tagline, locale)}</p>
-			<div class="guide-heading">
-				<h2>{m.channel_programme()}</h2>
-				<span aria-hidden="true">{String(project.videos.length).padStart(2, '0')} · VHS</span>
-			</div>
 			<p class="instruction">{m.channel_choose_tape()}</p>
 			<div class="tape-list" role="group" aria-label={m.channel_programme()}>
 				{#each project.videos as video, index (video.id)}
@@ -83,7 +76,6 @@
 						aria-label={m.channel_load_video({ title: video.title })}
 						onclick={() => loadTape(index)}
 					>
-						<span class="tape-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
 						{#if video.poster}<img
 								class="thumbnail"
 								src={video.poster}
@@ -93,15 +85,24 @@
 								loading="lazy"
 							/>{/if}
 						<span class="tape-copy">
-							<strong>{video.title}</strong>
-							<span class="tape-meta">
-								{#if video.duration}<span>{duration(video.duration)}</span>{/if}
-								{#if videoIndex === index}<span class="loaded"
-										><i aria-hidden="true"></i>{m.channel_loaded()}</span
-									>{/if}
-							</span>
+							<span class="video-title">{video.title}</span>
+							{#if video.duration}<span class="duration">{duration(video.duration)}</span>{/if}
 						</span>
-						<span class="load-arrow" aria-hidden="true">↳</span>
+						<svg
+							class="selection-mark"
+							class:visible={videoIndex === index}
+							viewBox="0 0 24 24"
+							fill="none"
+							aria-hidden="true"
+						>
+							<path
+								d="m5 12 4 4 10-10"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg>
 					</button>
 				{/each}
 			</div>
@@ -112,34 +113,9 @@
 	</div>
 
 	<section class="liner" aria-labelledby="channel-about">
-		<div class="liner-spine" aria-hidden="true">LUIXBITS · SIDE B</div>
-		<div class="liner-content">
-			<header class="liner-header">
-				<p class="eyebrow">{m.channel_about()}</p>
-				<span class="format-stamp" aria-hidden="true">VHS <span>STEREO</span></span>
-			</header>
-			<div class="liner-columns">
-				<div class="salutation">
-					<h2 id="channel-about">Hello<br />nerds<span>.</span></h2>
-					<span class="handwritten">{m.channel_from_workbench()}</span>
-					<svg class="ink-arrow" viewBox="0 0 130 35" fill="none" aria-hidden="true">
-						<path
-							d="M4 8c32 27 72 24 115 5m-13-4 15 3-9 12"
-							stroke="currentColor"
-							stroke-width="1.5"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					</svg>
-				</div>
-				<div class="description">
-					{#each paragraphs as paragraph}<p>{paragraph}</p>{/each}
-				</div>
-			</div>
-			<footer class="liner-footer">
-				<span class="topics">{project.tags.join(' / ')}</span>
-				<span class="signature">Luix</span>
-			</footer>
+		<h2 id="channel-about">Hello nerds.</h2>
+		<div class="description">
+			{#each paragraphs as paragraph}<p>{paragraph}</p>{/each}
 		</div>
 	</section>
 {/if}
@@ -158,16 +134,16 @@
 		display: flex;
 		width: fit-content;
 		align-items: center;
-		gap: 1rem;
+		gap: 0.7rem;
 		min-height: 44px;
-		margin: 0.4rem auto 0;
+		margin: 0.75rem auto 0;
 		padding: 0.3rem 0.5rem;
 		color: var(--fg-muted);
-		font-size: 0.68rem;
+		font-size: var(--fs-small);
 		text-underline-offset: 4px;
 	}
 	.watch-link:hover {
-		color: var(--sub-bg);
+		color: var(--fg);
 	}
 	.programme {
 		min-width: 0;
@@ -194,71 +170,37 @@
 		height: auto;
 		border-radius: 3px;
 	}
-	.eyebrow {
-		margin: 0;
-		font-size: 0.61rem;
-		font-weight: 700;
-		letter-spacing: 0.15em;
-		text-transform: uppercase;
-	}
-	.masthead .eyebrow {
-		color: var(--sub-bg);
-	}
 	h1 {
-		margin: 0.2rem 0 0;
-		font-size: clamp(2.6rem, 4.4vw, 3.7rem);
-		line-height: 1;
+		margin: 0;
+		font-size: var(--fs-h1);
+		line-height: var(--lh-tight);
 		text-shadow:
-			-2px 0 #35e6e6,
-			2px 1px #ff5ed1;
+			-1px 0 #35e6e6,
+			1px 1px #ff5ed1;
 	}
 	.tagline {
 		color: var(--fg-muted);
-		font-size: 0.95rem;
-		line-height: 1.6;
-		margin: 1.1rem 0 1.6rem;
-	}
-	.guide-heading {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		gap: 0.8rem;
-		padding-bottom: 0.6rem;
-		border-bottom: 1px solid #ff5ed163;
-	}
-	.guide-heading h2 {
-		margin: 0;
-		padding: 0;
-		border: 0;
-		font-family: var(--font-body);
-		font-size: 0.7rem;
-		text-transform: uppercase;
-		letter-spacing: 0.17em;
-		color: var(--fg);
-	}
-	.guide-heading > span {
-		font-size: 0.56rem;
-		letter-spacing: 0.12em;
-		color: var(--accent);
-		white-space: nowrap;
+		font-size: var(--fs-body);
+		line-height: var(--lh-body);
+		margin: 1rem 0 1.5rem;
 	}
 	.instruction {
-		margin: 0.65rem 0 1rem;
-		font-size: 0.7rem;
-		color: var(--fg-muted);
-		line-height: 1.6;
+		margin: 0 0 0.8rem;
+		font-size: var(--fs-body);
+		color: var(--fg);
+		line-height: var(--lh-body);
 	}
 	.tape-list {
 		display: grid;
-		gap: 0.5rem;
+		gap: 0.6rem;
 	}
 	.programme-tape {
 		display: flex;
 		align-items: center;
-		gap: 0.65rem;
+		gap: 0.85rem;
 		position: relative;
 		width: 100%;
-		padding: 0.7rem;
+		padding: 0.85rem;
 		border: 1px solid #b29bd633;
 		border-left: 3px solid #6a507e;
 		border-radius: 3px;
@@ -268,7 +210,7 @@
 			inset 0 1px 0 #ffffff08;
 		text-align: left;
 		color: var(--fg);
-		font-family: var(--font-body);
+		font: inherit;
 		cursor: pointer;
 		transition:
 			border-color 160ms,
@@ -293,18 +235,8 @@
 	.programme-tape:active {
 		transform: translate(0, 1px);
 	}
-	.tape-number {
-		flex: none;
-		align-self: flex-start;
-		padding-top: 0.1rem;
-		font-size: 0.6rem;
-		color: var(--fg-muted);
-	}
-	.selected .tape-number {
-		color: var(--sub-bg);
-	}
 	.thumbnail {
-		width: 4.7rem;
+		width: 5.5rem;
 		height: auto;
 		aspect-ratio: 16 / 9;
 		object-fit: cover;
@@ -316,44 +248,26 @@
 		min-width: 0;
 		flex: 1;
 	}
-	.tape-copy strong {
+	.video-title {
 		display: block;
-		font-size: 0.75rem;
-		line-height: 1.5;
-		font-weight: 400;
+		font-size: var(--fs-body);
+		line-height: var(--lh-body);
 	}
-	.tape-meta {
-		display: flex;
-		gap: 0.65rem;
-		align-items: center;
-		flex-wrap: wrap;
-		margin-top: 0.35rem;
-		min-height: 0.8rem;
+	.duration {
+		display: block;
+		margin-top: 0.3rem;
 		color: var(--fg-muted);
-		font-size: 0.52rem;
-		letter-spacing: 0.06em;
+		font-size: var(--fs-small);
 	}
-	.loaded {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.35rem;
-		color: var(--sub-bg);
-		text-transform: uppercase;
+	.selection-mark {
+		flex: none;
+		width: 1.25rem;
+		height: 1.25rem;
+		visibility: hidden;
+		color: var(--fg);
 	}
-	.loaded i {
-		width: 4px;
-		height: 4px;
-		border-radius: 50%;
-		background: currentColor;
-		box-shadow: 0 0 6px currentColor;
-	}
-	.load-arrow {
-		color: var(--fg-muted);
-		font-size: 1rem;
-	}
-	.selected .load-arrow,
-	.programme-tape:hover .load-arrow {
-		color: var(--sub-bg);
+	.selection-mark.visible {
+		visibility: visible;
 	}
 	.channel-link {
 		display: flex;
@@ -364,16 +278,13 @@
 		margin-top: 1rem;
 		padding: 0.75rem 0;
 		border-bottom: 1px dashed #c8a6ef6b;
-		font-size: 0.75rem;
-		color: var(--vapor-sun);
+		font-size: var(--fs-body);
+		color: var(--fg);
 		text-decoration: none;
 	}
 	.channel-link:hover {
-		color: var(--fg);
-		border-bottom-color: var(--vapor-sun);
-	}
-	.channel-link > span:last-child {
-		font-size: 1.1rem;
+		text-decoration: underline;
+		text-underline-offset: 4px;
 	}
 	button:focus-visible,
 	a:focus-visible {
@@ -382,8 +293,11 @@
 	}
 	.liner {
 		position: relative;
-		display: flex;
+		display: grid;
+		grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+		gap: 2rem;
 		margin: 3rem 0 0;
+		padding: 2.5rem 3rem;
 		color: #34243f;
 		border: 1px solid #f8e3c5;
 		border-radius: 3px 3px 12px 3px;
@@ -404,108 +318,28 @@
 		transform: rotate(-5deg);
 		box-shadow: 0 1px 3px #36264014;
 	}
-	.liner-spine {
-		flex: none;
-		width: 2.2rem;
-		padding: 1.3rem 0.6rem;
-		writing-mode: vertical-rl;
-		transform: rotate(180deg);
-		text-align: center;
-		border-left: 1px solid #59415740;
-		font-size: 0.57rem;
-		font-weight: 700;
-		letter-spacing: 0.22em;
+	.liner::after {
+		content: '';
+		position: absolute;
+		inset: 0 auto 0 1.5rem;
+		border-left: 1px solid #59415726;
+		pointer-events: none;
 	}
-	.liner-content {
-		flex: 1;
-		min-width: 0;
-		padding: 1.6rem 2.1rem 1.2rem;
-	}
-	.liner-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 1rem;
-		padding-bottom: 0.8rem;
-		border-bottom: 1px solid #59415766;
-	}
-	.liner-header .eyebrow {
-		color: #78415d;
-	}
-	.format-stamp {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.4rem;
-		border: 1.5px solid currentColor;
-		padding: 0.2rem 0.35rem;
-		font-weight: 700;
-		font-size: 0.7rem;
-		transform: rotate(3deg);
-	}
-	.format-stamp span {
-		border-left: 1px solid currentColor;
-		padding-left: 0.4rem;
-		font-size: 0.4rem;
-		letter-spacing: 0.08em;
-	}
-	.liner-columns {
-		display: grid;
-		grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
-		gap: 2rem;
-		padding: 1.5rem 0;
-	}
-	.salutation h2 {
-		font-size: clamp(2.4rem, 5.2vw, 4.3rem);
-		line-height: 0.98;
-		color: #392446;
-		margin: 0 0 1rem;
+	.liner h2 {
+		font-size: var(--fs-h2);
+		line-height: var(--lh-tight);
+		color: inherit;
+		margin: 0;
 		padding: 0;
 		border: 0;
 	}
-	.salutation h2 span {
-		color: #a5366f;
-	}
-	.handwritten {
-		display: block;
-		transform: rotate(-4deg);
-		color: #814166;
-		font:
-			italic 1.15rem Georgia,
-			serif;
-	}
-	.ink-arrow {
-		width: 8rem;
-		height: 2rem;
-		margin: 0.7rem 0 0 1.5rem;
-		color: #814166;
-	}
 	.description p {
 		margin: 0;
-		font-size: 0.88rem;
-		line-height: 1.8;
+		font-size: var(--fs-body);
+		line-height: var(--lh-body);
 	}
 	.description p + p {
 		margin-top: 1rem;
-	}
-	.liner-footer {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		gap: 1rem;
-		border-top: 1px dashed #59415766;
-		padding-top: 0.8rem;
-	}
-	.topics {
-		font-size: 0.59rem;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		line-height: 1.8;
-	}
-	.signature {
-		font:
-			italic 1.5rem Georgia,
-			serif;
-		transform: rotate(-8deg);
 	}
 	@media (min-width: 65rem) {
 		.channel-counter {
@@ -524,7 +358,7 @@
 	}
 	@media (max-width: 40rem) {
 		.channel-counter {
-			gap: 1.3rem;
+			gap: 1.5rem;
 		}
 		.programme {
 			padding: 0 0.7rem;
@@ -532,62 +366,25 @@
 		.avatar {
 			width: 3.7rem;
 		}
-		h1 {
-			font-size: 2.7rem;
-		}
-		.masthead .eyebrow {
-			font-size: 0.53rem;
-		}
 		.thumbnail {
-			width: 3.8rem;
+			width: 4rem;
 		}
 		.programme-tape {
-			padding: 0.65rem 0.5rem;
-			gap: 0.5rem;
+			padding: 0.75rem 0.5rem;
+			gap: 0.65rem;
 		}
-		.tape-copy strong {
-			font-size: 0.68rem;
+		.selection-mark {
+			width: 1rem;
+			height: 1rem;
 		}
 		.liner {
-			margin: 2.2rem 0.4rem 0;
-		}
-		.liner-spine {
-			width: 1.4rem;
-			padding-inline: 0.3rem;
-			font-size: 0.48rem;
-		}
-		.liner-content {
-			padding: 1.2rem 1rem;
-		}
-		.liner-header .eyebrow {
-			font-size: 0.52rem;
-		}
-		.liner-columns {
 			grid-template-columns: 1fr;
-			gap: 1.4rem;
+			gap: 1.5rem;
+			margin: 2.2rem 0.4rem 0;
+			padding: 2rem 1.5rem;
 		}
-		.salutation h2 {
-			font-size: 3.2rem;
-		}
-		.salutation {
-			position: relative;
-		}
-		.handwritten {
-			font-size: 1.05rem;
-		}
-		.ink-arrow {
-			display: none;
-		}
-		.description p {
-			font-size: 0.8rem;
-		}
-		.topics {
-			font-size: 0.53rem;
-		}
-	}
-	@media (max-width: 23rem) {
-		.load-arrow {
-			display: none;
+		.liner::after {
+			left: 0.65rem;
 		}
 	}
 	@media (prefers-reduced-motion: reduce) {

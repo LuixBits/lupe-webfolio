@@ -144,9 +144,6 @@
 						alt={resolveLocalized(shot.image.alt, locale)}
 						decoding="async"
 					/>
-					<span class="osd top">STILL · {stillIdx + 1}/{shots.length}</span>
-					{#if shot.caption}<span class="osd caption">{resolveLocalized(shot.caption, locale)}</span
-						>{/if}
 				{:else if active === 'video' && live && video}
 					{#if video.provider === 'file'}
 						<!-- svelte-ignore a11y_media_has_caption -->
@@ -175,10 +172,6 @@
 						></iframe>
 					</div>
 				{:else}
-					<span class="osd top"
-						>AV 1 · READY{#if project.channel}
-							· {project.channel.handle}{/if}</span
-					>
 					<div class="poster" class:with-image={active === 'video' && Boolean(video?.poster)}>
 						{#if active === 'video' && video?.poster}<img
 								class="poster-image"
@@ -208,7 +201,17 @@
 			onclick={power}
 			aria-label={powered ? m.tv_power_off() : m.tv_power_on()}
 			title={powered ? m.tv_power_off() : m.tv_power_on()}
-			aria-pressed={powered}><span class="power-cap" aria-hidden="true">⏻</span></button
+			aria-pressed={powered}
+			><span class="power-cap" aria-hidden="true"
+				><svg viewBox="0 0 20 20" fill="none"
+					><path
+						d="M10 2v7m-4-5a7 7 0 1 0 8 0"
+						stroke="currentColor"
+						stroke-width="1.8"
+						stroke-linecap="round"
+					/></svg
+				></span
+			></button
 		>
 		{#if showHint}
 			<span class="play-hint" bind:this={hintLabel} aria-hidden="true">{m.tv_press_play()}</span>
@@ -225,9 +228,8 @@
 	</div>
 
 	<div class="recorder">
-		<span class="brand" aria-hidden="true">LUPE · VIDEO CASSETTE RECORDER</span>
 		<div class="transport">
-			<span class="slot" aria-hidden="true">VHS · HQ</span>
+			<span class="slot" aria-hidden="true"></span>
 			<output class="display" aria-live="polite">{transport}</output>
 			{#if active === 'video' && project.videos.length > 1 && powered}
 				<button
@@ -274,16 +276,13 @@
 		</div>
 		{#if channels.length > 1}
 			<div class="channels" role="group" aria-label={m.tv_channels()}>
-				{#each channels as channel, i (channel.id)}
+				{#each channels as channel (channel.id)}
 					<button
 						type="button"
 						class="hardware channel"
 						aria-pressed={powered && active === channel.id}
 						onclick={() => tune(channel.id)}
-						><span class="channel-number" aria-hidden="true">0{i + 1}</span>{channel.label}<span
-							class="led"
-							aria-hidden="true"
-						></span></button
+						>{channel.label}<span class="led" aria-hidden="true"></span></button
 					>
 				{/each}
 			</div>
@@ -308,16 +307,10 @@
 				>{/each}
 		</div>
 	{/if}
-	{#if active === 'video' && project.videos.length > 1 && powered}
-		<div class="video-selection">
-			<span class="tape-index"
-				>{String(videoIndex + 1).padStart(2, '0')} / {String(project.videos.length).padStart(
-					2,
-					'0'
-				)}</span
-			>
-			<span>{video?.title}</span>
-		</div>
+	{#if active === 'video' && project.videos.length > 1 && powered && !project.channel}
+		<p class="media-caption">{video?.title}</p>
+	{:else if active === 'stills' && powered && shots[stillIdx]?.caption}
+		<p class="media-caption">{resolveLocalized(shots[stillIdx].caption!, locale)}</p>
 	{/if}
 </section>
 
@@ -438,7 +431,7 @@
 		position: relative;
 		margin: 0;
 		font-family: var(--font-display);
-		font-size: clamp(0.8rem, 4.8cqw, 1.3rem);
+		font-size: var(--fs-body);
 		line-height: 1.2;
 		color: #efe9f4;
 		max-width: 100%;
@@ -457,7 +450,8 @@
 		background: #eaddc7;
 		box-shadow: 0 3px 0 #8f8374;
 		font-family: var(--font-body);
-		font-size: clamp(0.6rem, 2.8cqw, 0.8rem);
+		font-size: var(--fs-small);
+		max-width: 100%;
 		font-weight: 700;
 		color: #25232a;
 		cursor: pointer;
@@ -471,29 +465,6 @@
 		box-shadow:
 			0 3px 0 #8f8374,
 			0 0 18px #f9dc9944;
-	}
-	.osd {
-		position: absolute;
-		z-index: 3;
-		left: 5%;
-		color: #94eab1;
-		font-family: var(--font-body);
-		font-size: clamp(0.48rem, 2.3cqw, 0.65rem);
-		letter-spacing: 0.08em;
-		text-shadow: 0 0 4px #9eeaac6b;
-		pointer-events: none;
-	}
-	.osd.top {
-		top: 5%;
-	}
-	.caption {
-		bottom: 5%;
-		max-width: 88%;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		background: #0006;
-		padding: 0.12em 0.4em;
 	}
 	.power {
 		position: absolute;
@@ -524,13 +495,15 @@
 			0 0 0 1px #0b161c,
 			0 0 10px #70e8de26,
 			inset 0 1px 0 #ffffff33;
-		font:
-			12px Arial,
-			sans-serif;
+
 		color: #d6fff7;
 		transition:
 			background 160ms,
 			box-shadow 160ms;
+	}
+	.power-cap svg {
+		width: 14px;
+		height: 14px;
 	}
 	.power:hover .power-cap,
 	.power:focus-visible .power-cap {
@@ -551,7 +524,7 @@
 		top: -2.5rem;
 		transform: rotate(-8deg);
 		font:
-			italic 1.05rem Georgia,
+			italic var(--fs-body) Georgia,
 			serif;
 		color: #f7d89c;
 		z-index: 5;
@@ -570,19 +543,11 @@
 	.recorder {
 		position: relative;
 		margin: -4% 5% 0 3%;
-		padding: 1.2rem 0.85rem 0.55rem;
+		padding: 0.75rem 0.85rem 0.55rem;
 		border: 1px solid #51515d;
 		border-radius: 4px;
 		background: linear-gradient(#41434b, #252730 10%, #22242c 80%, #13151c);
 		box-shadow: 0 12px 20px #0006;
-	}
-	.brand {
-		position: absolute;
-		top: 0.3rem;
-		left: 0.85rem;
-		color: #aaa7b3;
-		font-size: 0.38rem;
-		letter-spacing: 0.15em;
 	}
 	.transport {
 		display: flex;
@@ -596,7 +561,6 @@
 		border-bottom: 1px solid #4c4d55;
 		height: 22px;
 		color: #8c8695;
-		font-size: 0.4rem;
 		letter-spacing: 0.13em;
 		text-align: center;
 		padding: 5px;
@@ -608,7 +572,7 @@
 		background: #0c1716;
 		border: 1px solid #343e3d;
 		letter-spacing: 0.12em;
-		font-size: 0.6rem;
+		font-size: var(--fs-small);
 		text-shadow: 0 0 8px #a3ebc633;
 		white-space: nowrap;
 	}
@@ -627,7 +591,7 @@
 		box-shadow:
 			inset 0 1px 0 #ffffff25,
 			0 0 8px #78e9d315;
-		font: 700 0.65rem var(--font-body);
+		font: 700 var(--fs-small) var(--font-body);
 		cursor: pointer;
 		transition:
 			background 160ms,
@@ -669,10 +633,6 @@
 		margin-top: 0.65rem;
 		padding-top: 0.65rem;
 		border-top: 1px solid #51515b66;
-	}
-	.channel-number {
-		font-size: 0.48rem;
-		color: #9aadb7;
 	}
 	.led {
 		width: 5px;
@@ -729,24 +689,12 @@
 		width: 100%;
 		height: auto;
 	}
-	.video-selection {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		margin: 1rem 0.5rem 0;
-		font-size: 0.7rem;
+	.media-caption {
+		margin: 0.8rem 0.5rem 0;
+		font-size: var(--fs-small);
 		color: var(--fg-muted);
 	}
-	.video-selection span {
-		flex: 1;
-	}
-	.video-selection .tape-index {
-		flex: none;
-		padding: 0.35rem 0.45rem;
-		border: 1px solid #35e6e64d;
-		color: var(--sub-bg);
-		font-size: 0.6rem;
-	}
+
 	button:focus-visible {
 		outline: 2px solid var(--sub-bg);
 		outline-offset: 4px;
@@ -757,27 +705,25 @@
 			transition: none;
 		}
 	}
+	@container (max-width: 20rem) {
+		.poster-art {
+			display: none;
+		}
+	}
 	@media (max-width: 40rem) {
 		.recorder {
-			padding: 1.2rem 0.55rem 0.45rem;
-		}
-		.brand {
-			left: 0.55rem;
-			font-size: 0.33rem;
+			padding: 0.65rem 0.55rem 0.45rem;
 		}
 		.transport {
 			gap: 0.2rem;
 		}
 		.display {
-			font-size: 0.5rem;
 			padding: 0.35rem;
 		}
 		.slot {
 			min-width: 0;
-			font-size: 0.3rem;
 		}
 		.hardware {
-			font-size: 0.58rem;
 			padding: 0.4rem;
 		}
 		.poster {
@@ -789,7 +735,6 @@
 		}
 		.play-hint {
 			right: 3%;
-			font-size: 0.95rem;
 		}
 	}
 </style>

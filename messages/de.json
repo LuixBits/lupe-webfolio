@@ -88,9 +88,7 @@
 	"channel_programme": "Das Programm",
 	"channel_choose_tape": "Kassette wählen, dann Play drücken.",
 	"channel_load_video": "Video laden: {title}",
-	"channel_loaded": "Eingelegt",
 	"channel_visit": "Zum LuixBits-Kanal",
 	"channel_watch_youtube": "Dieses Video auf YouTube ansehen",
-	"channel_about": "Über den Kanal",
-	"channel_from_workbench": "von meiner Werkbank"
+	"projects_back": "Zurück zu den Projekten"
 }
