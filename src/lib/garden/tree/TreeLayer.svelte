@@ -106,7 +106,35 @@
 	let deepRuns = $state<{ d: string }[]>([]);
 	let mushrooms = $state<{ x: number; y: number; s: number; flip: boolean }[]>([]);
 	let perches = $state<{ x: number; y: number; flip: boolean; delay: number }[]>([]);
-	let squirrel = $state<{ x: number; y: number; flip: boolean } | null>(null);
+	let trunkParams = $state<{
+		xTop: number;
+		xMain: number;
+		bendY0: number;
+		bendY1: number;
+		phase: number;
+		sizeK: number;
+		topY: number;
+		groundY: number;
+	} | null>(null);
+	let sqY = $state(0);
+	let sqRun = $state(false);
+	let sqDir = $state<'up' | 'down'>('up');
+	let forestFar = $state<{ x: number; y: number; d: string }[]>([]);
+	let forestNear = $state<{ x: number; y: number; d: string }[]>([]);
+	let distantTrunks = $state<{ d: string; w: number; o: number }[]>([]);
+	let grassTufts = $state<
+		{
+			x: number;
+			kind: 'grass' | 'daisy' | 'bell' | 'seed';
+			s: number;
+			sd: number;
+			sdel: number;
+			flip: boolean;
+			delay: number;
+		}[]
+	>([]);
+	let logPiece = $state<{ x: number; rot: number } | null>(null);
+	let fallenLeaves = $state<{ x: number; y: number; a: number; s: number }[]>([]);
 	let worm = $state<{ x: number; y: number } | null>(null);
 	let flyers = $state<{ x: number; y: number; dur: number; delay: number }[]>([]);
 	let butterfly = $state<{ x: number; y: number } | null>(null);
@@ -115,6 +143,9 @@
 	const uid = $derived(`tl-${hashSeed(seed).toString(36)}`);
 	const clipHeight = $derived(Math.max(0, trunkTopYS + (groundYS + 70 - trunkTopYS) * progress));
 	const underClipH = $derived(Math.max(0, (H - groundYS + 60) * underProgress));
+
+	let sqCool = 0;
+	let sqRunT: ReturnType<typeof setTimeout> | undefined;
 
 	// rustle bookkeeping (decorative, managed outside Svelte state)
 	let rustlePts: { ci: number; x: number; y: number }[] = [];
@@ -132,6 +163,26 @@
 		cx: number;
 		cy: number;
 	}
+
+	type TrunkParams = NonNullable<typeof trunkParams>;
+	function trunkXOf(p: TrunkParams, y: number): number {
+		const b = Math.min(1, Math.max(0, (y - p.bendY0) / (p.bendY1 - p.bendY0)));
+		const bs = b * b * (3 - 2 * b);
+		return (
+			p.xTop +
+			(p.xMain - p.xTop) * bs +
+			Math.sin(((y - p.topY) / Math.max(1, p.groundY - p.topY)) * Math.PI * 1.3 + p.phase) *
+				9 *
+				p.sizeK
+		);
+	}
+	function halfWOf(p: TrunkParams, y: number): number {
+		const t = Math.min(1, Math.max(0, (y - p.topY) / (p.groundY - p.topY)));
+		return (14 + 32 * t) * p.sizeK;
+	}
+	const sqX = $derived(
+		trunkParams ? trunkXOf(trunkParams, sqY) + halfWOf(trunkParams, sqY) * 0.74 : 0
+	);
 
 	function measure(): Record<string, Anchor> | null {
 		const parent = root?.parentElement;
@@ -198,6 +249,17 @@
 					9 *
 					sizeK
 			);
+		};
+
+		trunkParams = {
+			xTop,
+			xMain,
+			bendY0,
+			bendY1,
+			phase: sPhase,
+			sizeK,
+			topY: trunkTopY,
+			groundY
 		};
 
 		const f = (n: number) => +n.toFixed(1);
@@ -494,6 +556,75 @@
 				r: +(1.5 + rand() * 1.1).toFixed(1),
 				dur: +(10 + rand() * 8).toFixed(1),
 				delay: +(-14 * rand()).toFixed(1)
+			}));
+			// ---------- distant forest behind the tree ----------
+			const horizon = trunkTopY + 150;
+			const far: typeof forestFar = [];
+			const nFar = Math.max(7, Math.round(W / 150));
+			for (let i = 0; i < nFar; i++) {
+				const x = W * ((i + rand() * 0.7) / nFar);
+				far.push({
+					x: f(x),
+					y: f(horizon - 4 - rand() * 26),
+					d: blobPath(rand, 34 + rand() * 44, 20 + rand() * 16, 9)
+				});
+			}
+			forestFar = far;
+			const near: typeof forestNear = [];
+			const nNear = Math.max(4, Math.round(W / 260));
+			for (let i = 0; i < nNear; i++) {
+				const x = W * ((i + 0.3 + rand() * 0.5) / nNear);
+				near.push({
+					x: f(x),
+					y: f(horizon + 12 - rand() * 14),
+					d: blobPath(rand, 44 + rand() * 52, 24 + rand() * 18, 10)
+				});
+			}
+			forestNear = near;
+			// faint fellow trunks receding into the woods
+			const dts: typeof distantTrunks = [];
+			const nT2 = Math.max(6, Math.round(W / 170));
+			for (let i = 0; i < nT2; i++) {
+				const x = W * ((i + rand() * 0.8) / nT2);
+				if (Math.abs(x - xMain) < 150 && Math.abs(x - xTop) < 220) continue;
+				const lean = (rand() * 2 - 1) * 16;
+				const w2 = 5 + rand() * 11;
+				const yTop2 = horizon + 6 + rand() * 30;
+				dts.push({
+					d: `M ${f(x - w2 / 2)} ${f(groundY)} L ${f(x - w2 * 0.32 + lean)} ${f(yTop2)} L ${f(
+						x + w2 * 0.32 + lean
+					)} ${f(yTop2)} L ${f(x + w2 / 2)} ${f(groundY)} Z`,
+					w: w2,
+					o: +(0.05 + rand() * 0.07).toFixed(3)
+				});
+			}
+			distantTrunks = dts;
+			// ---------- the grassy verge where trunk becomes root ----------
+			const tufts: typeof grassTufts = [];
+			const nG = Math.max(10, Math.round(W / 95));
+			for (let i = 0; i < nG; i++) {
+				const x = W * ((i + rand() * 0.8) / nG);
+				const roll = rand();
+				tufts.push({
+					x: f(x),
+					kind: roll > 0.86 ? 'daisy' : roll > 0.74 ? 'bell' : roll > 0.64 ? 'seed' : 'grass',
+					s: +(0.75 + rand() * 0.5).toFixed(2),
+					sd: +(5.4 + rand() * 2.4).toFixed(1),
+					sdel: +(-6 * rand()).toFixed(1),
+					flip: rand() > 0.5,
+					delay: Math.round(i * 55 + rand() * 120)
+				});
+			}
+			grassTufts = tufts;
+			logPiece = {
+				x: f(xMain + (rand() > 0.5 ? 1 : -1) * (240 + rand() * 90)),
+				rot: +((rand() * 2 - 1) * 4).toFixed(1)
+			};
+			fallenLeaves = Array.from({ length: 5 }, () => ({
+				x: f(W * (0.08 + rand() * 0.84)),
+				y: f(groundY - 3 - rand() * 4),
+				a: f(80 + rand() * 40 * (rand() > 0.5 ? 1 : -1)),
+				s: +(0.7 + rand() * 0.4).toFixed(2)
 			}));
 		}
 
@@ -902,14 +1033,7 @@
 					y: f(myc.cy + 40)
 				};
 			}
-			const sqY = (a['notes']?.y1 ?? bendY1) + 90;
-			const sqT = Math.min(1, Math.max(0, (sqY - trunkTopY) / (groundY - trunkTopY)));
-			const sqSide = rand() > 0.5 ? 1 : -1;
-			squirrel = {
-				x: f(trunkXAt(sqY) + sqSide * (14 + 32 * sqT) * sizeK * 0.8),
-				y: f(sqY),
-				flip: sqSide < 0
-			};
+			if (!sqY) sqY = (a['notes']?.y1 ?? bendY1) + 90;
 			flyers = [
 				{ x: f(W * 0.6), y: 66, dur: 36, delay: -8 },
 				{ x: f(W * 0.26), y: 108, dur: 47, delay: -22 }
@@ -954,6 +1078,27 @@
 			underProgress = instant
 				? 1
 				: Math.min(1, Math.max(0, (tipY - groundYS) / Math.max(1, H - groundYS)));
+			// keep the squirrel in view (it never crosses the ground)
+			if (!instant && trunkParams && sqY) {
+				const viewTop = window.scrollY - layerPageTop;
+				const lo = Math.max(trunkParams.topY + 90, viewTop + 90);
+				const hi = Math.min(trunkParams.groundY - 70, viewTop + window.innerHeight - 150);
+				if (lo < hi) {
+					if (sqY < lo) {
+						sqY = lo;
+						sqDir = 'down';
+						sqRun = true;
+						clearTimeout(sqRunT);
+						sqRunT = setTimeout(() => (sqRun = false), 720);
+					} else if (sqY > hi) {
+						sqY = hi;
+						sqDir = 'up';
+						sqRun = true;
+						clearTimeout(sqRunT);
+						sqRunT = setTimeout(() => (sqRun = false), 720);
+					}
+				}
+			}
 		};
 		const schedule = () => {
 			if (!raf) raf = requestAnimationFrame(update);
@@ -997,6 +1142,28 @@
 			const px = mx - layerLeft;
 			const py = my + window.scrollY - layerPageTop;
 			const now = performance.now();
+			// the squirrel bolts along the trunk, away from the cursor
+			if (trunkParams && sqY) {
+				const dx2 = px - sqX;
+				const dy2 = py - sqY;
+				if (dx2 * dx2 + dy2 * dy2 < 230 * 230 && (sqCool ?? 0) < now) {
+					sqCool = now + 500;
+					let dir = py > sqY ? -1 : 1;
+					const viewTop = window.scrollY - layerPageTop;
+					const lo = Math.max(trunkParams.topY + 90, viewTop + 90);
+					const hi = Math.min(trunkParams.groundY - 70, viewTop + window.innerHeight - 150);
+					let target = sqY + dir * 230;
+					if (target < lo || target > hi) {
+						dir = -dir;
+						target = sqY + dir * 230;
+					}
+					sqY = Math.min(hi, Math.max(lo, target));
+					sqDir = dir < 0 ? 'up' : 'down';
+					sqRun = true;
+					clearTimeout(sqRunT);
+					sqRunT = setTimeout(() => (sqRun = false), 720);
+				}
+			}
 			for (const t of rustlePts) {
 				const d2 = (t.x - px) * (t.x - px) + (t.y - py) * (t.y - py);
 				if (d2 < 120 * 120 && (rustleCool.get(t.ci) ?? 0) < now) {
@@ -1080,17 +1247,25 @@
 
 {#snippet squirrelShape()}
 	<g class="sq-tailg">
-		<path class="sq-tail" d="M -3 -3 C -14 -4 -19 -14 -12 -21 C -6 -26 2 -22 1 -15" />
+		<path
+			class="sq-tail"
+			d="M 5 7 C 17 4 21 -10 13 -19 C 7 -25 -2 -23 0 -15 C 1.5 -9 8 -8 10 -12"
+		/>
+		<path class="sq-tail2" d="M 6 4 C 14 1 17 -9 12 -15" />
 	</g>
 	<path
 		class="sq-body"
-		d="M 0 0 C 8 1 12.5 -5 10 -12 C 8 -17 2 -18.5 -1.5 -14.5 C -4.5 -10.5 -3.5 -3.5 0 0 Z"
+		d="M 0 9 C -8 7 -11 -1 -8 -11 C -6 -18 -2 -23 3 -25 C 7 -26 9 -22 7 -18 C 10 -13 10 -3 5 4 C 3 7 1 9 0 9 Z"
 	/>
-	<ellipse class="sq-belly" cx="3.2" cy="-7.6" rx="3.2" ry="4.6" />
-	<circle class="sq-body" cx="8.6" cy="-15.6" r="4.1" />
-	<path class="sq-ear" d="M 6.4 -18.8 l 1.2 -3.6 l 2.6 2.6 z" />
-	<circle class="sq-eye" cx="9.8" cy="-16.4" r="0.9" />
-	<path class="sq-paw" d="M 6.5 -8.5 q 3 0.5 4 2.5" />
+	<path class="sq-belly" d="M -4 5 C -7.5 1 -7.5 -7 -4.5 -13 C -2.5 -8 -2.5 -1 -4 5 Z" />
+	<circle class="sq-body" cx="1.5" cy="-26" r="5" />
+	<path class="sq-ear" d="M -1.8 -30 l 0.8 -4.4 l 3.4 3 z" />
+	<path class="sq-earIn" d="M -0.9 -30.2 l 0.5 -2.4 l 1.8 1.7 z" />
+	<circle class="sq-eye" cx="-0.6" cy="-27" r="1.2" />
+	<circle class="sq-glint" cx="-1" cy="-27.4" r="0.45" />
+	<path class="sq-nose" d="M -4.4 -25.4 q -1.2 0.4 -1.6 1.2" />
+	<path class="sq-paw" d="M -7.5 -9 q -4 0.6 -5.2 3.4 M -5.6 0 q -4 0.8 -5.2 3.6" />
+	<path class="sq-foot" d="M -1 8.6 q -4 1 -6.2 0" />
 {/snippet}
 
 {#snippet wormShape()}
@@ -1106,22 +1281,98 @@
 	<circle class="mu-spot" cx="2.4" cy="-10.6" r="0.9" />
 {/snippet}
 
+{#snippet grassShape()}
+	<path class="gr-b1" d="M -8 0 Q -9.5 -11 -14 -17" />
+	<path class="gr-b2" d="M -3 0 Q -3 -14 -6 -22" />
+	<path class="gr-b1" d="M 2 0 Q 3.5 -12 8 -19" />
+	<path class="gr-b2" d="M 7 0 Q 8.5 -8 13 -12" />
+{/snippet}
+
+{#snippet daisyShape()}
+	<path class="gr-b2" d="M -6 0 Q -7 -9 -10 -14" />
+	<path class="gr-stem" d="M 0 0 Q 1 -10 0.5 -18" />
+	<g transform="translate(0.5 -20)">
+		{#each [0, 45, 90, 135, 180, 225, 270, 315] as pa (pa)}
+			<ellipse class="gr-petal" cx="0" cy="-4.6" rx="1.9" ry="4.6" transform="rotate({pa})" />
+		{/each}
+		<circle class="gr-disc" r="2.4" />
+	</g>
+	<path class="gr-b1" d="M 5 0 Q 6 -7 9 -11" />
+{/snippet}
+
+{#snippet bellShape()}
+	<path class="gr-b1" d="M -5 0 Q -6 -8 -9 -12" />
+	<path class="gr-stem" d="M 0 0 Q -1 -9 0 -15 Q 1.5 -17 3.5 -17.5" />
+	<g transform="translate(4 -16.5) rotate(14)">
+		<path
+			class="gr-bell"
+			d="M 0 0 C -3 0.5 -3.8 3.4 -2.8 6 L -1.4 5.2 L 0 6.2 L 1.4 5.2 L 2.8 6 C 3.8 3.4 3 0.5 0 0 Z"
+		/>
+	</g>
+	<path class="gr-b2" d="M 4 0 Q 5 -6 8 -9" />
+{/snippet}
+
+{#snippet seedShape()}
+	<path class="gr-stem" d="M 0 0 Q 0.5 -8 0 -15" />
+	<g transform="translate(0 -17)">
+		{#each [0, 45, 90, 135, 180, 225, 270, 315] as pa (pa)}
+			<line
+				class="gr-spoke"
+				x1="0"
+				y1="0"
+				x2={7 * Math.cos((pa * Math.PI) / 180)}
+				y2={7 * Math.sin((pa * Math.PI) / 180)}
+			/>
+			<circle
+				class="gr-puff"
+				cx={7 * Math.cos((pa * Math.PI) / 180)}
+				cy={7 * Math.sin((pa * Math.PI) / 180)}
+				r="1.5"
+			/>
+		{/each}
+		<circle class="gr-core" r="1.6" />
+	</g>
+	<path class="gr-b1" d="M -5 0 Q -6 -7 -9 -10" />
+{/snippet}
+
+{#snippet logShape()}
+	<path
+		class="log-body"
+		d="M -34 0 C -36 -4 -36 -10 -33 -13 L 26 -16 C 30 -12 30 -4 27 -1 L -34 0 Z"
+	/>
+	<ellipse class="log-end" cx="27" cy="-8.5" rx="4.6" ry="7.6" />
+	<ellipse class="log-ring" cx="27" cy="-8.5" rx="2.6" ry="4.4" />
+	<ellipse class="log-core" cx="27" cy="-8.5" rx="1" ry="1.7" />
+	<path class="log-crack" d="M -26 -3 q 8 -1.5 14 -0.5 M -12 -11 q 9 -1 15 0.5" />
+	<path class="log-stub" d="M -6 -13 L -2 -20 L 2 -19 L 0 -12.5 Z" />
+	<path class="gr-b2" d="M 30 -2 Q 32 -8 36 -11" />
+	<path class="gr-b1" d="M -38 0 Q -40 -7 -44 -10" />
+{/snippet}
+
 {#snippet flyerShape()}
 	<path class="flyer-w" d="M0 0 Q 6 -5 12 0 M12 0 Q 18 -5 24 0" />
 	<path class="flyer-w" d="M34 14 Q 39 10 44 14 M44 14 Q 49 10 54 14" />
 {/snippet}
 
+{#snippet bflyWing()}
+	<path class="bf-fore" d="M -1.5 -2 C -10 -13 -22 -14.5 -24.5 -6.5 C -26 -1 -16 2 -1.5 0.6 Z" />
+	<path class="bf-hind" d="M -1.5 1.6 C -12 1 -18.5 6 -16 11.2 C -13.5 15.5 -5 12.8 -1.5 5.6 Z" />
+	<circle class="bf-spot" cx="-15" cy="-6.4" r="2.3" />
+	<circle class="bf-spot2" cx="-10" cy="6.8" r="1.4" />
+	<path
+		class="bf-vein"
+		d="M -3.5 -2.4 C -10 -7 -16 -9 -21 -8 M -3.5 -0.6 C -10 -1.4 -15 0 -18.5 2"
+	/>
+{/snippet}
+
 {#snippet bflyShape()}
-	<g class="bf-wing">
-		<path d="M -1 -3 C -8 -11 -17 -12 -18 -6.5 C -19 -2 -12 0 -1 -0.5 Z" />
-		<path d="M -1 0.8 C -9 1 -13 5 -11 8.8 C -9 11.8 -3 9 -1 3.6 Z" />
-	</g>
-	<g transform="scale(-1 1)" class="bf-wing">
-		<path d="M -1 -3 C -8 -11 -17 -12 -18 -6.5 C -19 -2 -12 0 -1 -0.5 Z" />
-		<path d="M -1 0.8 C -9 1 -13 5 -11 8.8 C -9 11.8 -3 9 -1 3.6 Z" />
-	</g>
-	<ellipse class="bf-body" rx="1.5" ry="5.4" />
-	<circle class="bf-body" cy="-6" r="1.7" />
+	<g class="bf-wingL">{@render bflyWing()}</g>
+	<g transform="scale(-1 1)"><g class="bf-wingR">{@render bflyWing()}</g></g>
+	<ellipse class="bf-body" rx="1.4" ry="5.8" />
+	<circle class="bf-body" cy="-6.6" r="1.8" />
+	<path class="bf-ant" d="M -0.8 -7.8 Q -3.2 -11.5 -5.6 -12.4 M 0.8 -7.8 Q 3.2 -11.5 5.6 -12.4" />
+	<circle class="bf-antTip" cx="-5.8" cy="-12.5" r="0.7" />
+	<circle class="bf-antTip" cx="5.8" cy="-12.5" r="0.7" />
 {/snippet}
 
 {#snippet ladybugShape()}
@@ -1153,7 +1404,7 @@
 				{/each}
 				{#if butterfly}
 					<g transform="translate({butterfly.x} {butterfly.y})">
-						<g class="bflyg">{@render bflyShape()}</g>
+						<g class="bfly-x"><g class="bfly-y"><g class="bflyg">{@render bflyShape()}</g></g></g>
 					</g>
 				{/if}
 				{#if ladybug}
@@ -1193,6 +1444,25 @@
 
 				<!-- the atmosphere journey: sky → forest → soil → rock -->
 				<rect width={W} height={Math.max(H, 1)} fill="url(#{uid}-atmo)" />
+				<!-- distant forest, hazy behind everything -->
+				<g>
+					{#each forestFar as ft, i (i)}
+						<g transform="translate({ft.x} {ft.y})">
+							<rect x="-2.6" y="4" width="5.2" height="30" rx="2" class="forestFarT" />
+							<path d={ft.d} class="forestFar" />
+						</g>
+					{/each}
+					{#each forestNear as ft, i (i)}
+						<g transform="translate({ft.x} {ft.y})">
+							<rect x="-3.4" y="6" width="6.8" height="40" rx="2.4" class="forestNearT" />
+							<path d={ft.d} class="forestNear" />
+						</g>
+					{/each}
+					{#each distantTrunks as dt, i (i)}
+						<path d={dt.d} class="forestTrunk" opacity={dt.o} />
+					{/each}
+				</g>
+
 				{#each strata as sd, i (i)}
 					<path d={sd} class="stratum" fill="none" />
 				{/each}
@@ -1242,14 +1512,46 @@
 							<path d={m.d2} class="mossF" transform="translate(-2 -3)" />
 						</g>
 					{/each}
-					{#if squirrel}
-						<g transform="translate({squirrel.x} {squirrel.y}) scale({squirrel.flip ? -1 : 1} 1)">
-							{@render squirrelShape()}
+					{#if trunkParams && sqY}
+						<g
+							class="sq-holder"
+							class:running={sqRun}
+							style="transform: translate({sqX}px, {sqY}px)"
+						>
+							<g class="sq-pose" class:headdown={sqRun && sqDir === 'down'}>
+								<g transform="scale(1.18)">{@render squirrelShape()}</g>
+							</g>
 						</g>
 					{/if}
 					{#each zones.filter((z) => z.clipped) as z (z.key)}
 						<g class="zone" class:on={zoneOn(z)}>
 							{#each z.units as u, i (i)}{@render unitG(u)}{/each}
+						</g>
+					{/each}
+				</g>
+
+				<!-- the grassy verge where trunk turns to root -->
+				<g class="zone" class:on={isOn('ground')}>
+					{#if logPiece}
+						<g transform="translate({logPiece.x} {groundYS - 4}) rotate({logPiece.rot})">
+							<g class="grow" style="--gd:260ms">{@render logShape()}</g>
+						</g>
+					{/if}
+					{#each grassTufts as t, i (i)}
+						<g transform="translate({t.x} {groundYS - 1}) scale({t.flip ? -t.s : t.s} {t.s})">
+							<g class="grow" style="--gd:{t.delay}ms">
+								<g class="sway" style="--sd:{t.sd}s; --sdel:{t.sdel}s">
+									{#if t.kind === 'daisy'}{@render daisyShape()}
+									{:else if t.kind === 'bell'}{@render bellShape()}
+									{:else if t.kind === 'seed'}{@render seedShape()}
+									{:else}{@render grassShape()}{/if}
+								</g>
+							</g>
+						</g>
+					{/each}
+					{#each fallenLeaves as fl2, i (i)}
+						<g transform="translate({fl2.x} {fl2.y}) rotate({fl2.a}) scale({fl2.s})">
+							<path d={LEAF_D} class="leafp dark" opacity="0.8" />
 						</g>
 					{/each}
 				</g>
@@ -1409,27 +1711,146 @@
 	}
 	.sq-tail {
 		fill: none;
-		stroke: #8a6544;
-		stroke-width: 7;
+		stroke: #8a6142;
+		stroke-width: 8.5;
 		stroke-linecap: round;
+	}
+	.sq-tail2 {
+		fill: none;
+		stroke: #b08a5e;
+		stroke-width: 3.2;
+		stroke-linecap: round;
+		opacity: 0.85;
 	}
 	.sq-body {
 		fill: #96714d;
 	}
 	.sq-belly {
-		fill: #c8a87e;
+		fill: #cfae82;
 	}
 	.sq-ear {
-		fill: #8a6544;
+		fill: #8a6142;
+	}
+	.sq-earIn {
+		fill: #c79b6f;
 	}
 	.sq-eye {
-		fill: #2c2417;
+		fill: #241d12;
 	}
-	.sq-paw {
+	.sq-glint {
+		fill: #f4ead8;
+	}
+	.sq-nose {
+		fill: none;
+		stroke: #4f3a24;
+		stroke-width: 1;
+		stroke-linecap: round;
+	}
+	.sq-paw,
+	.sq-foot {
 		fill: none;
 		stroke: #6f5236;
-		stroke-width: 1.2;
+		stroke-width: 1.4;
 		stroke-linecap: round;
+	}
+	.sq-pose {
+		transform-origin: -1px -12px;
+	}
+	.forestFar {
+		fill: #c2d2c1;
+		opacity: 0.5;
+	}
+	.forestFarT {
+		fill: #a9baa8;
+		opacity: 0.45;
+	}
+	.forestNear {
+		fill: #a9c0a5;
+		opacity: 0.55;
+	}
+	.forestNearT {
+		fill: #8ba187;
+		opacity: 0.5;
+	}
+	.forestTrunk {
+		fill: #66755f;
+	}
+	.gr-b1 {
+		fill: none;
+		stroke: #6bbf7b;
+		stroke-width: 2;
+		stroke-linecap: round;
+		opacity: 0.9;
+	}
+	.gr-b2 {
+		fill: none;
+		stroke: #3f6d4e;
+		stroke-width: 2.1;
+		stroke-linecap: round;
+	}
+	.gr-stem {
+		fill: none;
+		stroke: #3f6d4e;
+		stroke-width: 1.7;
+		stroke-linecap: round;
+	}
+	.gr-petal {
+		fill: #fbfdf4;
+		stroke: #4f8a63;
+		stroke-width: 0.5;
+	}
+	.gr-disc {
+		fill: #d9a441;
+	}
+	.gr-bell {
+		fill: #cfe2f2;
+		stroke: #4f8a63;
+		stroke-width: 0.7;
+		stroke-linejoin: round;
+	}
+	.gr-spoke {
+		stroke: #3f6d4e;
+		stroke-width: 0.8;
+		opacity: 0.75;
+	}
+	.gr-puff {
+		fill: #f4f8ea;
+		stroke: #4f8a63;
+		stroke-width: 0.45;
+	}
+	.gr-core {
+		fill: #3f6d4e;
+	}
+	.log-body {
+		fill: #6d5b41;
+		stroke: #4a3d2a;
+		stroke-width: 1;
+		stroke-linejoin: round;
+	}
+	.log-end {
+		fill: #a68d64;
+		stroke: #4a3d2a;
+		stroke-width: 0.9;
+	}
+	.log-ring {
+		fill: none;
+		stroke: #7c6746;
+		stroke-width: 1;
+	}
+	.log-core {
+		fill: #4a3d2a;
+	}
+	.log-crack {
+		fill: none;
+		stroke: #443723;
+		stroke-width: 1;
+		stroke-linecap: round;
+		opacity: 0.7;
+	}
+	.log-stub {
+		fill: #5d4c35;
+		stroke: #443723;
+		stroke-width: 0.8;
 	}
 	.worm {
 		fill: none;
@@ -1463,13 +1884,43 @@
 		stroke-linecap: round;
 		opacity: 0.55;
 	}
-	.bf-wing {
-		fill: #f2f7ec;
+	.bf-fore {
+		fill: #f4e9c6;
+		stroke: #a8732c;
+		stroke-width: 0.8;
+		stroke-linejoin: round;
+	}
+	.bf-hind {
+		fill: #eaf2dc;
 		stroke: #4f8a63;
 		stroke-width: 0.7;
+		stroke-linejoin: round;
+	}
+	.bf-spot {
+		fill: #a8732c;
+		opacity: 0.85;
+	}
+	.bf-spot2 {
+		fill: #4f8a63;
+		opacity: 0.7;
+	}
+	.bf-vein {
+		fill: none;
+		stroke: #a8732c;
+		stroke-width: 0.55;
+		opacity: 0.6;
 	}
 	.bf-body {
-		fill: #3f6d4e;
+		fill: #3f4030;
+	}
+	.bf-ant {
+		fill: none;
+		stroke: #3f4030;
+		stroke-width: 0.7;
+		stroke-linecap: round;
+	}
+	.bf-antTip {
+		fill: #3f4030;
 	}
 	.lbg-body {
 		fill: #bf5a45;
@@ -1567,9 +2018,44 @@
 		.bflyg {
 			animation: tl-bob 6.5s ease-in-out infinite;
 		}
-		.bf-wing {
-			animation: tl-flap 2.8s ease-in-out infinite;
+		.bfly-x {
+			animation: tl-wanderx 10.5s ease-in-out infinite alternate;
+		}
+		.bfly-y {
+			animation: tl-wandery 6.8s ease-in-out infinite alternate;
+		}
+		.bf-wingL,
+		.bf-wingR {
+			animation: tl-flap 2.6s ease-in-out infinite;
 			transform-origin: 0px 0px;
+		}
+		.sq-holder {
+			transition: transform 660ms cubic-bezier(0.3, 0.85, 0.3, 1);
+		}
+		.sq-pose {
+			transition: transform 220ms ease;
+		}
+		.sq-pose.headdown {
+			transform: rotate(180deg);
+		}
+		.sq-holder.running .sq-tailg {
+			animation-duration: 0.9s;
+		}
+	}
+	@keyframes tl-wanderx {
+		from {
+			transform: translateX(-34px);
+		}
+		to {
+			transform: translateX(30px);
+		}
+	}
+	@keyframes tl-wandery {
+		from {
+			transform: translateY(-20px);
+		}
+		to {
+			transform: translateY(16px);
 		}
 	}
 	@keyframes tl-hop {
