@@ -7,7 +7,11 @@
 	import TapeArtwork from './TapeArtwork.svelte';
 	import { projectNavigation, type ProjectNavigation } from './navigation';
 
-	let { project, locale }: { project: Project; locale: string } = $props();
+	let {
+		project,
+		locale,
+		videoIndex = $bindable(0)
+	}: { project: Project; locale: string; videoIndex?: number } = $props();
 	const navigation = getContext<ProjectNavigation | undefined>(projectNavigation);
 	const shots = $derived(project.screenshots);
 	const demo = $derived(project.demo?.embed);
@@ -24,7 +28,6 @@
 	let powered = $state(true);
 	let live = $state(false);
 	let stillIdx = $state(0);
-	let videoIdx = $state(0);
 	let signalVersion = $state(0);
 	let revealDuration = $state(820);
 	let shell = $state<HTMLDivElement>();
@@ -32,7 +35,7 @@
 	let hintLabel = $state<HTMLSpanElement>();
 	let hintPath = $state('');
 	let hintViewBox = $state('0 0 660 510');
-	const video = $derived(project.videos[videoIdx]);
+	const video = $derived(project.videos[videoIndex]);
 	const showHint = $derived(powered && !live && active !== 'stills');
 	const feedTitle = $derived(
 		active === 'video'
@@ -110,11 +113,20 @@
 		await tick();
 		playButton?.focus({ preventScroll: true });
 	}
-	function nextVideo(direction: number) {
-		videoIdx = (videoIdx + direction + project.videos.length) % project.videos.length;
+	export function selectVideo(index: number) {
+		if (!project.videos[index]) return;
+		videoIndex = index;
+		active = 'video';
+		powered = true;
 		live = false;
 		revealDuration = 460;
 		signalVersion += 1;
+	}
+	export function focusPlay() {
+		playButton?.focus({ preventScroll: true });
+	}
+	function nextVideo(direction: number) {
+		selectVideo((videoIndex + direction + project.videos.length) % project.videos.length);
 	}
 </script>
 
@@ -163,14 +175,19 @@
 						></iframe>
 					</div>
 				{:else}
-					<span class="osd top">AV 1 · READY</span>
-					<div class="poster">
+					<span class="osd top"
+						>AV 1 · READY{#if project.channel}
+							· {project.channel.handle}{/if}</span
+					>
+					<div class="poster" class:with-image={active === 'video' && Boolean(video?.poster)}>
 						{#if active === 'video' && video?.poster}<img
 								class="poster-image"
 								src={video.poster}
 								alt=""
 							/>{/if}
-						<div class="poster-art"><TapeArtwork {project} /></div>
+						{#if active !== 'video' || !video?.poster}
+							<div class="poster-art"><TapeArtwork {project} /></div>
+						{/if}
 						<p class="feed-title">{feedTitle}</p>
 						<button class="play" type="button" bind:this={playButton} onclick={() => (live = true)}
 							><span aria-hidden="true">▶</span>
@@ -190,7 +207,8 @@
 			type="button"
 			onclick={power}
 			aria-label={powered ? m.tv_power_off() : m.tv_power_on()}
-			aria-pressed={powered}><span aria-hidden="true">⏻</span></button
+			title={powered ? m.tv_power_off() : m.tv_power_on()}
+			aria-pressed={powered}><span class="power-cap" aria-hidden="true">⏻</span></button
 		>
 		{#if showHint}
 			<span class="play-hint" bind:this={hintLabel} aria-hidden="true">{m.tv_press_play()}</span>
@@ -211,11 +229,28 @@
 		<div class="transport">
 			<span class="slot" aria-hidden="true">VHS · HQ</span>
 			<output class="display" aria-live="polite">{transport}</output>
+			{#if active === 'video' && project.videos.length > 1 && powered}
+				<button
+					type="button"
+					class="hardware small"
+					onclick={() => nextVideo(-1)}
+					aria-label={m.tv_previous_video()}
+					title={m.tv_previous_video()}><span aria-hidden="true">◀</span></button
+				>
+				<button
+					type="button"
+					class="hardware small"
+					onclick={() => nextVideo(1)}
+					aria-label={m.tv_next_video()}
+					title={m.tv_next_video()}><span aria-hidden="true">▶</span></button
+				>
+			{/if}
 			{#if active === 'stills' && shots.length > 1 && powered}
 				<button
 					type="button"
 					class="hardware small"
 					aria-label={m.tv_previous_image()}
+					title={m.tv_previous_image()}
 					onclick={() => (stillIdx = (stillIdx - 1 + shots.length) % shots.length)}
 					><span aria-hidden="true">◀</span></button
 				>
@@ -223,6 +258,7 @@
 					type="button"
 					class="hardware small"
 					aria-label={m.tv_next_image()}
+					title={m.tv_next_image()}
 					onclick={() => (stillIdx = (stillIdx + 1) % shots.length)}
 					><span aria-hidden="true">▶</span></button
 				>
@@ -232,6 +268,7 @@
 				class="hardware small eject"
 				onclick={eject}
 				aria-label={m.tv_eject()}
+				title={m.tv_eject()}
 				disabled={!live}><span aria-hidden="true">⏏</span></button
 			>
 		</div>
@@ -273,17 +310,13 @@
 	{/if}
 	{#if active === 'video' && project.videos.length > 1 && powered}
 		<div class="video-selection">
-			<button
-				class="hardware"
-				type="button"
-				onclick={() => nextVideo(-1)}
-				aria-label={m.tv_previous_video()}>◀</button
-			><span>{videoIdx + 1} / {project.videos.length} · {video?.title}</span><button
-				class="hardware"
-				type="button"
-				onclick={() => nextVideo(1)}
-				aria-label={m.tv_next_video()}>▶</button
+			<span class="tape-index"
+				>{String(videoIndex + 1).padStart(2, '0')} / {String(project.videos.length).padStart(
+					2,
+					'0'
+				)}</span
 			>
+			<span>{video?.title}</span>
 		</div>
 	{/if}
 </section>
@@ -376,8 +409,23 @@
 		inset: 0;
 		width: 100%;
 		height: 100%;
-		object-fit: cover;
-		opacity: 0.25;
+		object-fit: contain;
+		opacity: 0.8;
+	}
+	.poster.with-image {
+		justify-content: flex-end;
+		padding: 7% 9%;
+		background: #090e17;
+	}
+	.with-image::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(transparent 35%, #070c18c9 75%, #070c18);
+		pointer-events: none;
+	}
+	.with-image .feed-title {
+		display: none;
 	}
 	.poster-art {
 		position: relative;
@@ -418,6 +466,12 @@
 		transform: translateY(2px);
 		box-shadow: 0 1px 0 #8f8374;
 	}
+	.play:hover {
+		background: #fff0c9;
+		box-shadow:
+			0 3px 0 #8f8374,
+			0 0 18px #f9dc9944;
+	}
 	.osd {
 		position: absolute;
 		z-index: 3;
@@ -456,23 +510,40 @@
 		padding: 0;
 		cursor: pointer;
 	}
-	.power span {
+	.power-cap {
 		display: grid;
 		place-items: center;
-		min-width: 22px;
+		min-width: 25px;
 		width: 4.5cqw;
 		max-width: 32px;
-		height: 16px;
+		height: 20px;
 		border-radius: 3px;
 		background: linear-gradient(#51545a, #292c30);
-		border: 1px solid #191a1c;
+		border: 1px solid #99d9d49c;
+		box-shadow:
+			0 0 0 1px #0b161c,
+			0 0 10px #70e8de26,
+			inset 0 1px 0 #ffffff33;
 		font:
-			10px Arial,
+			12px Arial,
 			sans-serif;
-		color: #c9d1d4;
+		color: #d6fff7;
+		transition:
+			background 160ms,
+			box-shadow 160ms;
 	}
-	.power:active span {
+	.power:hover .power-cap,
+	.power:focus-visible .power-cap {
+		background: linear-gradient(#647675, #343e44);
+		box-shadow:
+			0 0 0 1px #b7fff2,
+			0 0 14px #70e8de80;
+	}
+	.power:active .power-cap {
 		background: #191b20;
+		box-shadow:
+			inset 0 2px 3px #0009,
+			0 0 7px #70e8de55;
 	}
 	.play-hint {
 		position: absolute;
@@ -548,13 +619,20 @@
 		gap: 0.45rem;
 		min-height: 44px;
 		padding: 0.45rem 0.7rem;
-		border: 1px solid #11131c;
+		border: 1px solid #91cbc18c;
 		border-bottom: 3px solid #101018;
 		border-radius: 3px;
 		background: linear-gradient(#50515a, #2e2e39);
-		color: #e2dce7;
+		color: #d9fff3;
+		box-shadow:
+			inset 0 1px 0 #ffffff25,
+			0 0 8px #78e9d315;
 		font: 700 0.65rem var(--font-body);
 		cursor: pointer;
+		transition:
+			background 160ms,
+			border-color 160ms,
+			box-shadow 160ms;
 	}
 	.hardware.small {
 		width: 44px;
@@ -566,9 +644,23 @@
 		background: linear-gradient(#202129, #32333d);
 		box-shadow: inset 0 2px 5px #0008;
 	}
+	.hardware:hover:not(:disabled),
+	.hardware:focus-visible {
+		border-color: #b0f3df;
+		background: linear-gradient(#626c72, #354449);
+		box-shadow:
+			inset 0 1px 0 #ffffff35,
+			0 0 12px #78e9d34d;
+	}
+	.hardware:active:not(:disabled) {
+		transform: translateY(1px);
+		box-shadow: inset 0 2px 5px #0008;
+	}
 	.hardware:disabled {
 		opacity: 0.35;
 		cursor: default;
+		border-color: #51515c;
+		box-shadow: none;
 	}
 	.channels {
 		display: flex;
@@ -648,9 +740,22 @@
 	.video-selection span {
 		flex: 1;
 	}
+	.video-selection .tape-index {
+		flex: none;
+		padding: 0.35rem 0.45rem;
+		border: 1px solid #35e6e64d;
+		color: var(--sub-bg);
+		font-size: 0.6rem;
+	}
 	button:focus-visible {
 		outline: 2px solid var(--sub-bg);
 		outline-offset: 4px;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.hardware,
+		.power-cap {
+			transition: none;
+		}
 	}
 	@media (max-width: 40rem) {
 		.recorder {

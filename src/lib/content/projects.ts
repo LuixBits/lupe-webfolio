@@ -10,17 +10,67 @@ import { defineProjects, type Project } from './schema';
 export const projects: Project[] = defineProjects([
 	{
 		slug: 'my-channel',
-		title: { en: 'My YouTube Channel', de: 'Mein YouTube-Kanal' },
-		tagline: { en: 'Videos I make.', de: 'Videos, die ich mache.' },
-		body: {
-			en: 'Sample entry — the real channel description goes here.',
-			de: 'Beispieleintrag — hier steht später die echte Kanalbeschreibung.'
+		title: { en: 'LuixBits', de: 'LuixBits' },
+		tagline: {
+			en: 'Linux, NixOS & things I build.',
+			de: 'Linux, NixOS & meine eigenen Projekte.'
 		},
-		tags: ['video'],
+		body: {
+			en: 'On LuixBits, I document what I do with Linux, NixOS and the tools around them. I build and configure things, explain how they work, and show the setup on screen.\n\nThat can mean breaking NixOS on purpose to test its recovery, building a floor planner inside Neovim, or using a Casio watch to control my desktop. There are practical walkthroughs alongside experiments and small open-source projects.',
+			de: 'Auf LuixBits dokumentiere ich, was ich mit Linux, NixOS und den Werkzeugen drumherum mache. Ich baue und konfiguriere Dinge, erkläre, wie sie funktionieren, und zeige das Setup direkt am Bildschirm.\n\nDafür mache ich auch mal NixOS absichtlich kaputt, um die Wiederherstellung zu testen, baue einen Grundrissplaner in Neovim oder steuere meinen Desktop mit einer Casio-Uhr. Neben praktischen Anleitungen gibt es Experimente und kleine Open-Source-Projekte.'
+		},
+		tags: ['Linux', 'NixOS', 'Neovim', 'open source'],
 		year: 2026,
 		category: 'youtube',
 		featured: true,
-		videos: [{ id: 'demo', title: 'Sample video', provider: 'youtube', src: 'dQw4w9WgXcQ' }]
+		channel: {
+			handle: '@LuixBits',
+			url: 'https://www.youtube.com/@LuixBits',
+			avatar: {
+				src: '/media/projects/luixbits/avatar.jpg',
+				width: 240,
+				height: 240,
+				alt: { en: 'LuixBits channel avatar', de: 'LuixBits-Kanalbild' }
+			}
+		},
+		links: [
+			{ label: 'YouTube · @LuixBits', url: 'https://www.youtube.com/@LuixBits', rel: 'external' }
+		],
+		// Public uploads and durations verified against the channel on 2026-09-26.
+		videos: [
+			{
+				id: 'nix-flakes',
+				title: 'What Is a Nix Flake? (And How to Use It)',
+				provider: 'youtube',
+				src: 'gn3h4x6_678',
+				poster: '/media/projects/luixbits/flakes.jpg',
+				duration: 636
+			},
+			{
+				id: 'nixos-recovery',
+				title: 'I Broke NixOS on Purpose and Fixed It in 40 Seconds',
+				provider: 'youtube',
+				src: 'YPBpWC6BpMQ',
+				poster: '/media/projects/luixbits/recovery.jpg',
+				duration: 828
+			},
+			{
+				id: 'neovim-floor-planner',
+				title: 'I built a floor planner in Neovim',
+				provider: 'youtube',
+				src: 'bAPyriQQsNM',
+				poster: '/media/projects/luixbits/roomplanner.jpg',
+				duration: 789
+			},
+			{
+				id: 'casio-nixos',
+				title: 'My Casio Watch Controls NixOS Now || Noctalia Plugin',
+				provider: 'youtube',
+				src: 'SYBy4kMvbhY',
+				poster: '/media/projects/luixbits/casio.jpg',
+				duration: 597
+			}
+		]
 	},
 	{
 		slug: 'lupe-webfolio',

@@ -84,5 +84,13 @@
 	"meta_gear": "Gear",
 	"meta_exposure": "Exposure",
 	"paper_status_preprint": "Preprint",
-	"meta_radec": "Coordinates"
+	"meta_radec": "Coordinates",
+	"channel_programme": "The programme",
+	"channel_choose_tape": "Pick a tape, then press play.",
+	"channel_load_video": "Load video: {title}",
+	"channel_loaded": "Loaded",
+	"channel_visit": "Visit the LuixBits channel",
+	"channel_watch_youtube": "Watch this video on YouTube",
+	"channel_about": "Behind the channel",
+	"channel_from_workbench": "from my workbench"
 }
