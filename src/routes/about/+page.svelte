@@ -204,14 +204,13 @@
 	<!-- UNDERGROUND: past the ground line, time runs deepest — roots, the
 	     mycelium network, and finally seeds to take with you. -->
 	<div class="underground">
+		<!-- ground anchor: the TreeLayer paints the dense grass verge here -->
 		<div
 			class="ground"
 			data-tree="ground"
 			aria-hidden="true"
 			use:revealOnce={() => (revealed['ground'] = true)}
-		>
-			<LivingLine variant="soil" seed="ground" thickness={2.5} />
-		</div>
+		></div>
 		{#each undergroundChapters as ch (ch.id)}
 			{@render chapterBlock(ch)}
 		{/each}

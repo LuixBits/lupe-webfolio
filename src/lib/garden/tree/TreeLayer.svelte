@@ -119,9 +119,22 @@
 	let sqY = $state(0);
 	let sqRun = $state(false);
 	let sqDir = $state<'up' | 'down'>('up');
-	let forestFar = $state<{ x: number; y: number; d: string }[]>([]);
-	let forestNear = $state<{ x: number; y: number; d: string }[]>([]);
-	let distantTrunks = $state<{ d: string; w: number; o: number }[]>([]);
+	let forestRows = $state<
+		{ cls: string; trees: { x: number; y: number; d: string; dh: string; trunk: boolean }[] }[]
+	>([]);
+	let grassBandBack = $state('');
+	let grassBandFront = $state('');
+	let deer = $state<{ y: number; startX: number; ww: number } | null>(null);
+	let colony = $state<{
+		x: number;
+		y: number;
+		entrance: string;
+		tunnels: { d: string; ants: { dur: number; delay: number; rev: boolean }[] }[];
+		chambers: { x: number; y: number; d: string; kind: 'nursery' | 'food' | 'queen' }[];
+		larvae: { x: number; y: number; a: number }[];
+		seeds: { x: number; y: number; a: number }[];
+		staticAnts: { x: number; y: number; a: number; s: number }[];
+	} | null>(null);
 	let grassTufts = $state<
 		{
 			x: number;
@@ -135,7 +148,7 @@
 	>([]);
 	let logPiece = $state<{ x: number; rot: number } | null>(null);
 	let fallenLeaves = $state<{ x: number; y: number; a: number; s: number }[]>([]);
-	let worm = $state<{ x: number; y: number } | null>(null);
+	let worms = $state<{ x: number; y: number; s: number; gate: string; delay: number }[]>([]);
 	let flyers = $state<{ x: number; y: number; dur: number; delay: number }[]>([]);
 	let butterfly = $state<{ x: number; y: number } | null>(null);
 	let ladybug = $state<{ x: number; y: number; a: number } | null>(null);
@@ -557,51 +570,53 @@
 				dur: +(10 + rand() * 8).toFixed(1),
 				delay: +(-14 * rand()).toFixed(1)
 			}));
-			// ---------- distant forest behind the tree ----------
+			// ---------- distant forest: three SOFT misty rows on the horizon.
+			// Each tree is a halo blob under a canopy blob (fuzzy edge without
+			// any filter) on a rounded trunk; colors sit barely off the sky. --
 			const horizon = trunkTopY + 150;
-			const far: typeof forestFar = [];
-			const nFar = Math.max(7, Math.round(W / 150));
-			for (let i = 0; i < nFar; i++) {
-				const x = W * ((i + rand() * 0.7) / nFar);
-				far.push({
-					x: f(x),
-					y: f(horizon - 4 - rand() * 26),
-					d: blobPath(rand, 34 + rand() * 44, 20 + rand() * 16, 9)
-				});
-			}
-			forestFar = far;
-			const near: typeof forestNear = [];
-			const nNear = Math.max(4, Math.round(W / 260));
-			for (let i = 0; i < nNear; i++) {
-				const x = W * ((i + 0.3 + rand() * 0.5) / nNear);
-				near.push({
-					x: f(x),
-					y: f(horizon + 12 - rand() * 14),
-					d: blobPath(rand, 44 + rand() * 52, 24 + rand() * 18, 10)
-				});
-			}
-			forestNear = near;
-			// faint fellow trunks receding into the woods
-			const dts: typeof distantTrunks = [];
-			const nT2 = Math.max(6, Math.round(W / 170));
-			for (let i = 0; i < nT2; i++) {
-				const x = W * ((i + rand() * 0.8) / nT2);
-				if (Math.abs(x - xMain) < 150 && Math.abs(x - xTop) < 220) continue;
-				const lean = (rand() * 2 - 1) * 16;
-				const w2 = 5 + rand() * 11;
-				const yTop2 = horizon + 6 + rand() * 30;
-				dts.push({
-					d: `M ${f(x - w2 / 2)} ${f(groundY)} L ${f(x - w2 * 0.32 + lean)} ${f(yTop2)} L ${f(
-						x + w2 * 0.32 + lean
-					)} ${f(yTop2)} L ${f(x + w2 / 2)} ${f(groundY)} Z`,
-					w: w2,
-					o: +(0.05 + rand() * 0.07).toFixed(3)
-				});
-			}
-			distantTrunks = dts;
+			const rowSpecs = [
+				{
+					cls: 'frow3',
+					y: horizon - 26,
+					n: Math.max(6, Math.round(W / 190)),
+					rx: 26,
+					trunk: false
+				},
+				{ cls: 'frow2', y: horizon - 8, n: Math.max(5, Math.round(W / 240)), rx: 34, trunk: true },
+				{ cls: 'frow1', y: horizon + 14, n: Math.max(4, Math.round(W / 320)), rx: 42, trunk: true }
+			];
+			forestRows = rowSpecs.map((r2) => ({
+				cls: r2.cls,
+				trees: Array.from({ length: r2.n }, (_, i) => {
+					const rx = r2.rx + rand() * r2.rx * 0.8;
+					return {
+						x: f(W * ((i + 0.2 + rand() * 0.6) / r2.n)),
+						y: f(r2.y - rand() * 16),
+						d: blobPath(rand, rx, rx * (0.6 + rand() * 0.15), 10),
+						dh: blobPath(rand, rx * 1.3, rx * 0.85, 9),
+						trunk: r2.trunk
+					};
+				})
+			}));
 			// ---------- the grassy verge where trunk becomes root ----------
+			// two filled, spiky grass silhouettes replace the old thin line
+			const mkBand = (hMin: number, hMax: number, step: number) => {
+				const pts: string[] = [`M 0 ${f(groundY + 9)}`];
+				let gx = 0;
+				while (gx < W) {
+					const spikeH = hMin + rand() * (hMax - hMin);
+					const lean2 = (rand() * 2 - 1) * 3.5;
+					pts.push(`L ${f(gx + step * 0.5 + lean2)} ${f(groundY - spikeH)}`);
+					pts.push(`L ${f(gx + step)} ${f(groundY + 2 - rand() * 3)}`);
+					gx += step;
+				}
+				pts.push(`L ${f(W)} ${f(groundY + 9)} Z`);
+				return pts.join(' ');
+			};
+			grassBandBack = mkBand(9, 20, 13);
+			grassBandFront = mkBand(5, 13, 9);
 			const tufts: typeof grassTufts = [];
-			const nG = Math.max(10, Math.round(W / 95));
+			const nG = Math.max(16, Math.round(W / 52));
 			for (let i = 0; i < nG; i++) {
 				const x = W * ((i + rand() * 0.8) / nG);
 				const roll = rand();
@@ -620,6 +635,8 @@
 				x: f(xMain + (rand() > 0.5 ? 1 : -1) * (240 + rand() * 90)),
 				rot: +((rand() * 2 - 1) * 4).toFixed(1)
 			};
+			// a doe ambling slowly across the verge, behind the trunk
+			deer = { y: f(groundY - 1), startX: f(W * 0.3), ww: Math.round(W + 340) };
 			fallenLeaves = Array.from({ length: 5 }, () => ({
 				x: f(W * (0.08 + rand() * 0.84)),
 				y: f(groundY - 3 - rand() * 4),
@@ -874,15 +891,17 @@
 			const baseX = trunkXAt(groundY);
 			const units: Unit[] = [];
 			const rootSpecs = [
-				{ a: 97, l: 310 },
-				{ a: 116, l: 255 },
-				{ a: 138, l: 205 },
-				{ a: 158, l: 168 },
-				{ a: 178, l: 155 },
-				{ a: 199, l: 172 },
-				{ a: 220, l: 215 },
-				{ a: 243, l: 265 },
-				{ a: 263, l: 320 }
+				{ a: 92, l: 540 },
+				{ a: 99, l: 460 },
+				{ a: 116, l: 400 },
+				{ a: 138, l: 330 },
+				{ a: 158, l: 260 },
+				{ a: 178, l: 235 },
+				{ a: 199, l: 268 },
+				{ a: 220, l: 340 },
+				{ a: 243, l: 415 },
+				{ a: 261, l: 470 },
+				{ a: 268, l: 560 }
 			];
 			const spread = 0.62 + Math.min(1, W / 1200) * 0.38;
 			rootSpecs.forEach((sp, i) => {
@@ -890,8 +909,8 @@
 					rand,
 					sp.a + (rand() * 2 - 1) * 5,
 					sp.l * (0.85 + rand() * 0.3) * spread * (0.55 + sizeK * 0.45),
-					(14 + rand() * 7) * sizeK,
-					1.1,
+					(20 + rand() * 9) * sizeK,
+					1.4,
 					sp.l * 0.16
 				);
 				const u: Unit = {
@@ -1007,15 +1026,16 @@
 					pts.push({ x: lx, y: b.y0 - 26 });
 					pts.push({ x: lx + (rand() * 2 - 1) * 12, y: b.cy });
 					pts.push({ x: lx + (rand() * 2 - 1) * 8, y: b.y1 + 26 });
-					rootlet(lx, b.cy, lx > xMain ? 116 : 244, 32 + rand() * 28, 3.2);
+					rootlet(lx, b.cy, lx > xMain ? 116 : 244, 40 + rand() * 34, 4.6);
 				}
 				pts.push({ x: xMain + off * 0.3 + (rand() * 2 - 1) * 12, y: endY });
 				runs.push({ d: taperedPath(pts, w0, 1.5) });
 			};
 			if (under.length) {
-				mkRun(0, 11, under, H - 34);
-				mkRun(-46, 7, under.slice(0, 2), (under[1] ?? under[0]).y1 + 60);
-				mkRun(50, 6, under.slice(0, 1), under[0].y1 + 70);
+				mkRun(0, 17, under, H - 34);
+				mkRun(-46, 11, under.slice(0, 2), (under[1] ?? under[0]).y1 + 60);
+				mkRun(50, 9, under.slice(0, 1), under[0].y1 + 70);
+				mkRun(96, 8, under.slice(0, 2), (under[1] ?? under[0]).y1 + 120);
 			}
 			deepRuns = runs;
 			// mushrooms at the buttress; a worm beside the mycelium block
@@ -1027,11 +1047,99 @@
 				flip: i % 2 === 1
 			}));
 			const myc = a['ch-mycelium'];
-			if (myc) {
-				worm = {
+			worms = [];
+			if (myc)
+				worms.push({
 					x: f(myc.cx < xMain ? myc.x1 + 90 : myc.x0 - 120),
-					y: f(myc.cy + 40)
+					y: f(myc.cy + 40),
+					s: 1,
+					gate: 'mycelium',
+					delay: 0
+				});
+			worms.push({
+				x: f(Math.min(W - 80, xMain + 300)),
+				y: f(groundY + 230),
+				s: 0.85,
+				gate: 'roots',
+				delay: 3
+			});
+			worms.push({
+				x: f(Math.max(60, xMain - 200)),
+				y: f(groundY + 660),
+				s: 0.9,
+				gate: 'mycelium',
+				delay: 6
+			});
+			// ---------- the ant colony: chambers, tunnels, larvae, workers ----
+			if (central) {
+				const rootsCard = a['ch-roots'];
+				const laneL = rootsCard ? rootsCard.x0 - 60 : xMain - 160;
+				const cx0 = Math.max(150, laneL - 250);
+				const cy0 = groundY + 150;
+				const ch = (
+					dx: number,
+					dy: number,
+					rx: number,
+					ry: number,
+					kind: 'nursery' | 'food' | 'queen'
+				) => ({
+					x: f(cx0 + dx),
+					y: f(cy0 + dy),
+					d: blobPath(rand, rx, ry, 10),
+					kind
+				});
+				const chambers = [
+					ch(-70, 60, 44, 26, 'nursery'),
+					ch(70, 96, 36, 22, 'food'),
+					ch(-6, 176, 50, 30, 'queen')
+				];
+				const t1 = `M ${f(cx0 + 4)} ${f(groundY - 2)} C ${f(cx0 - 10)} ${f(cy0 - 40)}, ${f(cx0 + 14)} ${f(cy0 - 10)}, ${f(cx0 - 2)} ${f(cy0 + 18)} C ${f(cx0 - 16)} ${f(cy0 + 40)}, ${f(cx0 - 50)} ${f(cy0 + 44)}, ${f(cx0 - 66)} ${f(cy0 + 56)}`;
+				const t2 = `M ${f(cx0 - 40)} ${f(cy0 + 70)} C ${f(cx0)} ${f(cy0 + 84)}, ${f(cx0 + 30)} ${f(cy0 + 78)}, ${f(cx0 + 62)} ${f(cy0 + 92)}`;
+				const t3 = `M ${f(cx0 - 60)} ${f(cy0 + 78)} C ${f(cx0 - 50)} ${f(cy0 + 120)}, ${f(cx0 - 30)} ${f(cy0 + 140)}, ${f(cx0 - 8)} ${f(cy0 + 168)}`;
+				const t4 = `M ${f(cx0 + 60)} ${f(cy0 + 108)} C ${f(cx0 + 44)} ${f(cy0 + 140)}, ${f(cx0 + 24)} ${f(cy0 + 156)}, ${f(cx0 + 4)} ${f(cy0 + 172)}`;
+				colony = {
+					x: f(cx0),
+					y: f(cy0),
+					entrance: `M ${f(cx0 - 16)} ${f(groundY + 1)} Q ${f(cx0 + 4)} ${f(groundY - 13)} ${f(cx0 + 24)} ${f(groundY + 1)} Z`,
+					tunnels: [
+						{
+							d: t1,
+							ants: [
+								{ dur: 16, delay: -2, rev: false },
+								{ dur: 21, delay: -11, rev: true }
+							]
+						},
+						{ d: t2, ants: [{ dur: 13, delay: -5, rev: false }] },
+						{
+							d: t3,
+							ants: [
+								{ dur: 18, delay: -8, rev: true },
+								{ dur: 24, delay: -1, rev: false }
+							]
+						},
+						{ d: t4, ants: [{ dur: 15, delay: -6, rev: false }] }
+					],
+					chambers,
+					larvae: Array.from({ length: 5 }, (_, i) => ({
+						x: f(cx0 - 88 + i * 11 + rand() * 4),
+						y: f(cy0 + 62 + (i % 2) * 7),
+						a: f((rand() * 2 - 1) * 40)
+					})),
+					seeds: Array.from({ length: 3 }, (_, i) => ({
+						x: f(cx0 + 56 + i * 12),
+						y: f(cy0 + 98 + (i % 2) * 6),
+						a: f(rand() * 180)
+					})),
+					staticAnts: [
+						{ x: f(cx0 - 62), y: f(cy0 + 56), a: 20, s: 1 },
+						{ x: f(cx0 - 44), y: f(cy0 + 68), a: -30, s: 1 },
+						{ x: f(cx0 + 48), y: f(cy0 + 90), a: 10, s: 1 },
+						{ x: f(cx0 - 2), y: f(cy0 + 178), a: 0, s: 1.9 },
+						{ x: f(cx0 + 18), y: f(cy0 + 170), a: -20, s: 1 }
+					]
 				};
+			} else {
+				colony = null;
 			}
 			if (!sqY) sqY = (a['notes']?.y1 ?? bendY1) + 90;
 			flyers = [
@@ -1247,25 +1355,75 @@
 
 {#snippet squirrelShape()}
 	<g class="sq-tailg">
-		<path
-			class="sq-tail"
-			d="M 5 7 C 17 4 21 -10 13 -19 C 7 -25 -2 -23 0 -15 C 1.5 -9 8 -8 10 -12"
-		/>
-		<path class="sq-tail2" d="M 6 4 C 14 1 17 -9 12 -15" />
+		<path class="sq-tail" d="M 6 3 C 15 1 20 -7 18 -16 C 16 -24 8 -28 3 -24 C -1 -20 1 -14 6 -14" />
+		<path class="sq-tail2" d="M 7 0 C 13 -1 16 -7 15 -13" />
 	</g>
+	<circle class="sq-hip" cx="0.5" cy="-5.5" r="6" />
 	<path
 		class="sq-body"
-		d="M 0 9 C -8 7 -11 -1 -8 -11 C -6 -18 -2 -23 3 -25 C 7 -26 9 -22 7 -18 C 10 -13 10 -3 5 4 C 3 7 1 9 0 9 Z"
+		d="M 5 -3 C 6.5 -10 4.5 -18 0 -22 C -3.5 -25 -8 -23.5 -8.5 -19.5 C -9 -15 -7 -9 -4.5 -4 C -3 -1 3 0 5 -3 Z"
 	/>
-	<path class="sq-belly" d="M -4 5 C -7.5 1 -7.5 -7 -4.5 -13 C -2.5 -8 -2.5 -1 -4 5 Z" />
-	<circle class="sq-body" cx="1.5" cy="-26" r="5" />
-	<path class="sq-ear" d="M -1.8 -30 l 0.8 -4.4 l 3.4 3 z" />
-	<path class="sq-earIn" d="M -0.9 -30.2 l 0.5 -2.4 l 1.8 1.7 z" />
-	<circle class="sq-eye" cx="-0.6" cy="-27" r="1.2" />
-	<circle class="sq-glint" cx="-1" cy="-27.4" r="0.45" />
-	<path class="sq-nose" d="M -4.4 -25.4 q -1.2 0.4 -1.6 1.2" />
-	<path class="sq-paw" d="M -7.5 -9 q -4 0.6 -5.2 3.4 M -5.6 0 q -4 0.8 -5.2 3.6" />
-	<path class="sq-foot" d="M -1 8.6 q -4 1 -6.2 0" />
+	<path class="sq-belly" d="M -5.5 -4.5 C -7.5 -9 -7.5 -15 -5 -19 C -3 -15 -3 -9 -3.5 -4.5 Z" />
+	<circle class="sq-body" cx="-4.2" cy="-24.5" r="4.6" />
+	<path
+		class="sq-body"
+		d="M -8.4 -23.2 C -9.6 -23.6 -9.8 -24.8 -8.8 -25.4 C -8 -25.8 -7.2 -25.2 -7.4 -24.2 Z"
+	/>
+	<path class="sq-ear" d="M -3.4 -28.6 l 1.4 -4 l 2.8 3.2 z" />
+	<path class="sq-earIn" d="M -2.6 -28.8 l 0.8 -2.2 l 1.6 1.8 z" />
+	<circle class="sq-eye" cx="-6" cy="-25.2" r="1.15" />
+	<circle class="sq-glint" cx="-6.4" cy="-25.6" r="0.42" />
+	<circle class="sq-nosetip" cx="-9.3" cy="-24.7" r="0.7" />
+	<path class="sq-paw" d="M -8.6 -16 q -3.6 0.4 -4.6 3 M -7.6 -10.5 q -3.8 0.6 -4.8 3.2" />
+	<path class="sq-foot" d="M -2 -0.4 q -4.4 1.2 -7 0.4" />
+{/snippet}
+
+{#snippet deerShape()}
+	<path class="deer-tail" d="M -30 -33 q -4 1 -5 4.5 q 3 1 5 -0.5 Z" />
+	<path
+		class="deer-body"
+		d="M -28 -25 C -31 -33 -25 -39 -13 -40 C -1 -41 9 -39 15 -35 C 21 -32 23 -27 21 -23 C 19 -19 13 -17.5 5 -17.5 L -17 -17.5 C -24 -17.5 -27 -20 -28 -25 Z"
+	/>
+	<g class="deer-legsA">
+		<path class="deer-leg" d="M 13 -19 C 14.5 -13 13.5 -6.5 14.5 -1" />
+		<path class="deer-leg" d="M -19 -18 C -21 -12 -20.5 -6 -21.5 -1" />
+	</g>
+	<g class="deer-legsB">
+		<path class="deer-leg" d="M 17 -19 C 19 -13 18.5 -6.5 19.5 -1" />
+		<path class="deer-leg" d="M -23 -18 C -25.5 -12 -25 -6 -26 -1" />
+	</g>
+	<path
+		class="deer-hoof"
+		d="M 13.4 -1 l 2.6 0 M -22.7 -1 l 2.6 0 M 18.4 -1 l 2.6 0 M -27.2 -1 l 2.6 0"
+	/>
+	<path class="deer-neck" d="M 14 -35 C 18 -43 22 -50 27 -54 L 32 -49 C 28 -44 26 -39 25 -34 Z" />
+	<circle class="deer-body" cx="30.5" cy="-54" r="4.6" />
+	<path
+		class="deer-muzzle"
+		d="M 34 -55.5 C 37.5 -55.5 39.5 -54 39.5 -52.6 C 39.5 -51.4 37.5 -50.8 34.5 -51.2 Z"
+	/>
+	<path
+		class="deer-ear"
+		d="M 27.5 -58 C 25.5 -62.5 26.5 -65 29 -65.5 C 30.5 -63 30.5 -60 29.5 -57.5 Z"
+	/>
+	<path
+		class="deer-ear"
+		d="M 32.5 -58.5 C 33.5 -63 36 -64.5 38 -63.5 C 37.5 -60.5 35.5 -58 33.5 -57 Z"
+	/>
+	<circle class="deer-eye" cx="32.4" cy="-55.4" r="1" />
+	<circle class="deer-nose" cx="39" cy="-52.9" r="0.9" />
+	<path class="deer-belly" d="M -14 -17.5 C -8 -15.5 0 -15.5 5 -17.5 Z" />
+{/snippet}
+
+{#snippet antShape()}
+	<ellipse class="ant-b" cx="-3" cy="0" rx="2.3" ry="1.5" />
+	<circle class="ant-b" cx="0.4" cy="0" r="1.15" />
+	<circle class="ant-b" cx="2.6" cy="0" r="1.35" />
+	<path
+		class="ant-l"
+		d="M -0.5 -1 l -1.4 -1.8 M 0.6 -1 l 0.4 -2 M 1.4 -0.8 l 1.6 -1.6 M -0.5 1 l -1.4 1.8 M 0.6 1 l 0.4 2 M 1.4 0.8 l 1.6 1.6"
+	/>
+	<path class="ant-l" d="M 3.4 -0.8 q 1.2 -0.8 1.6 -1.6 M 3.4 0.8 q 1.2 0.8 1.6 1.6" />
 {/snippet}
 
 {#snippet wormShape()}
@@ -1444,24 +1602,34 @@
 
 				<!-- the atmosphere journey: sky → forest → soil → rock -->
 				<rect width={W} height={Math.max(H, 1)} fill="url(#{uid}-atmo)" />
-				<!-- distant forest, hazy behind everything -->
-				<g>
-					{#each forestFar as ft, i (i)}
-						<g transform="translate({ft.x} {ft.y})">
-							<rect x="-2.6" y="4" width="5.2" height="30" rx="2" class="forestFarT" />
-							<path d={ft.d} class="forestFar" />
+				<!-- distant forest: three soft misty rows on the horizon -->
+				{#each forestRows as row (row.cls)}
+					<g class={row.cls}>
+						{#each row.trees as ft, i (i)}
+							<g transform="translate({ft.x} {ft.y})">
+								{#if ft.trunk}
+									<rect x="-2.8" y="8" width="5.6" height="34" rx="2.6" class="ftrunk" />
+								{/if}
+								<path d={ft.dh} class="fhalo" />
+								<path d={ft.d} class="fcrown" />
+							</g>
+						{/each}
+					</g>
+				{/each}
+
+				<!-- the doe, ambling the verge behind the trunk -->
+				{#if deer}
+					<g class="zone" class:on={isOn('ground')}>
+						<g transform="translate(0 {deer.y})">
+							<g
+								class="deer-walk"
+								style="--ww:{deer.ww}px; transform: translateX({instant ? deer.startX : 0}px)"
+							>
+								<g class="deer-bob"><g transform="scale(1.35)">{@render deerShape()}</g></g>
+							</g>
 						</g>
-					{/each}
-					{#each forestNear as ft, i (i)}
-						<g transform="translate({ft.x} {ft.y})">
-							<rect x="-3.4" y="6" width="6.8" height="40" rx="2.4" class="forestNearT" />
-							<path d={ft.d} class="forestNear" />
-						</g>
-					{/each}
-					{#each distantTrunks as dt, i (i)}
-						<path d={dt.d} class="forestTrunk" opacity={dt.o} />
-					{/each}
-				</g>
+					</g>
+				{/if}
 
 				{#each strata as sd, i (i)}
 					<path d={sd} class="stratum" fill="none" />
@@ -1472,6 +1640,59 @@
 						<path d={r.d2} fill="#b3a892" opacity="0.45" transform="translate(-4 -5)" />
 					</g>
 				{/each}
+
+				<!-- the ant colony: chambers and tunnels cut into the soil -->
+				{#if colony}
+					<g class="zone" class:on={isOn('roots')}>
+						<path d={colony.entrance} class="ant-mound" />
+						{#each colony.tunnels as t, i (i)}
+							<path d={t.d} class="ant-tunnel" fill="none" />
+							<path d={t.d} class="ant-tunnel2" fill="none" />
+						{/each}
+						{#each colony.chambers as c2, i (i)}
+							<g transform="translate({c2.x} {c2.y})">
+								<path d={c2.d} class="ant-chamber" />
+							</g>
+						{/each}
+						{#each colony.larvae as lv2, i (i)}
+							<ellipse
+								cx={lv2.x}
+								cy={lv2.y}
+								rx="4.2"
+								ry="2.6"
+								transform="rotate({lv2.a} {lv2.x} {lv2.y})"
+								class="ant-larva"
+							/>
+						{/each}
+						{#each colony.seeds as sd2, i (i)}
+							<ellipse
+								cx={sd2.x}
+								cy={sd2.y}
+								rx="4.6"
+								ry="2.4"
+								transform="rotate({sd2.a} {sd2.x} {sd2.y})"
+								class="ant-seed"
+							/>
+						{/each}
+						{#each colony.staticAnts as an, i (i)}
+							<g transform="translate({an.x} {an.y}) rotate({an.a}) scale({an.s})">
+								{@render antShape()}
+							</g>
+						{/each}
+						{#each colony.tunnels as t, ti (ti)}
+							{#each t.ants as an, ai (ai)}
+								<g
+									class="ant-move"
+									style="offset-path: path('{t.d}'); --ad:{an.dur}s; --adel:{an.delay}s; animation-direction:{an.rev
+										? 'reverse'
+										: 'normal'}"
+								>
+									{@render antShape()}
+								</g>
+							{/each}
+						{/each}
+					</g>
+				{/if}
 
 				<!-- deep root runs weaving around the underground blocks, revealed
 			     downward by your own descent -->
@@ -1532,6 +1753,8 @@
 
 				<!-- the grassy verge where trunk turns to root -->
 				<g class="zone" class:on={isOn('ground')}>
+					<path d={grassBandBack} class="grassBack" />
+					<path d={grassBandFront} class="grassFront" />
 					{#if logPiece}
 						<g transform="translate({logPiece.x} {groundYS - 4}) rotate({logPiece.rot})">
 							<g class="grow" style="--gd:260ms">{@render logShape()}</g>
@@ -1604,13 +1827,17 @@
 						</g>
 					{/each}
 				</g>
-				{#if worm}
-					<g class="zone" class:on={isOn('mycelium')}>
-						<g transform="translate({worm.x} {worm.y})">
-							<g class="grow" style="--gd:600ms"><g class="wormg">{@render wormShape()}</g></g>
+				{#each worms as w2, i (i)}
+					<g class="zone" class:on={isOn(w2.gate)}>
+						<g transform="translate({w2.x} {w2.y}) scale({w2.s})">
+							<g class="grow" style="--gd:600ms">
+								<g class="wormg" style="--wdel:{w2.delay}s">
+									<g class="wormwig">{@render wormShape()}</g>
+								</g>
+							</g>
 						</g>
 					</g>
-				{/if}
+				{/each}
 			</svg>
 		{/if}
 	{/if}
@@ -1756,24 +1983,126 @@
 	.sq-pose {
 		transform-origin: -1px -12px;
 	}
-	.forestFar {
-		fill: #c2d2c1;
-		opacity: 0.5;
-	}
-	.forestFarT {
-		fill: #a9baa8;
-		opacity: 0.45;
-	}
-	.forestNear {
-		fill: #a9c0a5;
+	/* soft misty forest rows — halo under crown gives a fuzzy edge, colors
+	   sit barely off the sky so they read as distance, not graphics */
+	.frow3 .fcrown {
+		fill: #dbe5d8;
 		opacity: 0.55;
 	}
-	.forestNearT {
-		fill: #8ba187;
+	.frow3 .fhalo {
+		fill: #e4ece2;
+		opacity: 0.35;
+	}
+	.frow2 .fcrown {
+		fill: #ccdac8;
+		opacity: 0.6;
+	}
+	.frow2 .fhalo {
+		fill: #d9e4d6;
+		opacity: 0.38;
+	}
+	.frow2 .ftrunk {
+		fill: #b4c3ae;
 		opacity: 0.5;
 	}
-	.forestTrunk {
-		fill: #66755f;
+	.frow1 .fcrown {
+		fill: #bccfb6;
+		opacity: 0.62;
+	}
+	.frow1 .fhalo {
+		fill: #cfdeca;
+		opacity: 0.4;
+	}
+	.frow1 .ftrunk {
+		fill: #a3b59b;
+		opacity: 0.55;
+	}
+	/* the dense grass silhouettes on the verge */
+	.grassBack {
+		fill: #43704d;
+		opacity: 0.9;
+	}
+	.grassFront {
+		fill: #6aaa6d;
+		opacity: 0.92;
+	}
+	/* the doe */
+	.deer-body,
+	.deer-neck {
+		fill: #b3906a;
+	}
+	.deer-chest {
+		fill: #d8c3a0;
+	}
+	.deer-belly {
+		fill: #d8c3a0;
+	}
+	.deer-tail {
+		fill: #a5825c;
+	}
+	.deer-leg {
+		fill: none;
+		stroke: #a07f58;
+		stroke-width: 2.8;
+		stroke-linecap: round;
+	}
+	.deer-hoof {
+		stroke: #4a3b28;
+		stroke-width: 2.6;
+		stroke-linecap: round;
+	}
+	.deer-muzzle {
+		fill: #c4a67e;
+	}
+	.deer-ear {
+		fill: #b3906a;
+		stroke: #8d6f4c;
+		stroke-width: 0.6;
+	}
+	.deer-eye,
+	.deer-nose {
+		fill: #2a211a;
+	}
+	/* the ant colony */
+	.ant-mound {
+		fill: #9a8563;
+		stroke: #6d5a41;
+		stroke-width: 1;
+	}
+	.ant-tunnel {
+		stroke: #866f52;
+		stroke-width: 8;
+		stroke-linecap: round;
+	}
+	.ant-tunnel2 {
+		stroke: #755f44;
+		stroke-width: 3.4;
+		stroke-linecap: round;
+		opacity: 0.7;
+	}
+	.ant-chamber {
+		fill: #866f52;
+		stroke: #5f4d38;
+		stroke-width: 1.2;
+	}
+	.ant-larva {
+		fill: #ece0c6;
+		stroke: #c9b997;
+		stroke-width: 0.7;
+	}
+	.ant-seed {
+		fill: #d9c9a1;
+		stroke: #a99366;
+		stroke-width: 0.6;
+	}
+	.ant-b {
+		fill: #35291d;
+	}
+	.ant-l {
+		fill: none;
+		stroke: #35291d;
+		stroke-width: 0.55;
+		stroke-linecap: round;
 	}
 	.gr-b1 {
 		fill: none;
@@ -2032,6 +2361,28 @@
 		.sq-holder {
 			transition: transform 660ms cubic-bezier(0.3, 0.85, 0.3, 1);
 		}
+		.deer-walk {
+			animation: tl-deerwalk 150s linear infinite;
+		}
+		.deer-bob {
+			animation: tl-deerbob 1.15s ease-in-out infinite;
+		}
+		.deer-legsA {
+			animation: tl-deerleg 1.15s ease-in-out infinite alternate;
+			transform-origin: 0px -18px;
+		}
+		.deer-legsB {
+			animation: tl-deerleg 1.15s ease-in-out -0.575s infinite alternate-reverse;
+			transform-origin: 0px -18px;
+		}
+		.ant-move {
+			animation: tl-antgo var(--ad, 18s) linear var(--adel, 0s) infinite;
+			offset-rotate: auto;
+		}
+		.wormwig {
+			animation: tl-wormwig 2.1s ease-in-out infinite alternate;
+			transform-origin: 14px 0px;
+		}
 		.sq-pose {
 			transition: transform 220ms ease;
 		}
@@ -2097,6 +2448,47 @@
 		}
 		50% {
 			transform: translateX(5px);
+		}
+	}
+	@keyframes tl-deerwalk {
+		from {
+			transform: translateX(-170px);
+		}
+		to {
+			transform: translateX(var(--ww, 1600px));
+		}
+	}
+	@keyframes tl-deerbob {
+		0%,
+		100% {
+			transform: translateY(0);
+		}
+		50% {
+			transform: translateY(-1.6px);
+		}
+	}
+	@keyframes tl-deerleg {
+		from {
+			transform: rotate(-7deg);
+		}
+		to {
+			transform: rotate(7deg);
+		}
+	}
+	@keyframes tl-antgo {
+		from {
+			offset-distance: 0%;
+		}
+		to {
+			offset-distance: 100%;
+		}
+	}
+	@keyframes tl-wormwig {
+		from {
+			transform: rotate(-4deg);
+		}
+		to {
+			transform: rotate(4.5deg);
 		}
 	}
 	@keyframes tl-bob {

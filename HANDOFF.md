@@ -97,9 +97,20 @@ on dev/build; if `$lib/paraglide/*` is missing run
   only), three leaves drift from the canopy. Content sits on translucent
   light-pool veils so branches can pass behind without stealing contrast.
   Shared vocabulary: sky · crown/canopy · topmost branch · leaf bush ·
-  bower · trunk · limbs · ground · underground. Chapter order lives in
-  `content/about.ts`: heartwood(ADHD) → branches → [ground] → roots →
-  mycelium.
+  bower · trunk · limbs · ground/verge · underground. Chapter order lives
+  in `content/about.ts`: heartwood(ADHD) → branches → [ground] → roots →
+  mycelium. Later additions: a soft three-row misty treeline on the
+  horizon; a dense two-band grass VERGE at the ground line (tufts,
+  daisies/bells/seedheads, fallen log + leaves, mushrooms) — the old thin
+  soil LivingLine is gone; a doe ambling across the verge on a 150s loop
+  (leg-swing + bob, behind the trunk); a wide 11-root plate plus thick
+  scroll-clipped deep runs; an ANT COLONY (chambers with larvae/seeds/
+  queen, tunnels with workers animated via CSS offset-path) plus three
+  wiggling worms; and the interactive squirrel (flees the cursor along
+  the bark via trunkXOf/halfWOf, viewport-clamped, never below ground).
+  The garden footer is fitted-stone bedrock built from a seamless SVG
+  <pattern> tile (mortar at tile edges; courses darken downward; fossils/
+  quartz/root-tip accents on top).
 - Grove chapters grow into view on scroll — a shared IntersectionObserver
   (`lib/garden/reveal.ts`) flips per-chapter classes, CSS does the animating
   (transform/opacity one-shots). `Garden.svelte` has `start` (grow when
