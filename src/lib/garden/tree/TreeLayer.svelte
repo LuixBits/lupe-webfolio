@@ -63,6 +63,8 @@
 		x: number;
 		y: number;
 		delay: number;
+		/** Wood tone by branch generation (roots get lighter toward the tips). */
+		tone?: number;
 		branch?: string;
 		stroke?: { d: string; w: number };
 		off?: Pt;
@@ -119,12 +121,17 @@
 	let sqY = $state(0);
 	let sqRun = $state(false);
 	let sqDir = $state<'up' | 'down'>('up');
-	let forestRows = $state<
-		{ cls: string; trees: { x: number; y: number; d: string; dh: string; trunk: boolean }[] }[]
-	>([]);
+
 	let grassBandBack = $state('');
+	let grassBandMid = $state('');
 	let grassBandFront = $state('');
-	let deer = $state<{ y: number; startX: number; ww: number } | null>(null);
+	let deer = $state<{ x: number } | null>(null);
+	let deerGaze = $state(-12);
+	let saplings = $state<Unit[]>([]);
+	let chest = $state<{ x: number; y: number } | null>(null);
+	let btc = $state(0);
+	let chestPop = $state(false);
+	let chestPopT: ReturnType<typeof setTimeout> | undefined;
 	let colony = $state<{
 		x: number;
 		y: number;
@@ -428,6 +435,15 @@
 				const lb = n0.cx < trunkXAt(n0.cy);
 				ladybug = { x: f(lb ? n0.x1 - 64 : n0.x0 + 64), y: f(n0.y0 + 3), a: lb ? -8 : 8 };
 			}
+			// buried treasure, deep among the roots — lives in THIS instance
+			// (z:3, above the content) so its click actually lands. Placed on
+			// the side the roots card leaves open, clear of any content.
+			const rc = a['ch-roots'];
+			const dirC = rc && rc.cx > xMain ? -1 : 1;
+			chest = {
+				x: f(Math.max(90, Math.min(W - 90, xMain + dirC * (340 + rand() * 50)))),
+				y: f(groundY + 420 + rand() * 60)
+			};
 			zones = zs;
 			return;
 		}
@@ -570,34 +586,6 @@
 				dur: +(10 + rand() * 8).toFixed(1),
 				delay: +(-14 * rand()).toFixed(1)
 			}));
-			// ---------- distant forest: three SOFT misty rows on the horizon.
-			// Each tree is a halo blob under a canopy blob (fuzzy edge without
-			// any filter) on a rounded trunk; colors sit barely off the sky. --
-			const horizon = trunkTopY + 150;
-			const rowSpecs = [
-				{
-					cls: 'frow3',
-					y: horizon - 26,
-					n: Math.max(6, Math.round(W / 190)),
-					rx: 26,
-					trunk: false
-				},
-				{ cls: 'frow2', y: horizon - 8, n: Math.max(5, Math.round(W / 240)), rx: 34, trunk: true },
-				{ cls: 'frow1', y: horizon + 14, n: Math.max(4, Math.round(W / 320)), rx: 42, trunk: true }
-			];
-			forestRows = rowSpecs.map((r2) => ({
-				cls: r2.cls,
-				trees: Array.from({ length: r2.n }, (_, i) => {
-					const rx = r2.rx + rand() * r2.rx * 0.8;
-					return {
-						x: f(W * ((i + 0.2 + rand() * 0.6) / r2.n)),
-						y: f(r2.y - rand() * 16),
-						d: blobPath(rand, rx, rx * (0.6 + rand() * 0.15), 10),
-						dh: blobPath(rand, rx * 1.3, rx * 0.85, 9),
-						trunk: r2.trunk
-					};
-				})
-			}));
 			// ---------- the grassy verge where trunk becomes root ----------
 			// two filled, spiky grass silhouettes replace the old thin line
 			const mkBand = (hMin: number, hMax: number, step: number) => {
@@ -613,10 +601,49 @@
 				pts.push(`L ${f(W)} ${f(groundY + 9)} Z`);
 				return pts.join(' ');
 			};
-			grassBandBack = mkBand(9, 20, 13);
-			grassBandFront = mkBand(5, 13, 9);
+			grassBandBack = mkBand(22, 42, 10);
+			grassBandMid = mkBand(14, 30, 8);
+			grassBandFront = mkBand(8, 20, 7);
+			// young saplings standing in the verge
+			const saps: Unit[] = [];
+			const sapXs = [xMain - 420, xMain + 440, xMain - 230, xMain + 130].map((x, i) =>
+				Math.min(W - 60, Math.max(50, x + (rand() * 2 - 1) * 40 + (i === 2 ? -40 : 0)))
+			);
+			for (const sx of sapXs) {
+				const trunk2 = taperedBranch(rand, (rand() * 2 - 1) * 7, 68 + rand() * 40, 8, 2.6, 10);
+				const arm = taperedBranch(
+					rand,
+					(rand() > 0.5 ? 1 : -1) * (28 + rand() * 16),
+					24 + rand() * 14,
+					3.4,
+					1.2,
+					5
+				);
+				const armU: Unit = {
+					x: f(trunk2.mid.x),
+					y: f(trunk2.mid.y),
+					delay: 260,
+					branch: arm.d,
+					children: [clumpUnit(arm.end.x, arm.end.y - 2, 12 + rand() * 5, 200)]
+				};
+				const u: Unit = {
+					x: f(sx),
+					y: f(groundY + 2),
+					delay: Math.round(300 + rand() * 400),
+					branch: trunk2.d,
+					children: [
+						armU,
+						clumpUnit(trunk2.end.x, trunk2.end.y - 4, 20 + rand() * 9, 260),
+						clumpUnit(trunk2.end.x - 10, trunk2.end.y + 4, 14 + rand() * 6, 380),
+						clumpUnit(trunk2.end.x + 11, trunk2.end.y + 5, 13 + rand() * 6, 440),
+						clumpUnit(trunk2.end.x + 2, trunk2.end.y - 14, 11 + rand() * 5, 520)
+					]
+				};
+				saps.push(u);
+			}
+			saplings = saps;
 			const tufts: typeof grassTufts = [];
-			const nG = Math.max(16, Math.round(W / 52));
+			const nG = Math.max(22, Math.round(W / 38));
 			for (let i = 0; i < nG; i++) {
 				const x = W * ((i + rand() * 0.8) / nG);
 				const roll = rand();
@@ -635,8 +662,8 @@
 				x: f(xMain + (rand() > 0.5 ? 1 : -1) * (240 + rand() * 90)),
 				rot: +((rand() * 2 - 1) * 4).toFixed(1)
 			};
-			// a doe ambling slowly across the verge, behind the trunk
-			deer = { y: f(groundY - 1), startX: f(W * 0.3), ww: Math.round(W + 340) };
+			// the doe rests in the deep grass, watching the cursor
+			deer = { x: f(Math.min(W - 160, xMain + 230 + rand() * 50)) };
 			fallenLeaves = Array.from({ length: 5 }, () => ({
 				x: f(W * (0.08 + rand() * 0.84)),
 				y: f(groundY - 3 - rand() * 4),
@@ -903,73 +930,61 @@
 				{ a: 261, l: 470 },
 				{ a: 268, l: 560 }
 			];
+			// Recursive branching: every root forks into daughters (up to three
+			// generations), each generation thinner and LIGHTER — the branching
+			// reads through the soil. Long shallow specs skim; middle ones dive.
 			const spread = 0.62 + Math.min(1, W / 1200) * 0.38;
-			rootSpecs.forEach((sp, i) => {
+			function rootRec(angle: number, len: number, w0: number, depth: number): Unit {
+				// stay in the downward hemisphere — roots never arc up over the grass
+				const ang = Math.max(97, Math.min(263, angle));
 				const g = taperedBranch(
 					rand,
-					sp.a + (rand() * 2 - 1) * 5,
-					sp.l * (0.85 + rand() * 0.3) * spread * (0.55 + sizeK * 0.45),
-					(20 + rand() * 9) * sizeK,
-					1.4,
-					sp.l * 0.16
+					ang,
+					len,
+					w0,
+					Math.max(1, w0 * 0.42),
+					len * (0.09 + rand() * 0.08)
 				);
 				const u: Unit = {
-					x: f(baseX + (i - 4) * 6 * sizeK),
-					y: f(groundY - 6),
-					delay: i * 90,
+					x: 0,
+					y: 0,
+					delay: Math.round(depth * 140 + rand() * 90),
+					tone: Math.min(3, depth),
 					branch: g.d,
 					children: []
 				};
-				const sub = taperedBranch(
-					rand,
-					g.endAngle + (rand() > 0.5 ? 18 : -18),
-					sp.l * 0.4 * spread,
-					3.2,
-					0.8,
-					12
-				);
-				const subU: Unit = {
-					x: f(g.end.x),
-					y: f(g.end.y),
-					delay: 300,
-					branch: sub.d,
-					children: []
-				};
-				const sub2 = taperedBranch(
-					rand,
-					sub.endAngle + (rand() > 0.5 ? 16 : -16),
-					sp.l * 0.2 * spread,
-					1.6,
-					0.5,
-					8
-				);
-				subU.children.push({
-					x: f(sub.end.x),
-					y: f(sub.end.y),
-					delay: 260,
-					branch: sub2.d,
-					children: []
-				});
-				u.children.push(subU);
-				if (sp.l > 190) {
-					const midSub = taperedBranch(
-						rand,
-						g.midAngle + (rand() > 0.5 ? 34 : -34),
-						sp.l * 0.3 * spread,
-						2.6,
-						0.7,
-						10
-					);
-					u.children.push({
-						x: f(g.mid.x),
-						y: f(g.mid.y),
-						delay: 380,
-						branch: midSub.d,
-						children: []
-					});
+				if (depth < 3 && w0 > 4) {
+					const kids = 2 + (depth < 2 && rand() > 0.6 ? 1 : 0);
+					for (let k = 0; k < kids; k++) {
+						const at = k === 2 ? g.mid : g.end;
+						const baseA = k === 2 ? g.midAngle : g.endAngle;
+						const spreadA = (k === 0 ? -1 : 1) * (14 + rand() * 26);
+						const child = rootRec(
+							baseA + spreadA,
+							len * (0.55 + rand() * 0.2),
+							w0 * 0.52,
+							depth + 1
+						);
+						child.x = f(at.x);
+						child.y = f(at.y);
+						u.children.push(child);
+					}
 				}
+				return u;
+			}
+			rootSpecs.forEach((sp, i) => {
+				const u = rootRec(
+					sp.a + (rand() * 2 - 1) * 5,
+					sp.l * 0.62 * (0.85 + rand() * 0.3) * spread * (0.55 + sizeK * 0.45),
+					(20 + rand() * 9) * sizeK,
+					0
+				);
+				u.x = f(baseX + (i - 5) * 6 * sizeK);
+				u.y = f(groundY + 4);
+				u.delay = i * 80;
 				units.push(u);
 			});
+
 			zs.push({ key: 'ground', clipped: false, units });
 		}
 		{
@@ -1032,7 +1047,9 @@
 				runs.push({ d: taperedPath(pts, w0, 1.5) });
 			};
 			if (under.length) {
-				mkRun(0, 17, under, H - 34);
+				// the taproot runs to the layer's very bottom — the layer overshoots
+				// the footer strip's top, so it hands off to the footer's seed roots
+				mkRun(0, 17, under, H - 2);
 				mkRun(-46, 11, under.slice(0, 2), (under[1] ?? under[0]).y1 + 60);
 				mkRun(50, 9, under.slice(0, 1), under[0].y1 + 70);
 				mkRun(96, 8, under.slice(0, 2), (under[1] ?? under[0]).y1 + 120);
@@ -1169,6 +1186,13 @@
 		}
 	}
 
+	function chestClick() {
+		btc += 1;
+		chestPop = true;
+		clearTimeout(chestPopT);
+		chestPopT = setTimeout(() => (chestPop = false), 1500);
+	}
+
 	const isOn = (key: string) => instant || (key === 'crown' ? arrive : !!grown[key]);
 	const zoneOn = (z: Zone) => isOn(z.gate ?? z.key);
 
@@ -1183,9 +1207,17 @@
 			const span = Math.max(1, groundYS - trunkTopYS);
 			const tipY = window.innerHeight * tip - r.top;
 			progress = instant ? 1 : Math.min(1, Math.max(0, (tipY - trunkTopYS) / span));
+			// span shortened by the tip line's viewport offset so the deepest
+			// runs finish revealing right as the page bottoms out
 			underProgress = instant
 				? 1
-				: Math.min(1, Math.max(0, (tipY - groundYS) / Math.max(1, H - groundYS)));
+				: Math.min(
+						1,
+						Math.max(
+							0,
+							(tipY - groundYS) / Math.max(1, H - groundYS - window.innerHeight * (1 - tip) - 80)
+						)
+					);
 			// keep the squirrel in view (it never crosses the ground)
 			if (!instant && trunkParams && sqY) {
 				const viewTop = window.scrollY - layerPageTop;
@@ -1250,6 +1282,14 @@
 			const px = mx - layerLeft;
 			const py = my + window.scrollY - layerPageTop;
 			const now = performance.now();
+			// the doe turns her head to follow the cursor (mirrored local space;
+			// constants = head-pivot offset at the deer's 1.55 mirror scale)
+			if (deer) {
+				const lx = deer.x - 20.2 - px;
+				const ly = py - (groundYS - 26.8);
+				const ang = (Math.atan2(ly, lx) * 180) / Math.PI;
+				deerGaze = Math.max(-42, Math.min(40, ang));
+			}
 			// the squirrel bolts along the trunk, away from the cursor
 			if (trunkParams && sqY) {
 				const dx2 = px - sqX;
@@ -1304,7 +1344,7 @@
 	<g transform="translate({u.x} {u.y})">
 		<g class="grow" style="--gd:{u.delay}ms">
 			{#if u.branch}
-				<path d={u.branch} class="wood" />
+				<path d={u.branch} class="wood {u.tone !== undefined ? `wr${u.tone}` : ''}" />
 			{/if}
 			{#if u.stroke}
 				<g transform={u.off ? `translate(${u.off.x} ${u.off.y})` : undefined}>
@@ -1378,41 +1418,45 @@
 	<path class="sq-foot" d="M -2 -0.4 q -4.4 1.2 -7 0.4" />
 {/snippet}
 
-{#snippet deerShape()}
-	<path class="deer-tail" d="M -30 -33 q -4 1 -5 4.5 q 3 1 5 -0.5 Z" />
+{#snippet deerRestShape()}
+	<path class="deer-tail" d="M -35 -12 q -5 2 -6 6 q 4 1 6 -1 Z" />
 	<path
 		class="deer-body"
-		d="M -28 -25 C -31 -33 -25 -39 -13 -40 C -1 -41 9 -39 15 -35 C 21 -32 23 -27 21 -23 C 19 -19 13 -17.5 5 -17.5 L -17 -17.5 C -24 -17.5 -27 -20 -28 -25 Z"
+		d="M -34 0 C -41 -3 -42 -13 -33 -18 C -22 -23 0 -24 13 -19 C 21 -16 23 -8 17 -3 C 8 1 -20 2 -34 0 Z"
 	/>
-	<g class="deer-legsA">
-		<path class="deer-leg" d="M 13 -19 C 14.5 -13 13.5 -6.5 14.5 -1" />
-		<path class="deer-leg" d="M -19 -18 C -21 -12 -20.5 -6 -21.5 -1" />
-	</g>
-	<g class="deer-legsB">
-		<path class="deer-leg" d="M 17 -19 C 19 -13 18.5 -6.5 19.5 -1" />
-		<path class="deer-leg" d="M -23 -18 C -25.5 -12 -25 -6 -26 -1" />
-	</g>
-	<path
-		class="deer-hoof"
-		d="M 13.4 -1 l 2.6 0 M -22.7 -1 l 2.6 0 M 18.4 -1 l 2.6 0 M -27.2 -1 l 2.6 0"
-	/>
-	<path class="deer-neck" d="M 14 -35 C 18 -43 22 -50 27 -54 L 32 -49 C 28 -44 26 -39 25 -34 Z" />
-	<circle class="deer-body" cx="30.5" cy="-54" r="4.6" />
+	<path class="deer-fold" d="M -20 -1 C -12 -6 0 -6 8 -3" />
+	<path class="deer-fold" d="M 4 -1 C 8 -3 13 -3 16 -1 l 3 0.5" />
+	<path class="deer-belly2" d="M -28 -3 C -20 -6 -4 -6 6 -4 C -4 -1 -20 0 -28 -3 Z" />
+{/snippet}
+
+{#snippet deerHeadShape()}
+	<path class="deer-neck2" d="M 0 2 C 2 -6 5 -12 10 -16 L 16 -11 C 12 -6 10 -2 9 3 Z" />
+	<circle class="deer-body" cx="13.5" cy="-17.5" r="4.8" />
 	<path
 		class="deer-muzzle"
-		d="M 34 -55.5 C 37.5 -55.5 39.5 -54 39.5 -52.6 C 39.5 -51.4 37.5 -50.8 34.5 -51.2 Z"
+		d="M 17.5 -19.2 C 21 -19.4 23.2 -18 23.2 -16.6 C 23.2 -15.4 21 -14.7 18 -15.1 Z"
 	/>
 	<path
 		class="deer-ear"
-		d="M 27.5 -58 C 25.5 -62.5 26.5 -65 29 -65.5 C 30.5 -63 30.5 -60 29.5 -57.5 Z"
+		d="M 10.6 -21.6 C 8.4 -26.4 9.6 -29 12.2 -29.4 C 13.8 -26.8 13.7 -23.6 12.6 -21.2 Z"
 	/>
 	<path
 		class="deer-ear"
-		d="M 32.5 -58.5 C 33.5 -63 36 -64.5 38 -63.5 C 37.5 -60.5 35.5 -58 33.5 -57 Z"
+		d="M 15.8 -22.2 C 17 -26.8 19.6 -28.2 21.6 -27 C 21 -24 19 -21.6 17 -20.7 Z"
 	/>
-	<circle class="deer-eye" cx="32.4" cy="-55.4" r="1" />
-	<circle class="deer-nose" cx="39" cy="-52.9" r="0.9" />
-	<path class="deer-belly" d="M -14 -17.5 C -8 -15.5 0 -15.5 5 -17.5 Z" />
+	<circle class="deer-eye" cx="15.6" cy="-18.6" r="1" />
+	<circle class="deer-nose" cx="22.6" cy="-16.9" r="0.9" />
+{/snippet}
+
+{#snippet chestShape()}
+	<path
+		class="ch-base"
+		d="M -21 0 L -21 -14 Q -21 -16 -19 -16 L 19 -16 Q 21 -16 21 -14 L 21 0 Q 21 2 19 2 L -19 2 Q -21 2 -21 0 Z"
+	/>
+	<path class="ch-plank" d="M -21 -9 L 21 -9 M -21 -4 L 21 -4" />
+	<path class="ch-band" d="M -12 2 L -12 -16 M 12 2 L 12 -16" />
+	<circle class="ch-lock" cy="-7" r="3.2" />
+	<path class="ch-keyhole" d="M 0 -8.2 a 1.1 1.1 0 1 1 0.01 0 M 0 -7.4 l 0 2.2" />
 {/snippet}
 
 {#snippet antShape()}
@@ -1570,6 +1614,42 @@
 						{@render ladybugShape()}
 					</g>
 				{/if}
+				<!-- buried treasure among the roots — click for your reward -->
+				{#if chest}
+					<g class="zone" class:on={isOn('roots')}>
+						<g
+							class="chest"
+							transform="translate({chest.x} {chest.y}) scale(1.2)"
+							role="button"
+							tabindex="0"
+							aria-label="Buried treasure"
+							onclick={chestClick}
+							onkeydown={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') {
+									e.preventDefault();
+									chestClick();
+								}
+							}}
+						>
+							<ellipse class="ch-niche" cy="-8" rx="34" ry="24" />
+							<ellipse class="ch-glow" class:lit={chestPop} cy="-16" rx="26" ry="16" />
+							{@render chestShape()}
+							<g class="ch-lidg" class:open={chestPop}>
+								<path class="ch-lid" d="M -21 -16 Q -21 -30 0 -30 Q 21 -30 21 -16 Z" />
+								<path class="ch-lidband" d="M -12 -16 Q -12 -27 0 -27 M 12 -16 Q 12 -27 0 -27" />
+							</g>
+							{#if chestPop}
+								{#key btc}
+									<g class="btc-float">
+										<circle class="btc-coin" cy="-8" r="9" />
+										<text class="btc-b" y="-4">₿</text>
+										<text class="btc-text" y="-26">+1 bitcoin</text>
+									</g>
+								{/key}
+							{/if}
+						</g>
+					</g>
+				{/if}
 			</svg>
 		{:else}
 			<svg viewBox="0 0 {W} {Math.max(H, 1)}">
@@ -1602,34 +1682,6 @@
 
 				<!-- the atmosphere journey: sky → forest → soil → rock -->
 				<rect width={W} height={Math.max(H, 1)} fill="url(#{uid}-atmo)" />
-				<!-- distant forest: three soft misty rows on the horizon -->
-				{#each forestRows as row (row.cls)}
-					<g class={row.cls}>
-						{#each row.trees as ft, i (i)}
-							<g transform="translate({ft.x} {ft.y})">
-								{#if ft.trunk}
-									<rect x="-2.8" y="8" width="5.6" height="34" rx="2.6" class="ftrunk" />
-								{/if}
-								<path d={ft.dh} class="fhalo" />
-								<path d={ft.d} class="fcrown" />
-							</g>
-						{/each}
-					</g>
-				{/each}
-
-				<!-- the doe, ambling the verge behind the trunk -->
-				{#if deer}
-					<g class="zone" class:on={isOn('ground')}>
-						<g transform="translate(0 {deer.y})">
-							<g
-								class="deer-walk"
-								style="--ww:{deer.ww}px; transform: translateX({instant ? deer.startX : 0}px)"
-							>
-								<g class="deer-bob"><g transform="scale(1.35)">{@render deerShape()}</g></g>
-							</g>
-						</g>
-					</g>
-				{/if}
 
 				{#each strata as sd, i (i)}
 					<path d={sd} class="stratum" fill="none" />
@@ -1754,6 +1806,22 @@
 				<!-- the grassy verge where trunk turns to root -->
 				<g class="zone" class:on={isOn('ground')}>
 					<path d={grassBandBack} class="grassBack" />
+					{#each saplings as sp2, i (i)}<g class="sapling">{@render unitG(sp2)}</g>{/each}
+					<path d={grassBandMid} class="grassMid" />
+					{#if deer}
+						<g transform="translate({deer.x} {groundYS - 2}) scale(-1.55 1.55)">
+							<g class="grow" style="--gd:520ms">
+								<g class="deer-rest">
+									{@render deerRestShape()}
+									<g transform="translate(13 -16)">
+										<g class="deer-head" style="transform: rotate({deerGaze}deg)">
+											{@render deerHeadShape()}
+										</g>
+									</g>
+								</g>
+							</g>
+						</g>
+					{/if}
 					<path d={grassBandFront} class="grassFront" />
 					{#if logPiece}
 						<g transform="translate({logPiece.x} {groundYS - 4}) rotate({logPiece.rot})">
@@ -1864,6 +1932,105 @@
 	}
 	.zone--under .wood {
 		fill: #453f2b;
+	}
+	/* root generations lighten + warm toward the tips so the branching reads */
+	.wr0 {
+		fill: #43331f;
+	}
+	.wr1 {
+		fill: #5d4526;
+	}
+	.wr2 {
+		fill: #7a5c31;
+	}
+	.wr3 {
+		fill: #97793f;
+	}
+	.zone--under .wood.wr0,
+	.zone--under .wood.wr1,
+	.zone--under .wood.wr2,
+	.zone--under .wood.wr3 {
+		stroke: #241d12;
+		stroke-width: 0.9;
+		stroke-linejoin: round;
+		paint-order: stroke;
+		stroke-opacity: 0.35;
+	}
+	/* the treasure chest */
+	.chest {
+		pointer-events: auto;
+		cursor: pointer;
+		outline: none;
+	}
+	.chest:focus-visible {
+		outline: 2px solid #f7931a;
+		outline-offset: 4px;
+	}
+	.ch-niche {
+		fill: #79624a;
+		opacity: 0.65;
+	}
+	.ch-glow {
+		fill: #ffcf6e;
+		opacity: 0;
+	}
+	.ch-glow.lit {
+		opacity: 0.5;
+	}
+	.ch-base {
+		fill: #7a5230;
+		stroke: #46311d;
+		stroke-width: 1.2;
+	}
+	.ch-plank,
+	.ch-lidband {
+		fill: none;
+		stroke: #5d3f24;
+		stroke-width: 1;
+		opacity: 0.8;
+	}
+	.ch-band {
+		fill: none;
+		stroke: #c9a24a;
+		stroke-width: 2.4;
+	}
+	.ch-lock {
+		fill: #c9a24a;
+		stroke: #6e5117;
+		stroke-width: 0.8;
+	}
+	.ch-keyhole {
+		fill: none;
+		stroke: #46311d;
+		stroke-width: 1;
+		stroke-linecap: round;
+	}
+	.ch-lidg {
+		transform-origin: -21px -16px;
+	}
+	.ch-lid {
+		fill: #8a5e36;
+		stroke: #46311d;
+		stroke-width: 1.2;
+	}
+	.btc-coin {
+		fill: #f7931a;
+		stroke: #a55f0a;
+		stroke-width: 1;
+	}
+	.btc-b {
+		fill: #fff4dd;
+		font: 700 11px var(--font-body, sans-serif);
+		text-anchor: middle;
+	}
+	.btc-text {
+		fill: #f7931a;
+		stroke: #3a2b12;
+		stroke-width: 0.5;
+		paint-order: stroke;
+		font: 700 13px var(--font-display, serif);
+		text-anchor: middle;
+		letter-spacing: 0.04em;
 	}
 	.rimL {
 		stroke: #bfb289;
@@ -1983,73 +2150,44 @@
 	.sq-pose {
 		transform-origin: -1px -12px;
 	}
-	/* soft misty forest rows — halo under crown gives a fuzzy edge, colors
-	   sit barely off the sky so they read as distance, not graphics */
-	.frow3 .fcrown {
-		fill: #dbe5d8;
-		opacity: 0.55;
-	}
-	.frow3 .fhalo {
-		fill: #e4ece2;
-		opacity: 0.35;
-	}
-	.frow2 .fcrown {
-		fill: #ccdac8;
-		opacity: 0.6;
-	}
-	.frow2 .fhalo {
-		fill: #d9e4d6;
-		opacity: 0.38;
-	}
-	.frow2 .ftrunk {
-		fill: #b4c3ae;
-		opacity: 0.5;
-	}
-	.frow1 .fcrown {
-		fill: #bccfb6;
-		opacity: 0.62;
-	}
-	.frow1 .fhalo {
-		fill: #cfdeca;
-		opacity: 0.4;
-	}
-	.frow1 .ftrunk {
-		fill: #a3b59b;
-		opacity: 0.55;
-	}
-	/* the dense grass silhouettes on the verge */
+	/* the dense grass silhouettes on the verge (back → front, dark → light) */
 	.grassBack {
-		fill: #43704d;
-		opacity: 0.9;
+		fill: #375f42;
+		opacity: 0.95;
+	}
+	.grassMid {
+		fill: #4d8156;
+		opacity: 0.95;
 	}
 	.grassFront {
 		fill: #6aaa6d;
-		opacity: 0.92;
+		opacity: 0.95;
+	}
+	/* young saplings: paler, greener wood than the old tree */
+	.sapling .wood {
+		fill: #71603c;
 	}
 	/* the doe */
 	.deer-body,
 	.deer-neck {
 		fill: #b3906a;
 	}
-	.deer-chest {
+	.deer-belly2 {
 		fill: #d8c3a0;
+		opacity: 0.9;
 	}
-	.deer-belly {
-		fill: #d8c3a0;
+	.deer-fold {
+		fill: none;
+		stroke: #96784f;
+		stroke-width: 2;
+		stroke-linecap: round;
+		opacity: 0.8;
+	}
+	.deer-neck2 {
+		fill: #b3906a;
 	}
 	.deer-tail {
 		fill: #a5825c;
-	}
-	.deer-leg {
-		fill: none;
-		stroke: #a07f58;
-		stroke-width: 2.8;
-		stroke-linecap: round;
-	}
-	.deer-hoof {
-		stroke: #4a3b28;
-		stroke-width: 2.6;
-		stroke-linecap: round;
 	}
 	.deer-muzzle {
 		fill: #c4a67e;
@@ -2361,19 +2499,25 @@
 		.sq-holder {
 			transition: transform 660ms cubic-bezier(0.3, 0.85, 0.3, 1);
 		}
-		.deer-walk {
-			animation: tl-deerwalk 150s linear infinite;
+		.deer-rest {
+			animation: tl-breathe 4.6s ease-in-out infinite;
+			transform-origin: 0px 0px;
 		}
-		.deer-bob {
-			animation: tl-deerbob 1.15s ease-in-out infinite;
+		.deer-head {
+			transition: transform 260ms ease-out;
+			transform-origin: 0px 0px;
 		}
-		.deer-legsA {
-			animation: tl-deerleg 1.15s ease-in-out infinite alternate;
-			transform-origin: 0px -18px;
+		.ch-lidg {
+			transition: transform 420ms cubic-bezier(0.3, 1.3, 0.5, 1);
 		}
-		.deer-legsB {
-			animation: tl-deerleg 1.15s ease-in-out -0.575s infinite alternate-reverse;
-			transform-origin: 0px -18px;
+		.ch-lidg.open {
+			transform: rotate(-36deg);
+		}
+		.ch-glow {
+			transition: opacity 500ms ease;
+		}
+		.btc-float {
+			animation: tl-btc 1.5s ease-out forwards;
 		}
 		.ant-move {
 			animation: tl-antgo var(--ad, 18s) linear var(--adel, 0s) infinite;
@@ -2450,29 +2594,30 @@
 			transform: translateX(5px);
 		}
 	}
-	@keyframes tl-deerwalk {
-		from {
-			transform: translateX(-170px);
-		}
-		to {
-			transform: translateX(var(--ww, 1600px));
-		}
-	}
-	@keyframes tl-deerbob {
+	@keyframes tl-breathe {
 		0%,
 		100% {
-			transform: translateY(0);
+			transform: scaleY(1);
 		}
 		50% {
-			transform: translateY(-1.6px);
+			transform: scaleY(1.018);
 		}
 	}
-	@keyframes tl-deerleg {
-		from {
-			transform: rotate(-7deg);
+	@keyframes tl-btc {
+		0% {
+			transform: translateY(6px) scale(0.6);
+			opacity: 0;
 		}
-		to {
-			transform: rotate(7deg);
+		18% {
+			transform: translateY(-6px) scale(1.08);
+			opacity: 1;
+		}
+		70% {
+			opacity: 1;
+		}
+		100% {
+			transform: translateY(-40px) scale(1);
+			opacity: 0;
 		}
 	}
 	@keyframes tl-antgo {

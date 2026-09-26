@@ -38,8 +38,8 @@
 	--label-sub-fg: #3a2a09;
 	--garden-stem: #3f6d4e;
 	--garden-leaf: #6bbf7b;
-	/* the About page ends in bedrock — the footer bar is rock, not hub green */
-	--footer-bar-bg: #3a352c;
+	/* the About page ends in the dark below bedrock — near-black, not hub green */
+	--footer-bar-bg: #241f18;
 	--label-active-fg: #081109;
 	--on-hub: #eaf4ee;
 	--font-display: 'Fraunces Variable', 'Fraunces', Georgia, serif;

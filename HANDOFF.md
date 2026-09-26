@@ -66,13 +66,16 @@ on dev/build; if `$lib/paraglide/*` is missing run
   scaled 0.78 in `CornerScene.svelte` so the L-system never sprawls over text.
 - `lib/decor/*` — per-theme floating decor (GSAP mouse-parallax, deliberately
   gentle — the owner dislikes wobble; hub has NO mouse effect).
-- `lib/components/footer/*` — four bespoke footers (bedrock strata with
-  fossils+crystals for garden / Hokusai wave / outrun car / planet horizon).
-  Rule: **no SVG sliced mid-shape at the edges**. The garden bar uses
-  `--footer-bar-bg` (themes.css) so the rock bar doesn't recolor the wheel
-  hub; the strip's top band matches the About page's deepest rock tone for a
-  seamless join (the page's TreeLayer overshoots main's padding by 2.5rem
-  top+bottom for the same reason).
+- `lib/components/footer/*` — four bespoke footers (garden = "the Seed":
+  smooth dark rock masses framing a fixed-size center vignette where the
+  tree's last roots converge on a glowing amber seed — the page's finale /
+  Hokusai wave / outrun car / planet horizon). Rule: **no SVG sliced
+  mid-shape at the edges** (the garden masses are amorphous curves, safe to
+  stretch; the seed vignette is fixed-size and centered). The garden bar
+  uses `--footer-bar-bg` (themes.css, near-black #241f18) so it doesn't
+  recolor the wheel hub; the strip's top band matches the About page's
+  deepest rock tone for a seamless join (the page's TreeLayer overshoots
+  main's padding by 2.5rem top+bottom for the same reason).
 - `routes/*/+page.svelte` — each section has a bespoke presentation:
   About = Herbarium Folio + **Grove walk**, Projects = VHS rental wall,
   Hobbies = Star Atlas, CV = Sounding Line (depth-as-time). CV's
@@ -105,7 +108,7 @@ on dev/build; if `$lib/paraglide/*` is missing run
   also paints the whole **atmosphere**: sky blue → forest greens/yellows →
   golden grass → soil → rock, with buried stones and strata seams
   underground; blocks sit on light-pool veils tuned stronger below ground. Growth = nested `<g
-  class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
+class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
   user units), staggered per generation; per-block limbs gate on the page's
   `revealed` record (which also tracks 'notes'/'contact'). Interactivity:
   foliage sways gently, clumps **rustle** near the cursor (pointer:fine
@@ -114,18 +117,21 @@ on dev/build; if `$lib/paraglide/*` is missing run
   Shared vocabulary: sky · crown/canopy · topmost branch · leaf bush ·
   bower · trunk · limbs · ground/verge · underground. Chapter order lives
   in `content/about.ts`: heartwood(ADHD) → branches → [ground] → roots →
-  mycelium. Later additions: a soft three-row misty treeline on the
-  horizon; a dense two-band grass VERGE at the ground line (tufts,
-  daisies/bells/seedheads, fallen log + leaves, mushrooms) — the old thin
-  soil LivingLine is gone; a doe ambling across the verge on a 150s loop
-  (leg-swing + bob, behind the trunk); a wide 11-root plate plus thick
-  scroll-clipped deep runs; an ANT COLONY (chambers with larvae/seeds/
-  queen, tunnels with workers animated via CSS offset-path) plus three
-  wiggling worms; and the interactive squirrel (flees the cursor along
-  the bark via trunkXOf/halfWOf, viewport-clamped, never below ground).
-  The garden footer is fitted-stone bedrock built from a seamless SVG
-  <pattern> tile (mortar at tile edges; courses darken downward; fossils/
-  quartz/root-tip accents on top).
+  mycelium. Later additions: a dense two-band grass VERGE at the ground
+  line (tufts, daisies/bells/seedheads, three saplings, fallen log +
+  leaves, mushrooms) — the old thin soil LivingLine and the misty horizon
+  treeline are both gone (owner cut the treeline); a resting doe lying in
+  the deep grass whose head turns to FOLLOW THE CURSOR (deerGaze state,
+  CSS-transitioned rotate); a recursive branching root plate (rootRec,
+  depth-tinted `wr0–wr3` wood tones + dark outline underground) plus
+  thick scroll-clipped deep runs; a buried TREASURE CHEST easter egg in
+  the roots chapter (click/Enter pops the lid + a "+1 bitcoin" float,
+  `btc` counter retriggers via {#key}); an ANT COLONY (chambers with
+  larvae/seeds/queen, tunnels with workers animated via CSS offset-path)
+  plus three wiggling worms; and the interactive squirrel (flees the
+  cursor along the bark via trunkXOf/halfWOf, viewport-clamped, never
+  below ground). The garden footer ("the Seed", see footer entry) ends
+  the descent where the tree began.
 - Grove chapters grow into view on scroll — a shared IntersectionObserver
   (`lib/garden/reveal.ts`) flips per-chapter classes, CSS does the animating
   (transform/opacity one-shots). `Garden.svelte` has `start` (grow when
