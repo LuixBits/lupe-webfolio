@@ -62,17 +62,26 @@ on dev/build; if `$lib/paraglide/*` is missing run
   education/positions live in `lib/content/cv.ts`.
 - **The tree (About)** — the page IS one tree, descended crown→underground;
   scrolling down travels back in time (newest growth up top, oldest parts
-  deepest — owner-agreed structure). Shared vocabulary: **sky** (bluish wash
-  at top) · **crown/canopy** (`lib/garden/Crown.svelte`) · **topmost branch**
-  (LivingLine under the h1) · **leaf bush** (bio's nest Opening) · **bower**
-  (the portrait's woven branch frame) · **trunk**
-  (`lib/garden/Trunk.svelte`, left gutter, tapering, clip-path scrubbed to
-  scroll — retracts on scroll-up by design) · **openings**
-  (`lib/garden/Opening.svelte`: foliage gaps content sits in, boughs
-  connecting to the trunk) · **ground** (soil LivingLine where the trunk
-  ends) · **underground** (earthy wash: roots, mycelium, seed packets).
-  Chapter order lives in `content/about.ts`: heartwood(ADHD) → branches →
-  [ground] → roots → mycelium.
+  deepest — owner-agreed structure). It is drawn by ONE component,
+  `lib/garden/tree/TreeLayer.svelte` (+ `tree/generate.ts`): a full-bleed
+  z:-1 layer that measures every `[data-tree]` anchor in the page, then
+  procedurally generates the whole organism — canopy masses crowding the top
+  edge, a thick tapered trunk down the gutter (SVG-clip scrubbed to scroll,
+  retracts on scroll-up), the **topmost branch** the title sits on, a **leaf
+  bush** around the bio, a woven **bower** ring around the portrait, one
+  embracing limb per content block (junction ABOVE the block — anything
+  crossing a veil gets washed by it), buttressed **roots** at the ground
+  line, and a long root reaching the seed packets. Growth = nested `<g
+  class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
+  user units), staggered per generation; per-block limbs gate on the page's
+  `revealed` record (which also tracks 'notes'/'contact'). Interactivity:
+  foliage sways gently, clumps **rustle** near the cursor (pointer:fine
+  only), three leaves drift from the canopy. Content sits on translucent
+  light-pool veils so branches can pass behind without stealing contrast.
+  Shared vocabulary: sky · crown/canopy · topmost branch · leaf bush ·
+  bower · trunk · limbs · ground · underground. Chapter order lives in
+  `content/about.ts`: heartwood(ADHD) → branches → [ground] → roots →
+  mycelium.
 - Grove chapters grow into view on scroll — a shared IntersectionObserver
   (`lib/garden/reveal.ts`) flips per-chapter classes, CSS does the animating
   (transform/opacity one-shots). `Garden.svelte` has `start` (grow when
