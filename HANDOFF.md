@@ -57,9 +57,19 @@ on dev/build; if `$lib/paraglide/*` is missing run
 - `lib/components/footer/*` — four bespoke footers (meadow / Hokusai wave /
   outrun car / planet horizon). Rule: **no SVG sliced mid-shape at the edges**.
 - `routes/*/+page.svelte` — each section has a bespoke presentation:
-  About = Herbarium Folio, Projects = VHS rental wall, Hobbies = Star Atlas,
-  CV = Sounding Line (depth-as-time). CV's education/positions live in
-  `lib/content/cv.ts`.
+  About = Herbarium Folio + **Grove walk**, Projects = VHS rental wall,
+  Hobbies = Star Atlas, CV = Sounding Line (depth-as-time). CV's
+  education/positions live in `lib/content/cv.ts`.
+- **Grove walk (About)**: chapters grow into view on scroll — a shared
+  IntersectionObserver (`lib/garden/reveal.ts`) flips per-chapter classes,
+  CSS does the animating (transform/opacity one-shots); a margin vine
+  (`lib/garden/Spine.svelte`) draws via stroke-dashoffset scrubbed to scroll
+  (retracts on scroll-up, by design). `Garden.svelte` gained `start` (grow
+  when revealed) + preset overrides (`step`/`iterations`/`angle`/`leafScale`/
+  `strokeWidth`) — plant params were picked by bbox-scanning seeds (the
+  L-system is deterministic). SSR/no-JS/reduced-motion always get a fully
+  grown page: the hidden `pending` state exists only client-side under
+  `prefers-reduced-motion: no-preference`.
 - `lib/content/*` — typed + Zod-validated bilingual content.
 
 ## Owner to fill (placeholder content)
@@ -69,6 +79,10 @@ on dev/build; if `$lib/paraglide/*` is missing run
   `education[]`/`positions[]` entries (marked "— placeholder"), and the About
   page's optional herbarium fields (epithet/since/link notes — see
   `routes/about/+page.svelte` fallbacks).
+- About `chapters[]` in `lib/content/about.ts` (roots / passions / mycelium /
+  ADHD-as-pioneer): structure + ids are load-bearing, but the prose is
+  assistant-written placeholder voice — owner should rewrite in their own
+  words (en + de).
 
 ## Known open items
 

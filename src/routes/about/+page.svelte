@@ -1,11 +1,23 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { about } from '$lib/content/about';
 	import { resolveLocalized } from '$lib/content/schema';
 	import { getLocale } from '$lib/paraglide/runtime';
 	import * as m from '$lib/paraglide/messages';
 	import Garden from '$lib/garden/Garden.svelte';
+	import Spine from '$lib/garden/Spine.svelte';
+	import { revealOnce } from '$lib/garden/reveal';
 
 	const locale = getLocale();
+
+	// Grove reveal state. `hydrated` gates the hidden `pending` state to the
+	// client, so SSR/no-JS readers always get a fully grown grove; each chapter
+	// flips to `in` once, the first time it scrolls into view.
+	let hydrated = $state(false);
+	let revealed = $state<Record<string, boolean>>({});
+	onMount(() => {
+		hydrated = true;
+	});
 	const bioParas = $derived(resolveLocalized(about.bio, locale).split('\n\n'));
 	// A drop cap mangles opening contractions ("I'm" → giant "I'" + orphaned
 	// "m"), so only grant it when the first word survives ::first-letter intact.
@@ -97,6 +109,147 @@
 			</ol>
 		</section>
 	{/if}
+
+	<section id="grove" class="section grove-head" aria-labelledby="grove-h">
+		<h2 id="grove-h">{m.about_grove_title()}</h2>
+		<p class="seeds-hint">{m.about_grove_hint()}</p>
+	</section>
+
+	<div class="grove">
+		<Spine seed="about-spine" />
+		{#each about.chapters as ch (ch.id)}
+			{@const paras = resolveLocalized(ch.body, locale).split('\n\n')}
+			<section
+				class="chapter chapter--{ch.id}"
+				class:pending={hydrated && !revealed[ch.id]}
+				class:in={!!revealed[ch.id]}
+				use:revealOnce={() => (revealed[ch.id] = true)}
+				aria-labelledby="grove-{ch.id}"
+			>
+				<p class="kicker sprout" style="--d:0">{resolveLocalized(ch.kicker, locale)}</p>
+				<h3 id="grove-{ch.id}" class="sprout" style="--d:1">
+					{resolveLocalized(ch.title, locale)}
+				</h3>
+				{#if ch.id === 'pioneer'}
+					<!-- Floated before the prose so the paragraphs wrap around the tree. -->
+					<div class="pioneer-fig sprout" style="--d:2" aria-hidden="true">
+						<!-- Params picked by bbox scan: fills 240×300 as a tall birch-like
+						     pioneer; smaller leaves keep the dense crown readable. -->
+						<Garden
+							seed="about-pioneer-4"
+							width={240}
+							height={300}
+							originX={120}
+							originY={294}
+							heading={0}
+							iterations={5}
+							step={4.4}
+							angle={36}
+							leafScale={0.5}
+							strokeWidth={4.4}
+							duration={4200}
+							start={!!revealed[ch.id]}
+						/>
+					</div>
+				{/if}
+				{#each paras as para, pi (pi)}
+					<p class="chapter-para sprout" style="--d:{2 + pi}">{para}</p>
+				{/each}
+				{#if ch.sprouts.length}
+					<ul class="leafcards">
+						{#each ch.sprouts as s, si (si)}
+							<li class="leafcard sprout" style="--d:{2 + paras.length + si}">
+								<h4>{resolveLocalized(s.title, locale)}</h4>
+								<p>{resolveLocalized(s.body, locale)}</p>
+							</li>
+						{/each}
+					</ul>
+				{/if}
+				{#if ch.id === 'roots'}
+					<!-- The root grammar grows narrow, so the system is composed: a deep
+					     taproot plus two slanted flankers sharing the same soil point. -->
+					<div class="rootbed" aria-hidden="true">
+						<div class="bed-layer">
+							<Garden
+								seed="about-roots-6"
+								width={320}
+								height={190}
+								originX={160}
+								originY={4}
+								variant="root"
+								iterations={5}
+								step={3}
+								strokeWidth={3.4}
+								duration={3400}
+								start={!!revealed[ch.id]}
+							/>
+						</div>
+						<div class="bed-layer">
+							<Garden
+								seed="about-roots-east"
+								width={320}
+								height={190}
+								originX={160}
+								originY={4}
+								variant="root"
+								heading={142}
+								step={4}
+								duration={2800}
+								start={!!revealed[ch.id]}
+							/>
+						</div>
+						<div class="bed-layer">
+							<Garden
+								seed="about-roots-west"
+								width={320}
+								height={190}
+								originX={160}
+								originY={4}
+								variant="root"
+								heading={226}
+								step={3.3}
+								duration={3800}
+								start={!!revealed[ch.id]}
+							/>
+						</div>
+					</div>
+				{:else if ch.id === 'mycelium'}
+					<div class="mycelium-bed" aria-hidden="true">
+						<!-- Wide 620-unit canvas so the two networks root far apart and
+						     reach toward each other, almost touching mid-bed. -->
+						<div class="bed-layer">
+							<Garden
+								seed="about-mycelium-east-2"
+								width={620}
+								height={150}
+								originX={110}
+								originY={8}
+								variant="root"
+								heading={115}
+								step={7.5}
+								duration={3200}
+								start={!!revealed[ch.id]}
+							/>
+						</div>
+						<div class="bed-layer">
+							<Garden
+								seed="about-mycelium-west-1"
+								width={620}
+								height={150}
+								originX={510}
+								originY={8}
+								variant="root"
+								heading={245}
+								step={7.5}
+								duration={3600}
+								start={!!revealed[ch.id]}
+							/>
+						</div>
+					</div>
+				{/if}
+			</section>
+		{/each}
+	</div>
 
 	<section id="contact" class="section">
 		<h2>{m.nav_about_contact()}</h2>
@@ -392,6 +545,137 @@
 		font-size: 0.98rem;
 	}
 
+	/* ---- the grove walk ---- */
+	.grove-head {
+		margin-bottom: 1.25rem;
+	}
+	.grove {
+		position: relative;
+		padding-left: clamp(2.6rem, 8vw, 4.25rem);
+		margin-bottom: 3.5rem;
+	}
+	.chapter {
+		position: relative;
+		max-width: 38rem;
+		margin: 0 0 4.75rem;
+		scroll-margin-top: 7rem;
+	}
+	.chapter:last-child {
+		margin-bottom: 1rem;
+	}
+	.kicker {
+		margin: 0 0 0.4rem;
+		font-size: 0.72rem;
+		letter-spacing: 0.28em;
+		text-transform: uppercase;
+		color: color-mix(in srgb, var(--garden-stem, var(--accent)) 78%, var(--fg));
+	}
+	.chapter h3 {
+		margin: 0 0 0.9rem;
+		font-size: var(--fs-h2);
+		font-style: italic;
+		font-weight: 620;
+	}
+	.chapter-para {
+		margin: 0 0 1rem;
+	}
+
+	/* leaf-shaped passion cards */
+	.leafcards {
+		list-style: none;
+		margin: 1.3rem 0 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(13.5rem, 1fr));
+		gap: 0.9rem;
+	}
+	.leafcard {
+		padding: 0.95rem 1.1rem;
+		background: color-mix(in srgb, var(--bg) 55%, white);
+		border: 1px solid color-mix(in srgb, var(--garden-stem, var(--accent)) 30%, transparent);
+		border-radius: 0.35rem 2.1rem;
+		box-shadow: 0 10px 22px -18px color-mix(in srgb, var(--garden-stem, #3f6d4e) 60%, transparent);
+	}
+	.leafcard:nth-child(even) {
+		border-radius: 2.1rem 0.35rem;
+	}
+	.leafcard h4 {
+		margin: 0 0 0.3rem;
+		font-size: 1rem;
+	}
+	.leafcard p {
+		margin: 0;
+		font-size: 0.92rem;
+		color: var(--fg-muted);
+	}
+
+	/* roots chapter footer: a soil line the root system descends from */
+	.rootbed {
+		position: relative;
+		height: 175px;
+		margin-top: 0.6rem;
+		border-top: 1.5px solid color-mix(in srgb, var(--garden-stem, var(--accent)) 45%, transparent);
+		overflow: clip;
+		/* underground palette: paler than the canopy above */
+		--garden-stem: #6f927d;
+		-webkit-mask-image: linear-gradient(#000 50%, transparent);
+		mask-image: linear-gradient(#000 50%, transparent);
+	}
+
+	/* mycelium: two muted root systems interleaving under their own soil line */
+	.mycelium-bed {
+		position: relative;
+		height: 150px;
+		margin-top: 0.6rem;
+		border-top: 1.5px solid color-mix(in srgb, var(--garden-stem, var(--accent)) 40%, transparent);
+		overflow: clip;
+		--garden-stem: #93b2a0;
+		--garden-leaf: #b9d8c2;
+		-webkit-mask-image: linear-gradient(#000 45%, transparent);
+		mask-image: linear-gradient(#000 45%, transparent);
+	}
+	.bed-layer {
+		position: absolute;
+		inset: 0;
+	}
+
+	/* pioneer tree: prose wraps around the growing specimen */
+	.pioneer-fig {
+		position: relative;
+		width: min(280px, 78vw);
+		height: 320px;
+		margin: 0.4rem auto 1rem;
+	}
+	.pioneer-fig::before {
+		content: '';
+		position: absolute;
+		inset: -4% -12% 6%;
+		background: radial-gradient(closest-side, rgba(255, 243, 201, 0.7), transparent 80%);
+	}
+	.chapter--pioneer::after {
+		content: '';
+		display: block;
+		clear: both;
+	}
+	@media (min-width: 900px) {
+		.chapter--pioneer {
+			max-width: 44rem;
+		}
+		.pioneer-fig {
+			float: right;
+			margin: -2rem -0.5rem 0.6rem 2rem;
+		}
+	}
+	/* Phones: tuck the vine into the margin so its leaves stay off the prose. */
+	@media (max-width: 720px) {
+		.grove {
+			padding-left: 3rem;
+		}
+		.grove > :global(.spine) {
+			left: -0.7rem;
+		}
+	}
+
 	/* ---- motion (all of it) — stilled under reduced motion; Garden itself
 	   snaps to fully grown there, leaving a complete pressed specimen. ---- */
 	@media (prefers-reduced-motion: no-preference) {
@@ -442,6 +726,43 @@
 	@keyframes drift-b {
 		to {
 			transform: translate(-6px, 8px);
+		}
+	}
+
+	/* ---- grove growth. Hidden state exists only client-side (`pending` is
+	   gated on hydration) and only when motion is welcome, so SSR, no-JS and
+	   reduced-motion readers always meet a fully grown grove. ---- */
+	@media (prefers-reduced-motion: no-preference) {
+		.chapter.pending .sprout {
+			opacity: 0;
+		}
+		.chapter.in .sprout {
+			animation: sprout-up 620ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+			animation-delay: calc(var(--d, 0) * 95ms);
+		}
+		.chapter.in .leafcard {
+			animation-name: leaf-unfurl;
+			transform-origin: 12% 88%;
+		}
+		.chapter.in .pioneer-fig::before {
+			animation: dapple-in 1600ms ease 500ms backwards;
+		}
+	}
+	@keyframes sprout-up {
+		from {
+			opacity: 0;
+			transform: translateY(16px);
+		}
+	}
+	@keyframes leaf-unfurl {
+		from {
+			opacity: 0;
+			transform: translateY(10px) rotate(-4deg) scale(0.88);
+		}
+	}
+	@keyframes dapple-in {
+		from {
+			opacity: 0;
 		}
 	}
 </style>

@@ -211,6 +211,22 @@ export const albumSchema = z.object({
 });
 export type Album = z.infer<typeof albumSchema>;
 
+/** One stop on the About page's grove walk. `sprouts` are small leaf-cards
+ *  that unfurl inside the chapter (passions, idea seeds…). */
+export const chapterSchema = z.object({
+	/** Stable id — anchors the chapter, seeds its plant, picks its art. */
+	id: z.string(),
+	/** Small stratum label above the title — 'Forest floor', 'Waldboden'… */
+	kicker: localizedString,
+	title: localizedString,
+	/** Paragraphs, split on blank lines at render time. */
+	body: localizedString,
+	sprouts: z
+		.array(z.object({ title: localizedString, body: localizedString }))
+		.default([])
+});
+export type Chapter = z.infer<typeof chapterSchema>;
+
 /** The About section — who I am, a few highlights, plus contact links. */
 export const aboutSchema = z.object({
 	name: z.string(),
@@ -219,6 +235,8 @@ export const aboutSchema = z.object({
 	highlights: z
 		.array(z.object({ title: localizedString, body: localizedString }))
 		.default([]),
+	/** The grove walk — personal chapters that grow into view on scroll. */
+	chapters: z.array(chapterSchema).default([]),
 	links: z.array(linkSchema).default([])
 });
 export type About = z.infer<typeof aboutSchema>;

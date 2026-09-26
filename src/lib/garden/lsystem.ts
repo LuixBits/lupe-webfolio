@@ -50,7 +50,7 @@ export interface LSystemOptions {
 }
 
 /** mulberry32 — tiny fast seeded PRNG. Deterministic given the seed. */
-function rng(seed: number): () => number {
+export function rng(seed: number): () => number {
 	let a = seed >>> 0;
 	return () => {
 		a |= 0;
