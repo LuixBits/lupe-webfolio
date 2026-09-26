@@ -107,6 +107,30 @@ export function taperedBranch(
 	return { d, end: c[K], endAngle: tipA, mid: c[mi], midAngle: midA };
 }
 
+/** A tapered wood polygon along an arbitrary centerline (absolute coords) —
+ *  used for the long root runs that snake around the underground blocks. */
+export function taperedPath(pts: Pt[], w0: number, w1: number): string {
+	const K = pts.length - 1;
+	if (K < 1) return '';
+	const w = (t: number) => Math.max(0.4, w0 + (w1 - w0) * t) / 2;
+	const L: Pt[] = [];
+	const R: Pt[] = [];
+	for (let i = 0; i <= K; i++) {
+		const t = i / K;
+		const p0 = pts[Math.max(0, i - 1)];
+		const p1 = pts[Math.min(K, i + 1)];
+		const dx = p1.x - p0.x;
+		const dy = p1.y - p0.y;
+		const dl = Math.hypot(dx, dy) || 1;
+		const nx = -dy / dl;
+		const ny = dx / dl;
+		L.push({ x: pts[i].x + nx * w(t), y: pts[i].y + ny * w(t) });
+		R.push({ x: pts[i].x - nx * w(t), y: pts[i].y - ny * w(t) });
+	}
+	R.reverse();
+	return `M${smoothOpen(L)} L ${smoothOpen(R)} Z`;
+}
+
 /** A wobbly rounded-rect ring (the bower) around a w×h box whose top-left is
  *  at (0,0), drawn `pad` px OUTSIDE the box. */
 export function bowerRing(
