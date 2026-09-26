@@ -192,6 +192,45 @@ export const positionSchema = z.object({
 });
 export type Position = z.infer<typeof positionSchema>;
 
+/** One station of the CV dive — a role or a degree hanging on the sounding
+ *  line. `start`/`end` are decimal years (end null = today) and only order
+ *  the stations by depth; the displayed strings (`span`, `duration`) are
+ *  literal, owner-maintained (matches the LinkedIn export; auto-computing
+ *  "heute" durations risks hydration drift). `group` ties multi-role
+ *  employers into one washi panel (e.g. both SIGA roles). */
+export const stationSchema = z.object({
+	id: z.string(),
+	track: z.enum(['education', 'work']),
+	org: z.string(),
+	role: localizedString,
+	span: yearSpan,
+	start: z.number(),
+	end: z.number().nullable(),
+	/** "2 Jahre 3 Monate" — literal display string. */
+	duration: localizedString.optional(),
+	location: localizedString.optional(),
+	pensum: z.enum(['full', 'part']).optional(),
+	/** "Hybrid" etc. */
+	mode: localizedString.optional(),
+	/** Full skills list; truncated "+N" sources get placeholder slots. */
+	skills: z.array(localizedString).default([]),
+	/** Employer-panel key — stations sharing it render as one grouped panel. */
+	group: z.string().optional(),
+	/** Panel note on the first group member, e.g. "5 Jahre 2 Monate". */
+	groupNote: localizedString.optional(),
+	/** Slug into /cv/[slug] (the thesis scroll, once it exists). */
+	detail: z.string().optional(),
+	/** Organisation website — renders a hanko link on the card. */
+	url: z.url().optional()
+});
+export type Station = z.infer<typeof stationSchema>;
+
+/** Parse + validate the dive stations (authored in any order; the page sorts
+ *  by depth). */
+export function defineStations(input: unknown[]): Station[] {
+	return z.array(stationSchema).parse(input);
+}
+
 /** A single item in a hobby gallery — a photo or an embedded/hosted video. */
 export const mediaItemSchema = z.object({
 	id: z.string(),

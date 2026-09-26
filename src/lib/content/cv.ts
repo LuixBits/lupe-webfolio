@@ -2,10 +2,149 @@ import {
 	defineEducation,
 	definePositions,
 	defineProjects,
+	defineStations,
 	type Education,
 	type Position,
-	type Project
+	type Project,
+	type Station
 } from './schema';
+
+/** The dive stations — the real CV (LinkedIn export, 2026-09). Depth = time:
+ *  `start`/`end` order the stations; the visible strings are literal.
+ *  `skills` arrays are partial — the export truncates ("+4 Kenntnisse") —
+ *  so the known-real entries ship plus one "— placeholder" slot where the
+ *  source said "+N"; the owner fills the real remainders. */
+export const stations: Station[] = defineStations([
+	{
+		id: 'siga-dev',
+		track: 'work',
+		org: 'SIGA',
+		role: { en: 'Developer Customer Experience', de: 'Developer Customer Experience' },
+		span: { en: 'Jul 2024 – today', de: 'Juli 2024 – heute' },
+		start: 2024.5,
+		end: null,
+		duration: { en: '2 yrs 3 mos', de: '2 Jahre 3 Monate' },
+		location: { en: 'Ruswil LU', de: 'Ruswil LU' },
+		pensum: 'full',
+		mode: { en: 'Hybrid', de: 'Hybrid' },
+		skills: [{ en: 'Skills — placeholder', de: 'Kenntnisse — Platzhalter' }],
+		group: 'siga',
+		groupNote: { en: 'SIGA · 5 yrs 2 mos', de: 'SIGA · 5 Jahre 2 Monate' },
+		url: 'https://www.siga.swiss'
+	},
+	{
+		id: 'siga-trainee',
+		track: 'work',
+		org: 'SIGA',
+		role: { en: 'Trainee Digitalisierung', de: 'Trainee Digitalisierung' },
+		span: { en: 'Aug 2021 – Jul 2024', de: 'Aug. 2021 – Juli 2024' },
+		start: 2021.6,
+		end: 2024.5,
+		duration: { en: '3 yrs', de: '3 Jahre' },
+		pensum: 'part',
+		skills: [
+			{ en: 'Linux Desktop', de: 'Linux Desktop' },
+			{ en: 'Software development', de: 'Softwareentwicklung' },
+			{ en: 'more — placeholder', de: 'weitere — Platzhalter' }
+		],
+		group: 'siga'
+	},
+	{
+		id: 'hslu-ma',
+		track: 'education',
+		org: 'Hochschule Luzern',
+		role: { en: 'MA Design — Digital Ideation', de: 'MA Design — Digital Ideation' },
+		span: { en: 'Aug 2021 – Jul 2024', de: 'Aug. 2021 – Juli 2024' },
+		start: 2021.6,
+		end: 2024.5,
+		skills: [
+			{ en: 'UX', de: 'UX' },
+			{ en: 'Svelte', de: 'Svelte' },
+			{ en: '+4 — placeholder', de: '+4 — Platzhalter' }
+		],
+		url: 'https://www.hslu.ch'
+		// detail: 'thesis' — wired once the thesis scroll exists at /cv/thesis
+	},
+	{
+		id: 'hslu-bsc',
+		track: 'education',
+		org: 'Hochschule Luzern',
+		role: { en: 'BSc Computer Science — Major HCID', de: 'BSc Informatik — Major HCID' },
+		span: '2018 – 2021',
+		start: 2018.7,
+		end: 2021.6,
+		skills: [
+			{ en: 'Linux Desktop', de: 'Linux Desktop' },
+			{ en: 'Ubuntu', de: 'Ubuntu' },
+			{ en: '+4 — placeholder', de: '+4 — Platzhalter' }
+		],
+		url: 'https://www.hslu.ch'
+	},
+	{
+		id: 'neptun',
+		track: 'work',
+		org: 'Projekt Neptun',
+		role: {
+			en: 'Support staff · Head of Help Point Lucerne',
+			de: 'Support Mitarbeiter · Leitung Help Point Luzern'
+		},
+		span: { en: 'Feb 2019 – Jul 2021', de: 'Feb. 2019 – Juli 2021' },
+		start: 2019.1,
+		end: 2021.5,
+		duration: { en: '2 yrs 6 mos', de: '2 Jahre 6 Monate' },
+		location: { en: 'Lucerne', de: 'Luzern' },
+		pensum: 'part',
+		skills: [{ en: 'Linux Desktop', de: 'Linux Desktop' }],
+		url: 'https://www.projektneptun.ch'
+	},
+	{
+		id: 'armee',
+		track: 'work',
+		org: 'Schweizer Armee',
+		role: { en: 'Medic (Sanitätssoldat)', de: 'Sanitätssoldat' },
+		span: { en: 'Jul 2017 – Apr 2018', de: 'Juli 2017 – Apr. 2018' },
+		start: 2017.5,
+		end: 2018.3,
+		duration: { en: '10 mos', de: '10 Monate' }
+	},
+	{
+		id: 'efz',
+		track: 'education',
+		org: 'EMVs Visp',
+		role: { en: 'EFZ Informatik', de: 'EFZ Informatik' },
+		span: '2013 – 2017',
+		start: 2013.6,
+		end: 2017.6,
+		skills: [{ en: 'Skills — placeholder', de: 'Kenntnisse — Platzhalter' }]
+	},
+	{
+		id: 'bm',
+		track: 'education',
+		org: 'BFS Oberwallis',
+		role: {
+			en: 'Technische Berufsmaturität (TALS)',
+			de: 'Technische Berufsmaturität (TALS)'
+		},
+		span: '2013 – 2017',
+		start: 2013.6,
+		end: 2017.6
+	},
+	{
+		id: 'emvs-lehre',
+		track: 'work',
+		org: 'EMVs Sion',
+		role: { en: 'Apprentice (Informatik)', de: 'Lernender Informatik' },
+		span: '2013 – 2017',
+		start: 2013.6,
+		end: 2017.6,
+		duration: { en: '4 yrs', de: '4 Jahre' }
+	}
+]);
+
+/** The Flaschenpost target — the CV as a PDF. Stays undefined until the
+ *  owner drops the real file (expected: static/media/cv/luiz-perren-cv.pdf);
+ *  the bottle renders a "PDF folgt — placeholder" tag meanwhile. */
+export const cvPdf: string | undefined = undefined;
 
 /** CV / Lebenslauf — research work and publications. Placeholder-but-plausible
  *  copy; replace with the real thing. */

@@ -25,8 +25,8 @@ export const menu: MenuItem[] = [
 		label: m.nav_cv,
 		href: '/cv',
 		children: [
-			{ id: 'cv-research', label: m.nav_cv_research, href: '/cv#research' },
-			{ id: 'cv-publications', label: m.nav_cv_publications, href: '/cv#publications' }
+			{ id: 'cv-experience', label: m.nav_cv_experience, href: '/cv#experience' },
+			{ id: 'cv-education', label: m.nav_cv_education, href: '/cv#education' }
 		]
 	},
 	{
