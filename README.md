@@ -55,3 +55,7 @@ Malformed content fails at build/dev, not runtime.
 
 Architecture decision records live in [`docs/adr/`](docs/adr/) — runes,
 app-not-library, hybrid rendering, Paraglide, typed content, generative garden.
+
+[ADR-0007](docs/adr/0007-handcrafted-projects-scenes.md) records the Projects
+scene design. The [scene-building guide](docs/handcrafted-scenes.md) explains
+the SVG/CSS materials, lighting, motion and review process for future work.
