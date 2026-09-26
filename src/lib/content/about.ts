@@ -43,6 +43,77 @@ export const about = defineAbout({
 			}
 		}
 	],
+	/* The grove walk. Placeholder voice — owner: rewrite these in your own
+	 * words; structure (ids) is load-bearing, prose is not. Paragraphs split
+	 * on blank lines. */
+	chapters: [
+		{
+			id: 'roots',
+			kicker: { en: 'Forest floor', de: 'Waldboden' },
+			title: { en: 'Roots', de: 'Wurzeln' },
+			body: {
+				en: 'Every forest starts below the surface. Mine is made of early curiosity — taking things apart to see how they work, putting them back together slightly better or slightly worse, and being equally delighted either way.\n\nWhat grounds me hasn’t changed since: honest questions, patient observation, and the stubborn belief that understanding something deeply is its own reward. Everything above ground grows from there.',
+				de: 'Jeder Wald beginnt unter der Oberfläche. Meiner besteht aus früher Neugier — Dinge auseinandernehmen, um zu sehen, wie sie funktionieren, sie wieder zusammensetzen, mal etwas besser, mal etwas schlechter, und mich in beiden Fällen gleich sehr freuen.\n\nWas mich erdet, hat sich seitdem nicht geändert: ehrliche Fragen, geduldiges Beobachten und der sture Glaube, dass tiefes Verstehen seine eigene Belohnung ist. Alles über der Erde wächst von dort.'
+			}
+		},
+		{
+			id: 'branches',
+			kicker: { en: 'Branchwork', de: 'Geäst' },
+			title: { en: 'Passions', de: 'Leidenschaften' },
+			body: {
+				en: 'A tree doesn’t choose one direction; it reaches for every patch of light it can find. That’s how my passions work. At night I point a telescope at the sky and stack faint photons into galaxies. By day I fly drones to borrow a bird’s perspective, or sit very still until wildlife forgets I’m there.\n\nThey look like separate hobbies, but they’re one habit: building instruments to see what eyes alone can’t.',
+				de: 'Ein Baum entscheidet sich nicht für eine Richtung; er streckt sich nach jedem Fleck Licht, den er findet. Genau so funktionieren meine Leidenschaften. Nachts richte ich ein Teleskop auf den Himmel und stapele schwache Photonen zu Galaxien. Tagsüber leihe ich mir mit der Drohne den Blick eines Vogels — oder sitze so still, bis die Wildtiere vergessen, dass ich da bin.\n\nEs sieht aus wie getrennte Hobbys, ist aber eine einzige Gewohnheit: Instrumente bauen, um zu sehen, was Augen allein nicht können.'
+			},
+			sprouts: [
+				{
+					title: { en: 'Astrophotography', de: 'Astrofotografie' },
+					body: {
+						en: 'Hours of patience, stacked into one image of something unreasonably far away.',
+						de: 'Stunden an Geduld, gestapelt zu einem Bild von etwas unvernünftig Weitem.'
+					}
+				},
+				{
+					title: { en: 'Drone flights', de: 'Drohnenflüge' },
+					body: {
+						en: 'Perspective as a tool — the world explains itself differently from above.',
+						de: 'Perspektive als Werkzeug — von oben erklärt sich die Welt anders.'
+					}
+				},
+				{
+					title: { en: 'Wildlife', de: 'Wildtiere' },
+					body: {
+						en: 'Sitting still long enough that the forest resumes around you.',
+						de: 'So lange stillsitzen, bis der Wald um dich herum weitermacht.'
+					}
+				},
+				{
+					title: { en: 'Building things', de: 'Dinge bauen' },
+					body: {
+						en: 'Code, optics, small machines — if it can be made, it can be understood.',
+						de: 'Code, Optik, kleine Maschinen — was man bauen kann, kann man verstehen.'
+					}
+				}
+			]
+		},
+		{
+			id: 'mycelium',
+			kicker: { en: 'Below the floor', de: 'Unter dem Boden' },
+			title: { en: 'Mycelium', de: 'Myzel' },
+			body: {
+				en: 'Under every forest runs a network that connects trees that will never touch — nutrients from a sunny clearing feeding a sapling in the shade. Ideas work the same way for me.\n\nA rendering trick becomes a way to think about attention. A pattern from bird flight ends up in a codebase. I keep a compost heap of half-ideas and let them rot productively; the good ones fruit later, usually somewhere unexpected. If we talk for ten minutes, I will probably hand you one.',
+				de: 'Unter jedem Wald verläuft ein Netzwerk, das Bäume verbindet, die sich nie berühren werden — Nährstoffe aus einer sonnigen Lichtung füttern einen Schössling im Schatten. Genauso funktionieren Ideen bei mir.\n\nEin Rendering-Trick wird zu einer Denkfigur über Aufmerksamkeit. Ein Muster aus dem Vogelflug landet im Code. Ich pflege einen Komposthaufen halber Ideen und lasse sie produktiv verrotten; die guten tragen später Früchte, meist an unerwarteter Stelle. Wenn wir zehn Minuten reden, drücke ich dir vermutlich eine in die Hand.'
+			}
+		},
+		{
+			id: 'pioneer',
+			kicker: { en: 'The clearing', de: 'Die Lichtung' },
+			title: { en: 'ADHD — my pioneer species', de: 'ADHS — meine Pionierart' },
+			body: {
+				en: 'When a storm opens a clearing, the first tree back is the pioneer species: fast, hungry for light, growing in six directions at once. That’s the most accurate picture of my ADHD I’ve found.\n\nIt means my attention doesn’t queue politely — it floods. The same head that loses its keys can sink into a problem for eight hours straight and surface holding something nobody asked it to find. Divergent by default, hyperfocused when it matters: most of what I’m proud of was built in that weather.\n\nA forest of pioneers still needs tending — routines, lists, deadlines that act like trellises. I’ve stopped treating that as a flaw to hide and started treating it as my growing condition: this is simply the climate I do my best work in.',
+				de: 'Wenn ein Sturm eine Lichtung reißt, ist der erste Baum, der zurückkehrt, die Pionierart: schnell, hungrig nach Licht, in sechs Richtungen gleichzeitig wachsend. Das ist das treffendste Bild für mein ADHS, das ich gefunden habe.\n\nEs bedeutet: Meine Aufmerksamkeit stellt sich nicht höflich an — sie flutet. Derselbe Kopf, der die Schlüssel verliert, kann acht Stunden in einem Problem versinken und mit etwas auftauchen, wonach niemand gefragt hat. Divergent als Grundzustand, hyperfokussiert, wenn es zählt: Das meiste, worauf ich stolz bin, ist bei diesem Wetter entstanden.\n\nEin Pionierwald braucht trotzdem Pflege — Routinen, Listen, Deadlines als Rankhilfen. Ich habe aufgehört, das als Makel zu verstecken, und angefangen, es als meine Kulturbedingung zu behandeln: Das ist schlicht das Klima, in dem ich am besten arbeite.'
+			}
+		}
+	],
 	links: [
 		{ label: 'Email', url: 'mailto:luizperren96@gmail.com', rel: 'external' },
 		{ label: 'GitHub', url: 'https://github.com/LuixBits', rel: 'source' },

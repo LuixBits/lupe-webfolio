@@ -45,6 +45,7 @@ export const menu: MenuItem[] = [
 		href: '/about',
 		children: [
 			{ id: 'about-bio', label: m.nav_about_bio, href: '/about#bio' },
+			{ id: 'about-grove', label: m.nav_about_grove, href: '/about#grove' },
 			{ id: 'about-contact', label: m.nav_about_contact, href: '/about#contact' }
 		]
 	}
