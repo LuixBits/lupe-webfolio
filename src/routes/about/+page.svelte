@@ -5,9 +5,7 @@
 	import { getLocale } from '$lib/paraglide/runtime';
 	import * as m from '$lib/paraglide/messages';
 	import Garden from '$lib/garden/Garden.svelte';
-	import Crown from '$lib/garden/Crown.svelte';
-	import Trunk from '$lib/garden/Trunk.svelte';
-	import Opening from '$lib/garden/Opening.svelte';
+	import TreeLayer from '$lib/garden/tree/TreeLayer.svelte';
 	import LivingLine from '$lib/garden/LivingLine.svelte';
 	import { revealOnce } from '$lib/garden/reveal';
 
@@ -53,22 +51,18 @@
 <!-- `living` swaps the static borders for grown LivingLines (JS only, so
      SSR/no-JS keeps plain borders). -->
 <div class="page page--folio" class:living={hydrated}>
-	<!-- SKY + CROWN: the page is one tree; you arrive at the top of it. -->
-	<Crown seed="about-crown" />
+	<!-- THE TREE: one procedural organism spanning the whole page. It measures
+	     every [data-tree] anchor and grows a trunk, crown, an embracing limb
+	     per content block, roots, and a root to the seeds. Behind the prose. -->
+	<TreeLayer seed="about-tree" grown={revealed} arrive={hydrated} />
 
-	<!-- THE TREE: everything above ground hangs off the trunk in the left
-	     gutter. Scrolling down descends it — and travels back in time. -->
-	<div class="tree">
-		<Trunk seed="about-trunk" />
-
+	<!-- Everything above ground hangs off the trunk in the left gutter.
+	     Scrolling down descends it — and travels back in time. -->
+	<div class="tree" data-tree="treewrap">
 		<section id="bio" class="section folio">
-			<div class="folio-text">
-				<!-- the leaf bush the bio nests in -->
-				<Opening seed="bush-bio" variant="nest" />
+			<div class="folio-text" data-tree="bio">
 				<p class="eyebrow">{m.about_folio_eyebrow()} · {about.name}</p>
-				<h1 class="living-h2">
-					{m.nav_about()}<LivingLine seed="topmost-branch" leafSide="up" thickness={3} />
-				</h1>
+				<h1 data-tree="title">{m.nav_about()}</h1>
 				<p class="lead">{resolveLocalized(about.role, locale)}</p>
 				{#each bioParas as para, i (i)}
 					<p class="bio-para" class:dropcap={i === 0 && dropcapOk}>{para}</p>
@@ -76,9 +70,7 @@
 			</div>
 
 			<figure class="plate">
-				<div class="bower-box">
-					<!-- the bower: a square of woven branches and leaves -->
-					<Opening seed="about-bower" variant="bower" light={false} />
+				<div class="bower-box" data-tree="portrait">
 					<div class="portrait">
 						{#if about.portrait}
 							<img
@@ -163,8 +155,12 @@
 		</section>
 
 		{#if about.highlights.length}
-			<section class="section notes-section" aria-labelledby="notes-h">
-				<Opening seed="open-notes" variant="sparse" bough />
+			<section
+				class="section notes-section"
+				aria-labelledby="notes-h"
+				data-tree="notes"
+				use:revealOnce={() => (revealed['notes'] = true)}
+			>
 				<h2 id="notes-h" class="living-h2">
 					{m.about_notes_title()}<LivingLine seed="ul-notes" />
 				</h2>
@@ -198,14 +194,19 @@
 	<!-- UNDERGROUND: past the ground line, time runs deepest — roots, the
 	     mycelium network, and finally seeds to take with you. -->
 	<div class="underground">
-		<div class="ground" aria-hidden="true">
+		<div class="ground" data-tree="ground" aria-hidden="true">
 			<LivingLine variant="soil" seed="ground" thickness={2.5} />
 		</div>
 		{#each undergroundChapters as ch (ch.id)}
 			{@render chapterBlock(ch)}
 		{/each}
 
-		<section id="contact" class="section">
+		<section
+			id="contact"
+			class="section"
+			data-tree="contact"
+			use:revealOnce={() => (revealed['contact'] = true)}
+		>
 			<h2 class="living-h2">{m.nav_about_contact()}<LivingLine seed="ul-contact" /></h2>
 			<p class="seeds-hint">{m.about_seeds_hint()}</p>
 			<ul class="packets">
@@ -246,11 +247,8 @@
 			class:in={!!revealed[ch.id]}
 			use:revealOnce={() => (revealed[ch.id] = true)}
 			aria-labelledby="grove-{ch.id}"
+			data-tree="ch-{ch.id}"
 		>
-			{#if !UNDERGROUND.has(ch.id)}
-				<!-- an opening in the foliage, connected to the trunk by a bough -->
-				<Opening seed="open-{ch.id}" variant="sparse" bough grow={!!revealed[ch.id]} />
-			{/if}
 			<p class="kicker sprout" style="--d:0">{resolveLocalized(ch.kicker, locale)}</p>
 			<h3 id="grove-{ch.id}" class="sprout" style="--d:1">
 				{resolveLocalized(ch.title, locale)}
@@ -654,18 +652,25 @@
 		z-index: -1;
 		pointer-events: none;
 	}
-	/* CROWN: the canopy band spans the full viewport over the sky. */
-	.page--folio > :global(.crown) {
-		position: relative;
-		height: clamp(110px, 18vw, 190px);
-		margin: -3.5rem calc(50% - 50vw) 0.75rem;
+	/* THE TREE LAYER: one full-bleed organism painted behind all content. */
+	.page--folio {
+		padding-top: 9.5rem; /* headroom for the canopy */
 	}
-	/* THE TREE + UNDERGROUND: both keep the trunk gutter so every opening
-	   hangs off the same line. */
+	.page--folio > :global(.tree-layer) {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 100vw;
+		z-index: -1;
+	}
+	/* THE TREE + UNDERGROUND: a wide gutter carries the trunk; every content
+	   block hangs off it. */
 	.tree,
 	.underground {
 		position: relative;
-		padding-left: clamp(2.6rem, 8vw, 4.25rem);
+		padding-left: clamp(4.5rem, 10vw, 7rem);
 	}
 	.underground {
 		padding-bottom: 1rem;
@@ -697,34 +702,32 @@
 		inset: 0;
 		--line-op: 0.95;
 	}
-	/* openings: the foliage gaps content blocks sit in. z-index -1 keeps the
-	   light pool + foliage BEHIND the prose (positioned elements would
-	   otherwise paint over static text and wash it out). */
-	.folio-text {
+	/* content veils: every block floats in its own pool of light, so branches
+	   and foliage can pass behind it without stealing the prose's contrast */
+	.folio-text,
+	.notes-section,
+	.chapter {
 		position: relative;
+		padding: 1.15rem 1.35rem;
+		border-radius: 18px;
+		background:
+			radial-gradient(115% 90% at 50% 26%, rgba(255, 251, 232, 0.55), transparent 74%),
+			color-mix(in srgb, var(--bg) 58%, transparent);
 	}
-	.folio-text > :global(.opening) {
-		inset: -1.5rem -1.9rem;
-		z-index: -1;
+	.folio-text {
+		margin: 0 -1.35rem;
 	}
 	.notes-section {
-		position: relative;
-	}
-	.notes-section > :global(.opening) {
-		inset: -0.8rem -1.1rem;
-		z-index: -1;
-	}
-	.chapter > :global(.opening) {
-		inset: -1rem -1.3rem;
-		z-index: -1;
+		margin-left: -1.35rem;
+		margin-right: -1.35rem;
 	}
 	.grove-head {
 		margin-bottom: 1.25rem;
 	}
 	.chapter {
 		position: relative;
-		max-width: 38rem;
-		margin: 0 0 4.75rem;
+		max-width: calc(38rem + 2.7rem);
+		margin: 0 -1.35rem 4.75rem;
 		scroll-margin-top: 7rem;
 	}
 	.chapter:last-child {
@@ -826,28 +829,34 @@
 	}
 	@media (min-width: 900px) {
 		.chapter--pioneer {
-			max-width: 44rem;
+			max-width: calc(44rem + 2.7rem);
 		}
 		.pioneer-fig {
 			float: right;
 			margin: -2rem -0.5rem 0.6rem 2rem;
 		}
 	}
-	/* Phones: tuck the trunk into the margin so its boughs stay off the prose. */
+	/* Phones: slimmer gutter, tighter veils, less canopy headroom. */
 	@media (max-width: 720px) {
+		.page--folio {
+			padding-top: 7rem;
+		}
 		.tree,
 		.underground {
-			padding-left: 3rem;
+			padding-left: 3.4rem;
 		}
-		.tree > :global(.trunk) {
-			left: -1.1rem;
+		.folio-text,
+		.notes-section,
+		.chapter {
+			padding: 0.9rem 0.95rem;
 		}
-		.page--folio > :global(.crown) {
-			height: 96px;
-			margin-top: -2.5rem;
+		.folio-text {
+			margin: 0 -0.95rem;
 		}
-		.folio-text > :global(.opening) {
-			inset: -0.9rem -0.7rem;
+		.notes-section,
+		.chapter {
+			margin-left: -0.95rem;
+			margin-right: -0.95rem;
 		}
 	}
 

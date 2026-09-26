@@ -1,0 +1,837 @@
+<script lang="ts">
+	import { onMount, tick } from 'svelte';
+	import { hashSeed, rng } from '../lsystem';
+	import { prefersReducedMotion } from '../reveal';
+	import { blobPath, taperedBranch, bowerRing, smoothOpen, type Pt } from './generate';
+
+	let {
+		seed = 'about-tree',
+		grown = {},
+		arrive = false,
+		tip = 0.86
+	}: {
+		seed?: string;
+		/** Per-zone growth flags from the page: chapter ids + 'notes' + 'contact'. */
+		grown?: Record<string, boolean>;
+		/** Flips true once the page mounts — the crown unfurls on arrival. */
+		arrive?: boolean;
+		/** Viewport fraction where the trunk's growing tip rides. */
+		tip?: number;
+	} = $props();
+	// (tip default lives in the destructure above; 0.86 keeps the growth edge
+	// near the fold so the flat clip line rarely sits mid-screen)
+
+	/* THE TREE. One procedural organism spanning the whole page: it measures
+	 * every [data-tree] anchor in the page, then grows a trunk down the
+	 * gutter, a crown around the title/bio/portrait, a limb that embraces
+	 * each content block, roots at the ground line, and one long root that
+	 * reaches the seed packets.
+	 *
+	 * Growth mechanics: every branch/foliage unit is a nested <g> whose inner
+	 * .grow group scales from ~0 about its own junction (transform-origin in
+	 * USER units, 0px 0px = the junction), so limbs visibly extend out of
+	 * their parent, staggered by generation — pure CSS one-shots. The trunk
+	 * is revealed by a single SVG clip rect scrubbed to scroll (retracts on
+	 * scroll-up). Ambient: gentle foliage sway, a few drifting leaves, and
+	 * clumps that rustle when the cursor brushes them. Reduced motion: the
+	 * whole tree stands fully grown and still. */
+
+	const LEAF_D = 'M0 0 C 5 -4 5 -12 0 -16 C -5 -12 -5 -4 0 0 Z';
+
+	interface Leaf {
+		x: number;
+		y: number;
+		a: number;
+		s: number;
+		dark: boolean;
+	}
+	interface Clump {
+		back: string;
+		front: string;
+		hi: string;
+		frontOff: Pt;
+		hiOff: Pt;
+		leaves: Leaf[];
+		sway: number;
+	}
+	interface Unit {
+		x: number;
+		y: number;
+		delay: number;
+		branch?: string;
+		stroke?: { d: string; w: number };
+		off?: Pt;
+		clump?: Clump;
+		ci?: number;
+		children: Unit[];
+	}
+	interface Zone {
+		key: string;
+		clipped: boolean;
+		units: Unit[];
+	}
+
+	let root = $state<HTMLDivElement | null>(null);
+	let W = $state(0);
+	let H = $state(0);
+	let zones = $state<Zone[]>([]);
+	let trunkD = $state('');
+	let sheenD = $state('');
+	let bark = $state<string[]>([]);
+	let falls = $state<{ x: number; y: number; dur: number; delay: number }[]>([]);
+	let trunkTopYS = $state(0);
+	let groundYS = $state(0);
+	let progress = $state(0);
+	let instant = $state(false);
+
+	const uid = $derived(`tl-${hashSeed(seed).toString(36)}`);
+	const clipHeight = $derived(Math.max(0, trunkTopYS + (groundYS + 70 - trunkTopYS) * progress));
+
+	// rustle bookkeeping (decorative, managed outside Svelte state)
+	let rustlePts: { ci: number; x: number; y: number }[] = [];
+	let rustleEls = new Map<number, Element>();
+	const rustleCool = new Map<number, number>();
+	let layerPageTop = 0;
+	let layerLeft = 0;
+	let ciCounter = 0;
+
+	interface Anchor {
+		x0: number;
+		y0: number;
+		x1: number;
+		y1: number;
+		cx: number;
+		cy: number;
+	}
+
+	function measure(): Record<string, Anchor> | null {
+		const parent = root?.parentElement;
+		if (!root || !parent) return null;
+		const lr = root.getBoundingClientRect();
+		if (lr.width < 10 || lr.height < 10) return null;
+		layerPageTop = lr.top + window.scrollY;
+		layerLeft = lr.left;
+		const out: Record<string, Anchor> = {};
+		for (const el of parent.querySelectorAll<HTMLElement>('[data-tree]')) {
+			const r = el.getBoundingClientRect();
+			out[el.dataset.tree!] = {
+				x0: r.left - lr.left,
+				y0: r.top - lr.top,
+				x1: r.right - lr.left,
+				y1: r.bottom - lr.top,
+				cx: (r.left + r.right) / 2 - lr.left,
+				cy: (r.top + r.bottom) / 2 - lr.top
+			};
+		}
+		W = Math.round(lr.width);
+		H = Math.round(lr.height);
+		return out;
+	}
+
+	function build(a: Record<string, Anchor>) {
+		const bio = a['bio'];
+		const wrap = a['treewrap'];
+		const ground = a['ground'];
+		if (!bio || !wrap || !ground) return;
+		const rand = rng(hashSeed(`${seed}:${W}x${H}`));
+		ciCounter = 0;
+		rustlePts = [];
+
+		const gutter = Math.max(40, bio.x0 - wrap.x0);
+		const sizeK = Math.min(1, Math.max(0.52, gutter / 100));
+		const trunkX = wrap.x0 + gutter * 0.52;
+		const trunkTopY = Math.max(26, bio.y0 - 175);
+		const groundY = ground.cy;
+		trunkTopYS = trunkTopY;
+		groundYS = groundY;
+
+		const f = (n: number) => +n.toFixed(1);
+
+		// ---------- helpers ----------
+		function mkClump(size: number, sway: number): Clump {
+			const rx = size;
+			const ry = size * (0.62 + rand() * 0.16);
+			const leaves: Leaf[] = [];
+			const nl = Math.round(5 + size / 11);
+			for (let i = 0; i < nl; i++) {
+				const ang = rand() * Math.PI * 2;
+				const rr = 0.9 + rand() * 0.18;
+				leaves.push({
+					x: f(Math.cos(ang) * rx * rr),
+					y: f(Math.sin(ang) * ry * rr),
+					a: f((ang * 180) / Math.PI + 90 + (rand() - 0.5) * 36),
+					s: +(0.38 + rand() * 0.34).toFixed(2),
+					dark: rand() > 0.5
+				});
+			}
+			return {
+				back: blobPath(rand, rx, ry, 12),
+				front: blobPath(rand, rx * 0.84, ry * 0.8, 11),
+				hi: blobPath(rand, rx * 0.46, ry * 0.42, 9),
+				frontOff: { x: f(-rx * 0.1), y: f(-ry * 0.16) },
+				hiOff: { x: f(-rx * 0.2), y: f(-ry * 0.3) },
+				leaves,
+				sway
+			};
+		}
+
+		function clumpUnit(
+			x: number,
+			y: number,
+			size: number,
+			delay: number,
+			sway = 9 + rand() * 4
+		): Unit {
+			const ci = ciCounter++;
+			return {
+				x: f(x),
+				y: f(y),
+				delay: Math.round(delay),
+				clump: mkClump(size, sway),
+				ci,
+				children: []
+			};
+		}
+
+		/** Track a clump's absolute position for the cursor rustle. */
+		function reg(u: Unit, ax: number, ay: number) {
+			if (u.clump && u.ci !== undefined) rustlePts.push({ ci: u.ci, x: ax + u.x, y: ay + u.y });
+			for (const c of u.children) reg(c, ax + u.x, ay + u.y);
+		}
+
+		/** Recursive limb: tapered branch, children sprouting from tip + mid. */
+		function limb(angle: number, len: number, w0: number, depth: number, delay: number): Unit {
+			const g = taperedBranch(rand, angle, len, w0, Math.max(1.3, w0 * 0.3), len * 0.14);
+			const u: Unit = { x: 0, y: 0, delay: Math.round(delay), branch: g.d, children: [] };
+			if (depth >= 2 || w0 < 6.5) {
+				u.children.push(clumpUnit(g.end.x, g.end.y, 24 + w0 * 3 + rand() * 14, 280 + rand() * 160));
+			} else {
+				const kids = 2 + (rand() > 0.55 ? 1 : 0);
+				for (let k = 0; k < kids; k++) {
+					const at = k === 0 ? g.end : g.mid;
+					const baseA = k === 0 ? g.endAngle : g.midAngle;
+					const spread = k === 1 ? (rand() > 0.5 ? 36 : -36) : 0;
+					const child = limb(
+						baseA + spread + (rand() * 2 - 1) * 30,
+						len * (0.58 + rand() * 0.16),
+						w0 * 0.55,
+						depth + 1,
+						230 + rand() * 150
+					);
+					child.x = f(at.x);
+					child.y = f(at.y);
+					u.children.push(child);
+				}
+				if (rand() > 0.45)
+					u.children.push(clumpUnit(g.mid.x, g.mid.y, 18 + w0 * 2.2, 360 + rand() * 140));
+			}
+			return u;
+		}
+
+		// ---------- trunk (absolute coords, tapered, buttressed base) ----------
+		{
+			const n = Math.max(6, Math.round((groundY - trunkTopY) / 120));
+			const cl: Pt[] = [];
+			for (let i = 0; i <= n; i++) {
+				const t = i / n;
+				cl.push({
+					x: trunkX + (rand() * 2 - 1) * 6 * sizeK,
+					y: trunkTopY + (groundY - trunkTopY) * t
+				});
+			}
+			const halfW = (t: number) => (8 + 22 * t) * sizeK * (1 + Math.max(0, t - 0.93) * 9);
+			const L: Pt[] = [];
+			const R: Pt[] = [];
+			for (let i = 0; i <= n; i++) {
+				const t = i / n;
+				const p0 = cl[Math.max(0, i - 1)];
+				const p1 = cl[Math.min(n, i + 1)];
+				const dx = p1.x - p0.x;
+				const dy = p1.y - p0.y;
+				const dl = Math.hypot(dx, dy) || 1;
+				const nx = -dy / dl;
+				const ny = dx / dl;
+				L.push({ x: cl[i].x + nx * halfW(t), y: cl[i].y + ny * halfW(t) });
+				R.push({ x: cl[i].x - nx * halfW(t), y: cl[i].y - ny * halfW(t) });
+			}
+			R.reverse();
+			trunkD = `M${smoothOpen(L)} L ${smoothOpen(R)} Z`;
+			sheenD = `M${smoothOpen(cl.map((p, i) => ({ x: p.x - halfW(i / n) * 0.45, y: p.y })))}`;
+			const bk: string[] = [];
+			const nB = Math.max(4, Math.round((groundY - trunkTopY) / 260));
+			for (let i = 0; i < nB; i++) {
+				const t = 0.15 + (0.75 * i) / Math.max(1, nB - 1) + (rand() - 0.5) * 0.05;
+				const y = trunkTopY + (groundY - trunkTopY) * t;
+				const x = trunkX + (rand() * 2 - 1) * halfW(t) * 0.5;
+				const l = 16 + rand() * 22;
+				bk.push(`M${f(x)} ${f(y)} q ${f((rand() * 2 - 1) * 3)} ${f(l / 2)} 0 ${f(l)}`);
+			}
+			bark = bk;
+		}
+
+		const zs: Zone[] = [];
+
+		// ---------- crown ----------
+		{
+			const units: Unit[] = [];
+			const crownBase = trunkTopY + 26;
+			const reachK = Math.min(1, W / 950);
+			const angles = [-56, -28, -6, 22, 48];
+			angles.forEach((ang, i) => {
+				const u = limb(
+					ang + (rand() * 2 - 1) * 8,
+					(150 + rand() * 95) * reachK + 60,
+					(8 + 22 * 0) * sizeK * 1.9,
+					0,
+					i * 150
+				);
+				u.x = f(trunkX + (rand() * 2 - 1) * 5);
+				u.y = f(crownBase + i * 5);
+				units.push(u);
+			});
+			// canopy masses crowding (and cropped by) the top edge — you stand
+			// under the crown, so it reads as one connected mass
+			const nc = Math.max(5, Math.round(W / 210));
+			for (let i = 0; i < nc; i++) {
+				const cx = W * (0.03 + (0.94 * i) / Math.max(1, nc - 1) + (rand() - 0.5) * 0.04);
+				units.push(clumpUnit(cx, -18 + rand() * 88, 64 + rand() * 66, 160 + i * 80));
+			}
+			// the leaf bush around the bio block
+			const title = a['title'];
+			const bx0 = bio.x0;
+			const bx1 = bio.x1;
+			const topXs = [0.25, 0.55, 0.85];
+			for (const tx of topXs) {
+				const x = bx0 + (bx1 - bx0) * tx;
+				if (!title || x > title.x1 + 30 || bio.y0 - 12 < title.y0 - 20)
+					units.push(clumpUnit(x, bio.y0 - 10 + rand() * 8, 26 + rand() * 16, 420 + rand() * 300));
+			}
+			units.push(
+				clumpUnit(
+					bx0 - 14,
+					bio.y0 + (bio.y1 - bio.y0) * (0.3 + rand() * 0.15),
+					24 + rand() * 12,
+					520
+				)
+			);
+			units.push(
+				clumpUnit(
+					bx0 - 12,
+					bio.y0 + (bio.y1 - bio.y0) * (0.68 + rand() * 0.1),
+					20 + rand() * 12,
+					640
+				)
+			);
+			// bottom corners of the bush, hugging the veil
+			units.push(clumpUnit(bx0 + 22, bio.y1 - 4, 24 + rand() * 12, 700));
+			units.push(clumpUnit(bx1 - 40, bio.y1 - 2, 20 + rand() * 12, 780));
+			// the topmost branch: a bough the title sits on
+			if (title) {
+				const g = taperedBranch(rand, 91, (title.x1 - trunkX) * 1.04, 12 * sizeK + 3, 2.2, 14);
+				const u: Unit = {
+					x: f(trunkX),
+					y: f(title.y1 + 8),
+					delay: 320,
+					branch: g.d,
+					children: [
+						clumpUnit(g.mid.x, g.mid.y - 4, 15, 380, 0),
+						clumpUnit(g.end.x, g.end.y - 2, 21, 520)
+					]
+				};
+				units.push(u);
+			}
+			// the bower: a holding limb + woven ring + corner clumps
+			const portrait = a['portrait'];
+			if (portrait) {
+				const pw = portrait.x1 - portrait.x0;
+				const ph = portrait.y1 - portrait.y0;
+				const dx = portrait.x0 + 12 - trunkX;
+				const dy = portrait.y0 - 6 - crownBase;
+				const hold = taperedBranch(
+					rand,
+					(Math.atan2(dy, dx) * 180) / Math.PI + 90,
+					Math.hypot(dx, dy) * 1.02,
+					11 * sizeK + 3,
+					3,
+					30
+				);
+				units.push({ x: f(trunkX), y: f(crownBase), delay: 240, branch: hold.d, children: [] });
+				const ring = bowerRing(rand, pw, ph, 8, 24);
+				const ring2 = bowerRing(rand, pw, ph, 1.5, 20);
+				const bower: Unit = {
+					x: f(portrait.cx),
+					y: f(portrait.cy),
+					delay: 640,
+					stroke: { d: ring, w: 6.5 },
+					off: { x: -pw / 2, y: -ph / 2 },
+					children: [
+						{
+							x: 0,
+							y: 0,
+							delay: 240,
+							stroke: { d: ring2, w: 3 },
+							off: { x: -pw / 2, y: -ph / 2 },
+							children: []
+						},
+						clumpUnit(-pw / 2, -ph / 2, 20, 340),
+						clumpUnit(pw / 2, -ph / 2, 24, 430),
+						clumpUnit(pw / 2, ph / 2, 18, 520),
+						clumpUnit(-pw / 2, ph / 2, 22, 610)
+					]
+				};
+				units.push(bower);
+			}
+			zs.push({ key: 'crown', clipped: false, units });
+		}
+
+		// ---------- one embracing limb per content block ----------
+		const sections: [string, string][] = [
+			['notes', 'notes'],
+			['ch-pioneer', 'pioneer'],
+			['ch-branches', 'branches']
+		];
+		for (const [anchorKey, zoneKey] of sections) {
+			const s = a[anchorKey];
+			if (!s) continue;
+			// The limb leaves the trunk ABOVE the block and rides in the clear —
+			// anything that crosses the veil gets washed by it, so only the
+			// draping twigs and corner clumps may touch it.
+			const jy = s.y0 - 30;
+			const tgt = { x: s.x0 + (s.x1 - s.x0) * 0.46, y: s.y0 - 16 };
+			const dx = tgt.x - trunkX;
+			const dy = tgt.y - jy;
+			const main = taperedBranch(
+				rand,
+				(Math.atan2(dy, dx) * 180) / Math.PI + 90,
+				Math.hypot(dx, dy) * 1.02,
+				Math.max(10, (9 + 22 * ((jy - trunkTopY) / (groundY - trunkTopY))) * sizeK),
+				2.8,
+				20
+			);
+			const u: Unit = { x: f(trunkX), y: f(jy), delay: 0, branch: main.d, children: [] };
+			// twig continuing along the block's top edge, staying above the veil
+			const twig = taperedBranch(
+				rand,
+				92 + (rand() * 2 - 1) * 5,
+				(s.x1 - tgt.x) * 0.85,
+				5,
+				1.5,
+				12
+			);
+			const twigU: Unit = {
+				x: f(main.end.x),
+				y: f(main.end.y),
+				delay: 300,
+				branch: twig.d,
+				children: []
+			};
+			twigU.children.push(clumpUnit(twig.end.x, twig.end.y - 2, 18 + rand() * 8, 360));
+			u.children.push(twigU);
+			// draping twig that falls onto the block's top-left shoulder
+			const droop = taperedBranch(rand, 172 + (rand() * 2 - 1) * 8, 52 + rand() * 30, 4, 1.2, 10);
+			const droopU: Unit = {
+				x: f(main.mid.x),
+				y: f(main.mid.y),
+				delay: 380,
+				branch: droop.d,
+				children: []
+			};
+			droopU.children.push(clumpUnit(droop.end.x, droop.end.y, 14 + rand() * 6, 300, 7));
+			u.children.push(droopU);
+			u.children.push(clumpUnit(main.end.x, main.end.y - 6, 26 + rand() * 10, 460));
+			u.children.push(clumpUnit(main.mid.x, main.mid.y - 8, 19 + rand() * 8, 560));
+			// a clump resting on the block's top-right corner
+			u.children.push(clumpUnit(s.x1 - trunkX - 28, s.y0 - jy + 2, 17 + rand() * 8, 640));
+			zs.push({ key: zoneKey, clipped: true, units: [u] });
+		}
+
+		// ---------- roots + the long root to the seeds ----------
+		{
+			const units: Unit[] = [];
+			const rootAngles = [146, 165, 183, 200, 217];
+			rootAngles.forEach((ang, i) => {
+				const g = taperedBranch(
+					rand,
+					ang + (rand() * 2 - 1) * 6,
+					(60 + rand() * 55) * (1 + sizeK) * 0.9,
+					(10 + rand() * 6) * sizeK,
+					1.2,
+					12
+				);
+				const u: Unit = {
+					x: f(trunkX + (i - 2) * 6 * sizeK),
+					y: f(groundY - 8),
+					delay: i * 110,
+					branch: g.d,
+					children: []
+				};
+				if (rand() > 0.4) {
+					const sub = taperedBranch(
+						rand,
+						g.endAngle + (rand() > 0.5 ? 26 : -26),
+						34 + rand() * 22,
+						3,
+						0.8,
+						8
+					);
+					u.children.push({
+						x: f(g.end.x),
+						y: f(g.end.y),
+						delay: 240,
+						branch: sub.d,
+						children: []
+					});
+				}
+				units.push(u);
+			});
+			zs.push({ key: 'roots', clipped: false, units });
+		}
+		{
+			const contact = a['contact'];
+			if (contact) {
+				const dx = contact.x0 - 26 - trunkX;
+				const dy = contact.y0 + 20 - groundY;
+				const g = taperedBranch(
+					rand,
+					(Math.atan2(dy, dx) * 180) / Math.PI + 90,
+					Math.hypot(dx, dy) * 1.03,
+					6.5 * sizeK + 1.5,
+					1,
+					44
+				);
+				const u: Unit = { x: f(trunkX), y: f(groundY + 4), delay: 0, branch: g.d, children: [] };
+				u.children.push(clumpUnit(g.end.x, g.end.y, 12, 500, 0));
+				zs.push({ key: 'contact', clipped: false, units: [u] });
+			}
+		}
+
+		// drifting leaves released from the canopy
+		falls = Array.from({ length: 3 }, (_, i) => ({
+			x: f(W * (0.25 + 0.3 * i) + (rand() - 0.5) * 120),
+			y: f(90 + rand() * 60),
+			dur: 26 + i * 7 + rand() * 6,
+			delay: -(rand() * 30)
+		}));
+
+		for (const z of zs) for (const u of z.units) reg(u, 0, 0);
+		zones = zs;
+	}
+
+	function refreshRustleEls() {
+		rustleEls = new Map();
+		if (!root) return;
+		for (const el of root.querySelectorAll('[data-ci]')) {
+			rustleEls.set(+(el as HTMLElement).dataset.ci!, el);
+		}
+	}
+
+	const isOn = (key: string) => instant || (key === 'crown' ? arrive : !!grown[key]);
+
+	onMount(() => {
+		instant = prefersReducedMotion();
+		let raf = 0;
+		const update = () => {
+			raf = 0;
+			if (!root) return;
+			const r = root.getBoundingClientRect();
+			if (r.height < 1) return;
+			const span = Math.max(1, groundYS - trunkTopYS);
+			progress = instant
+				? 1
+				: Math.min(1, Math.max(0, (window.innerHeight * tip - r.top - trunkTopYS) / span));
+		};
+		const schedule = () => {
+			if (!raf) raf = requestAnimationFrame(update);
+		};
+		let buildRaf = 0;
+		const rebuild = () => {
+			buildRaf = 0;
+			const anchors = measure();
+			if (anchors) {
+				build(anchors);
+				void tick().then(refreshRustleEls);
+				schedule();
+			}
+		};
+		const ro = new ResizeObserver(() => {
+			if (!buildRaf) buildRaf = requestAnimationFrame(rebuild);
+		});
+		if (root) ro.observe(root);
+		rebuild();
+
+		if (!instant) {
+			window.addEventListener('scroll', schedule, { passive: true });
+			window.addEventListener('resize', schedule, { passive: true });
+		}
+
+		// cursor rustle — desktop pointers only
+		let moveRaf = 0;
+		let mx = 0;
+		let my = 0;
+		const onMove = (e: PointerEvent) => {
+			mx = e.clientX;
+			my = e.clientY;
+			if (!moveRaf) moveRaf = requestAnimationFrame(applyRustle);
+		};
+		const applyRustle = () => {
+			moveRaf = 0;
+			const px = mx - layerLeft;
+			const py = my + window.scrollY - layerPageTop;
+			const now = performance.now();
+			for (const t of rustlePts) {
+				const d2 = (t.x - px) * (t.x - px) + (t.y - py) * (t.y - py);
+				if (d2 < 120 * 120 && (rustleCool.get(t.ci) ?? 0) < now) {
+					rustleCool.set(t.ci, now + 1500);
+					const el = rustleEls.get(t.ci);
+					if (el) {
+						el.classList.add('rustle');
+						setTimeout(() => el.classList.remove('rustle'), 750);
+					}
+				}
+			}
+		};
+		const finePointer = window.matchMedia('(pointer: fine)').matches;
+		if (!instant && finePointer) window.addEventListener('pointermove', onMove, { passive: true });
+
+		return () => {
+			ro.disconnect();
+			window.removeEventListener('scroll', schedule);
+			window.removeEventListener('resize', schedule);
+			window.removeEventListener('pointermove', onMove);
+			if (raf) cancelAnimationFrame(raf);
+			if (buildRaf) cancelAnimationFrame(buildRaf);
+			if (moveRaf) cancelAnimationFrame(moveRaf);
+		};
+	});
+</script>
+
+{#snippet unitG(u: Unit)}
+	<g transform="translate({u.x} {u.y})">
+		<g class="grow" style="--gd:{u.delay}ms">
+			{#if u.branch}
+				<path d={u.branch} class="wood" />
+			{/if}
+			{#if u.stroke}
+				<g transform={u.off ? `translate(${u.off.x} ${u.off.y})` : undefined}>
+					<path d={u.stroke.d} class="woodline" stroke-width={u.stroke.w} />
+				</g>
+			{/if}
+			{#if u.clump}
+				<g class="clump" data-ci={u.ci}>
+					<g
+						class="sway"
+						class:still={!u.clump.sway}
+						style="--sd:{u.clump.sway || 9}s; --sdel:{-((u.ci ?? 0) % 7) * 1.4}s"
+					>
+						<path d={u.clump.back} class="fol folB" />
+						<path
+							d={u.clump.front}
+							class="fol folF"
+							transform="translate({u.clump.frontOff.x} {u.clump.frontOff.y})"
+						/>
+						<path
+							d={u.clump.hi}
+							class="fol folH"
+							transform="translate({u.clump.hiOff.x} {u.clump.hiOff.y})"
+						/>
+						{#each u.clump.leaves as l, i (i)}
+							<g transform="translate({l.x} {l.y}) rotate({l.a}) scale({l.s})">
+								<path d={LEAF_D} class="leafp" class:dark={l.dark} />
+							</g>
+						{/each}
+					</g>
+				</g>
+			{/if}
+			{#each u.children as c, i (i)}
+				{@render unitG(c)}
+			{/each}
+		</g>
+	</g>
+{/snippet}
+
+<div
+	class="tree-layer"
+	class:instant
+	bind:this={root}
+	data-progress={progress.toFixed(3)}
+	aria-hidden="true"
+>
+	{#if W > 0 && trunkD}
+		<svg viewBox="0 0 {W} {Math.max(H, 1)}">
+			<defs>
+				<clipPath id="{uid}-clip">
+					<rect class="trunk-clip-rect" x="0" y="0" width={W} height={clipHeight} />
+				</clipPath>
+			</defs>
+
+			<!-- underground first: roots + the root to the seeds -->
+			{#each zones.filter((z) => z.key === 'roots' || z.key === 'contact') as z (z.key)}
+				<g class="zone" class:on={isOn(z.key)}>
+					{#each z.units as u, i (i)}{@render unitG(u)}{/each}
+				</g>
+			{/each}
+
+			<!-- trunk + its section limbs, revealed by the scroll clip -->
+			<g clip-path="url(#{uid}-clip)">
+				<path d={trunkD} class="wood trunkfill" />
+				<path d={sheenD} class="sheen" fill="none" />
+				{#each bark as b, i (i)}
+					<path d={b} class="bark" fill="none" />
+				{/each}
+				{#each zones.filter((z) => z.clipped) as z (z.key)}
+					<g class="zone" class:on={isOn(z.key)}>
+						{#each z.units as u, i (i)}{@render unitG(u)}{/each}
+					</g>
+				{/each}
+			</g>
+
+			<!-- the crown, over the trunk's top -->
+			{#each zones.filter((z) => z.key === 'crown') as z (z.key)}
+				<g class="zone" class:on={isOn(z.key)}>
+					{#each z.units as u, i (i)}{@render unitG(u)}{/each}
+					{#each falls as fl, i (i)}
+						<g class="fall" style="--fd:{fl.dur}s; --fdel:{fl.delay}s">
+							<g transform="translate({fl.x} {fl.y}) scale(1.15)">
+								<path d={LEAF_D} class="leafp" />
+							</g>
+						</g>
+					{/each}
+				</g>
+			{/each}
+		</svg>
+	{/if}
+</div>
+
+<style>
+	.tree-layer {
+		display: block;
+		pointer-events: none;
+	}
+	svg {
+		display: block;
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		overflow: visible;
+	}
+
+	/* ---- wood + foliage palette ---- */
+	.wood {
+		fill: color-mix(in srgb, var(--garden-stem, #3f6d4e) 88%, #20301f);
+	}
+	.trunkfill {
+		fill: color-mix(in srgb, var(--garden-stem, #3f6d4e) 82%, #241f14);
+	}
+	.sheen {
+		stroke: color-mix(in srgb, #ffffff 26%, var(--garden-stem, #3f6d4e));
+		stroke-width: 2.4;
+		stroke-linecap: round;
+		opacity: 0.5;
+	}
+	.bark {
+		stroke: color-mix(in srgb, #10200f 55%, var(--garden-stem, #3f6d4e));
+		stroke-width: 1.6;
+		stroke-linecap: round;
+		opacity: 0.4;
+	}
+	.woodline {
+		fill: none;
+		stroke: color-mix(in srgb, var(--garden-stem, #3f6d4e) 88%, #20301f);
+		stroke-linecap: round;
+	}
+	.folB {
+		fill: color-mix(in srgb, var(--garden-leaf, #6bbf7b) 50%, var(--garden-stem, #3f6d4e));
+		opacity: 0.96;
+	}
+	.folF {
+		fill: var(--garden-leaf, #6bbf7b);
+		opacity: 0.94;
+	}
+	.folH {
+		fill: color-mix(in srgb, var(--garden-leaf, #6bbf7b) 68%, #f4ffe8);
+		opacity: 0.85;
+	}
+	.leafp {
+		fill: color-mix(in srgb, var(--garden-leaf, #6bbf7b) 72%, #ffffff);
+		opacity: 0.95;
+	}
+	.leafp.dark {
+		fill: color-mix(in srgb, var(--garden-leaf, #6bbf7b) 55%, var(--garden-stem, #3f6d4e));
+	}
+
+	/* ---- growth: every unit scales out of its junction ---- */
+	.grow {
+		transform: scale(0.02);
+		transform-origin: 0px 0px;
+	}
+	.zone.on .grow {
+		transform: scale(1);
+		transition: transform var(--gt, 900ms) cubic-bezier(0.32, 1.18, 0.45, 1) var(--gd, 0ms);
+	}
+	.instant .grow {
+		transition: none;
+		transform: scale(1);
+	}
+
+	/* ---- ambient life (stilled under reduced motion) ---- */
+	@media (prefers-reduced-motion: no-preference) {
+		.sway {
+			animation: tl-sway var(--sd, 9s) ease-in-out var(--sdel, 0s) infinite alternate;
+			transform-origin: 0px 0px;
+		}
+		.sway.still {
+			animation-name: none;
+		}
+		:global(.clump.rustle) .sway {
+			animation: tl-rustle 720ms cubic-bezier(0.3, 0.9, 0.4, 1);
+		}
+		.fall {
+			animation: tl-fall var(--fd, 30s) linear var(--fdel, 0s) infinite;
+			opacity: 0;
+		}
+	}
+	@keyframes tl-sway {
+		from {
+			transform: rotate(-0.7deg);
+		}
+		to {
+			transform: rotate(0.8deg);
+		}
+	}
+	@keyframes tl-rustle {
+		0% {
+			transform: rotate(0deg) scale(1);
+		}
+		35% {
+			transform: rotate(2.4deg) scale(1.025);
+		}
+		70% {
+			transform: rotate(-1.4deg) scale(1.01);
+		}
+		100% {
+			transform: rotate(0deg) scale(1);
+		}
+	}
+	@keyframes tl-fall {
+		0% {
+			transform: translate(0, 0) rotate(0deg);
+			opacity: 0;
+		}
+		6% {
+			opacity: 0.85;
+		}
+		80% {
+			opacity: 0.85;
+		}
+		100% {
+			transform: translate(-130px, 62vh) rotate(-230deg);
+			opacity: 0;
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.fall {
+			display: none;
+		}
+	}
+</style>

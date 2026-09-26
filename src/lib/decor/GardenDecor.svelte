@@ -459,6 +459,13 @@
     position: absolute;
   }
 
+  /* The About page's TreeLayer canopy owns the top corners now — the old
+     thin corner branch/tendril up there would clash with it. */
+  .branch--tl,
+  .tendril--tr {
+    display: none;
+  }
+
   .branch--tl {
     top: -6px;
     left: -8px;
