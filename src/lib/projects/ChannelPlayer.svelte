@@ -7,6 +7,7 @@
 	import CasioWatch from './workbench/CasioWatch.svelte';
 	import WorkbenchKeyboard from './workbench/WorkbenchKeyboard.svelte';
 	import FloorPlan from './workbench/FloorPlan.svelte';
+	import VideoCassette from './workbench/VideoCassette.svelte';
 	import { projectNavigation, type ProjectNavigation } from './navigation';
 
 	let { project, locale }: { project: Project; locale: string } = $props();
@@ -30,9 +31,6 @@
 			: channel?.url
 	);
 
-	function duration(seconds: number) {
-		return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
-	}
 	async function loadTape(index: number, focusPlayer = false) {
 		player?.selectVideo(index);
 		await tick();
@@ -99,43 +97,13 @@
 				<p class="instruction">{m.channel_choose_tape()}</p>
 				<div class="tape-list" role="group" aria-label={m.channel_programme()}>
 					{#each project.videos as video, index (video.id)}
-						<button
-							type="button"
-							class="programme-tape"
-							class:selected={videoIndex === index}
-							aria-pressed={videoIndex === index}
-							aria-controls="channel-player"
-							aria-label={m.channel_load_video({ title: video.title })}
-							onclick={() => loadTape(index)}
-						>
-							{#if video.poster}<img
-									class="thumbnail"
-									src={video.poster}
-									width="1280"
-									height="720"
-									alt=""
-									loading="lazy"
-								/>{/if}
-							<span class="tape-copy">
-								<span class="video-title">{video.title}</span>
-								{#if video.duration}<span class="duration">{duration(video.duration)}</span>{/if}
-							</span>
-							<svg
-								class="selection-mark"
-								class:visible={videoIndex === index}
-								viewBox="0 0 24 24"
-								fill="none"
-								aria-hidden="true"
-							>
-								<path
-									d="m5 12 4 4 10-10"
-									stroke="currentColor"
-									stroke-width="2"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-								/>
-							</svg>
-						</button>
+						<div class="tape-slot">
+							<VideoCassette
+								{video}
+								selected={videoIndex === index}
+								onloadvideo={() => loadTape(index)}
+							/>
+						</div>
 					{/each}
 				</div>
 				<a class="channel-link" href={channel.url} target="_blank" rel="noopener">
@@ -376,90 +344,36 @@
 		line-height: var(--lh-body);
 	}
 	.tape-list {
+		position: relative;
+		isolation: isolate;
 		display: grid;
-		gap: 0.6rem;
-		padding: 0.8rem;
+		gap: 0.8rem;
+		padding: 0.9rem 1rem 1.1rem;
 		border: 1px solid #89758266;
 		border-radius: 4px;
-		background: linear-gradient(115deg, #2a242d, #16161e);
+		background: linear-gradient(115deg, #342934, #15151e 55%, #332732);
 		box-shadow:
 			inset 0 2px 4px #08070d99,
 			3px 5px 0 #100e17aa;
 	}
-	.programme-tape {
-		display: flex;
-		align-items: center;
-		gap: 0.85rem;
+	.tape-slot {
 		position: relative;
-		width: 100%;
-		padding: 0.85rem;
-		border: 1px solid #b29bd633;
-		border-left: 3px solid #6a507e;
-		border-radius: 3px;
-		background: linear-gradient(100deg, #171028d9, #28173cb3);
-		box-shadow:
-			0 3px 0 #140a2580,
-			inset 0 1px 0 #ffffff08;
-		text-align: left;
-		color: var(--fg);
-		font: inherit;
-		cursor: pointer;
-		transition:
-			border-color 160ms,
-			background 160ms,
-			transform 160ms,
-			box-shadow 160ms;
+		padding: 0.3rem 0 0.75rem;
+		perspective: 900px;
 	}
-	.programme-tape:hover {
-		border-color: #ff5ed1a6;
-		background: #42203fe6;
-		transform: translateX(-3px);
-		box-shadow: 3px 3px 0 #ff5ed11f;
-	}
-	.programme-tape.selected {
-		border-color: #35e6e66e;
-		border-left-color: var(--sub-bg);
-		background: linear-gradient(110deg, #17353be0, #1b1938d9);
-		box-shadow:
-			-5px 0 16px #35e6e613,
-			inset 0 1px 0 #ffffff12;
-	}
-	.programme-tape:active {
-		transform: translate(0, 1px);
-	}
-	.thumbnail {
-		width: 5.5rem;
-		height: auto;
-		aspect-ratio: 16 / 9;
-		object-fit: cover;
-		flex: none;
+	.tape-slot::after {
+		content: '';
+		position: absolute;
+		z-index: -1;
+		left: -0.45rem;
+		right: -0.45rem;
+		bottom: -0.15rem;
+		height: 0.65rem;
+		border: 1px solid #77607080;
 		border-radius: 2px;
-		box-shadow: 0 0 0 1px #ffffff1a;
-	}
-	.tape-copy {
-		min-width: 0;
-		flex: 1;
-	}
-	.video-title {
-		display: block;
-		font-size: var(--fs-body);
-		line-height: var(--lh-body);
-	}
-	.duration {
-		display: block;
-		margin-top: 0.3rem;
-		color: var(--fg-muted);
-		font-size: var(--fs-small);
-	}
-	.selection-mark {
-		flex: none;
-		width: 1.25rem;
-		height: 1.25rem;
-		visibility: hidden;
-		color: var(--fg);
-	}
-	.selection-mark.visible {
-		visibility: visible;
+		background: linear-gradient(#715766, #4b3847 2px, #201b27 4px);
+		box-shadow: 0 5px 7px #08071080;
+		pointer-events: none;
 	}
 	.channel-link {
 		display: flex;
@@ -478,7 +392,6 @@
 		text-decoration: underline;
 		text-underline-offset: 4px;
 	}
-	button:focus-visible,
 	a:focus-visible {
 		outline: 2px solid var(--sub-bg);
 		outline-offset: 4px;
@@ -756,7 +669,7 @@
 			height: 2rem;
 		}
 		.tape-list {
-			padding: 0.45rem;
+			padding: 0.6rem 0.8rem 0.9rem;
 		}
 		.desk-surface {
 			margin: 3rem -0.2rem 0;
@@ -791,17 +704,6 @@
 		.avatar {
 			width: 3.7rem;
 		}
-		.thumbnail {
-			width: 4rem;
-		}
-		.programme-tape {
-			padding: 0.75rem 0.5rem;
-			gap: 0.65rem;
-		}
-		.selection-mark {
-			width: 1rem;
-			height: 1rem;
-		}
 		.liner {
 			grid-template-columns: 1fr;
 			gap: 1.5rem;
@@ -820,13 +722,7 @@
 			padding-inline: 0.3rem;
 		}
 		.tape-list {
-			padding: 0.35rem 0.3rem;
-		}
-		.thumbnail {
-			width: 3.3rem;
-		}
-		.selection-mark {
-			display: none;
+			padding: 0.6rem 0.7rem 0.9rem;
 		}
 	}
 	@media (prefers-reduced-motion: reduce) {
@@ -837,12 +733,6 @@
 		.lamp-pool,
 		.paper-light {
 			transition: none;
-		}
-		.programme-tape {
-			transition: none;
-		}
-		.programme-tape:hover {
-			transform: none;
 		}
 	}
 </style>
