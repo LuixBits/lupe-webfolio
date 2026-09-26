@@ -77,6 +77,12 @@
 	let zones = $state<Zone[]>([]);
 	let trunkD = $state('');
 	let sheenD = $state('');
+	let rimLD = $state('');
+	let rimRD = $state('');
+	let fissures = $state<{ d: string; light: boolean; w: number }[]>([]);
+	let knots = $state<{ x: number; y: number; r: number }[]>([]);
+	let woodX0 = $state(0);
+	let woodX1 = $state(100);
 	let bark = $state<string[]>([]);
 	let atmoStops = $state<{ o: number; c: string }[]>([]);
 	let rocks = $state<{ x: number; y: number; d: string; d2: string; fill: string }[]>([]);
@@ -284,14 +290,46 @@
 			}
 			R.reverse();
 			trunkD = `M${smoothOpen(L)} L ${smoothOpen(R)} Z`;
-			sheenD = `M${smoothOpen(cl.map((p, i) => ({ x: p.x - halfW(i / n) * 0.45, y: p.y })))}`;
-			const bk: string[] = [];
-			const nB = Math.max(4, Math.round((groundY - trunkTopY) / 260));
-			for (let i = 0; i < nB; i++) {
-				const t = 0.15 + (0.75 * i) / Math.max(1, nB - 1) + (rand() - 0.5) * 0.05;
+			// WOOD: a horizontal light-to-shadow gradient across the trunk's
+			// span (sun from the left), plus curve-following rims, a highlight
+			// streak, long bark fissures, growth ticks and a pair of knots —
+			// layered so the cylinder reads 3D.
+			woodX0 = Math.min(...cl.map((p) => p.x)) - halfW(1);
+			woodX1 = Math.max(...cl.map((p) => p.x)) + halfW(1);
+			rimLD = `M${smoothOpen(L)}`;
+			rimRD = `M${smoothOpen(R)}`;
+			sheenD = `M${smoothOpen(cl.map((p, i) => ({ x: p.x - halfW(i / n) * 0.38, y: p.y })))}`;
+			const fis: { d: string; light: boolean; w: number }[] = [];
+			[-0.55, -0.2, 0.14, 0.5, -0.36, 0.32].forEach((off, k) => {
+				const pts: Pt[] = [];
+				for (let i = 0; i <= n; i++) {
+					const t = i / n;
+					const y = trunkTopY + (groundY - trunkTopY) * t;
+					pts.push({ x: trunkXAt(y) + off * halfW(t) * 1.45 + (rand() * 2 - 1) * 2.4, y });
+				}
+				fis.push({
+					d: `M${smoothOpen(pts)}`,
+					light: k >= 4,
+					w: +(k >= 4 ? 1.6 : 1.1 + rand()).toFixed(1)
+				});
+			});
+			fissures = fis;
+			knots = [0.3, 0.62].map((kt) => {
+				const t = kt + (rand() - 0.5) * 0.06;
 				const y = trunkTopY + (groundY - trunkTopY) * t;
-				const x = trunkXAt(y) + (rand() * 2 - 1) * halfW(t) * 0.5;
-				const l = 16 + rand() * 22;
+				return {
+					x: f(trunkXAt(y) + (rand() * 2 - 1) * halfW(t) * 0.35),
+					y: f(y),
+					r: +(4 + rand() * 3).toFixed(1)
+				};
+			});
+			const bk: string[] = [];
+			const nB = Math.max(6, Math.round((groundY - trunkTopY) / 170));
+			for (let i = 0; i < nB; i++) {
+				const t = 0.12 + (0.8 * i) / Math.max(1, nB - 1) + (rand() - 0.5) * 0.05;
+				const y = trunkTopY + (groundY - trunkTopY) * t;
+				const x = trunkXAt(y) + (rand() * 2 - 1) * halfW(t) * 0.55;
+				const l = 14 + rand() * 20;
 				bk.push(`M${f(x)} ${f(y)} q ${f((rand() * 2 - 1) * 3)} ${f(l / 2)} 0 ${f(l)}`);
 			}
 			bark = bk;
@@ -316,7 +354,7 @@
 			];
 			// buried stones — bigger and greyer the deeper they sit
 			const rk: typeof rocks = [];
-			const nR = Math.min(16, Math.max(8, Math.round(W / 150)));
+			const nR = Math.min(24, Math.max(12, Math.round(W / 105)));
 			const fills = ['#958a77', '#89806f', '#9d9280', '#8b8274'];
 			for (let i = 0; i < nR; i++) {
 				const t = Math.pow(rand(), 1.3);
@@ -583,58 +621,87 @@
 		// Gated on the GROUND anchor's own reveal (not the roots chapter, which
 		// sits lower) so the burst is visible right when the trunk arrives.
 		{
+			// FAR AND WIDE: nine roots, the shallow outer ones running long and
+			// nearly horizontal through the topsoil, the middle ones diving,
+			// each with two generations of side-roots — a real root plate.
 			const baseX = trunkXAt(groundY);
 			const units: Unit[] = [];
-			const rootAngles = [134, 152, 170, 186, 204, 226];
-			rootAngles.forEach((ang, i) => {
+			const rootSpecs = [
+				{ a: 97, l: 310 },
+				{ a: 116, l: 255 },
+				{ a: 138, l: 205 },
+				{ a: 158, l: 168 },
+				{ a: 178, l: 155 },
+				{ a: 199, l: 172 },
+				{ a: 220, l: 215 },
+				{ a: 243, l: 265 },
+				{ a: 263, l: 320 }
+			];
+			const spread = 0.62 + Math.min(1, W / 1200) * 0.38;
+			rootSpecs.forEach((sp, i) => {
 				const g = taperedBranch(
 					rand,
-					ang + (rand() * 2 - 1) * 6,
-					(85 + rand() * 70) * (0.9 + sizeK * 0.5),
-					(11 + rand() * 7) * sizeK,
-					1.3,
-					16
+					sp.a + (rand() * 2 - 1) * 5,
+					sp.l * (0.85 + rand() * 0.3) * spread * (0.55 + sizeK * 0.45),
+					(10 + rand() * 6) * sizeK,
+					1.1,
+					sp.l * 0.16
 				);
 				const u: Unit = {
-					x: f(baseX + (i - 2.5) * 7 * sizeK),
+					x: f(baseX + (i - 4) * 6 * sizeK),
 					y: f(groundY - 6),
-					delay: i * 140,
+					delay: i * 90,
 					branch: g.d,
 					children: []
 				};
 				const sub = taperedBranch(
 					rand,
-					g.endAngle + (rand() > 0.5 ? 24 : -24),
-					40 + rand() * 30,
-					3.4,
-					0.9,
-					9
+					g.endAngle + (rand() > 0.5 ? 18 : -18),
+					sp.l * 0.4 * spread,
+					3.2,
+					0.8,
+					12
 				);
 				const subU: Unit = {
 					x: f(g.end.x),
 					y: f(g.end.y),
-					delay: 280,
+					delay: 300,
 					branch: sub.d,
 					children: []
 				};
-				if (rand() > 0.5) {
-					const sub2 = taperedBranch(
+				const sub2 = taperedBranch(
+					rand,
+					sub.endAngle + (rand() > 0.5 ? 16 : -16),
+					sp.l * 0.2 * spread,
+					1.6,
+					0.5,
+					8
+				);
+				subU.children.push({
+					x: f(sub.end.x),
+					y: f(sub.end.y),
+					delay: 260,
+					branch: sub2.d,
+					children: []
+				});
+				u.children.push(subU);
+				if (sp.l > 190) {
+					const midSub = taperedBranch(
 						rand,
-						sub.endAngle + (rand() > 0.5 ? 20 : -20),
-						24 + rand() * 18,
-						1.8,
-						0.6,
-						6
+						g.midAngle + (rand() > 0.5 ? 34 : -34),
+						sp.l * 0.3 * spread,
+						2.6,
+						0.7,
+						10
 					);
-					subU.children.push({
-						x: f(sub.end.x),
-						y: f(sub.end.y),
-						delay: 240,
-						branch: sub2.d,
+					u.children.push({
+						x: f(g.mid.x),
+						y: f(g.mid.y),
+						delay: 380,
+						branch: midSub.d,
 						children: []
 					});
 				}
-				u.children.push(subU);
 				units.push(u);
 			});
 			zs.push({ key: 'ground', clipped: false, units });
@@ -817,6 +884,19 @@
 				<clipPath id="{uid}-clip">
 					<rect class="trunk-clip-rect" x="0" y="0" width={W} height={clipHeight} />
 				</clipPath>
+				<linearGradient
+					id="{uid}-wood"
+					gradientUnits="userSpaceOnUse"
+					x1={woodX0}
+					y1="0"
+					x2={woodX1}
+					y2="0"
+				>
+					<stop offset="0" stop-color="#8f8663" />
+					<stop offset="0.28" stop-color="#6e6949" />
+					<stop offset="0.55" stop-color="#4f4d33" />
+					<stop offset="1" stop-color="#33321f" />
+				</linearGradient>
 				<linearGradient id="{uid}-atmo" x1="0" y1="0" x2="0" y2="1">
 					{#each atmoStops as s, i (i)}
 						<stop offset={s.o} stop-color={s.c} />
@@ -838,17 +918,28 @@
 
 			<!-- underground next: roots + the root to the seeds -->
 			{#each zones.filter((z) => z.key === 'ground' || z.key === 'contact') as z (z.key)}
-				<g class="zone" class:on={isOn(z.key)}>
+				<g class="zone zone--under" class:on={isOn(z.key)}>
 					{#each z.units as u, i (i)}{@render unitG(u)}{/each}
 				</g>
 			{/each}
 
 			<!-- trunk + its section limbs, revealed by the scroll clip -->
 			<g clip-path="url(#{uid}-clip)">
-				<path d={trunkD} class="wood trunkfill" />
+				<path d={trunkD} fill="url(#{uid}-wood)" />
+				<path d={rimLD} class="rimL" fill="none" />
+				<path d={rimRD} class="rimR" fill="none" />
 				<path d={sheenD} class="sheen" fill="none" />
+				{#each fissures as fi, i (i)}
+					<path d={fi.d} class={fi.light ? 'fisL' : 'fisD'} stroke-width={fi.w} fill="none" />
+				{/each}
 				{#each bark as b, i (i)}
 					<path d={b} class="bark" fill="none" />
+				{/each}
+				{#each knots as k, i (i)}
+					<g transform="translate({k.x} {k.y})">
+						<ellipse rx={k.r} ry={k.r * 1.7} class="knotO" />
+						<ellipse rx={k.r * 0.45} ry={k.r * 0.8} class="knotI" />
+					</g>
 				{/each}
 				{#each zones.filter((z) => z.clipped) as z (z.key)}
 					<g class="zone" class:on={isOn(z.key)}>
@@ -899,24 +990,55 @@
 		overflow: visible;
 	}
 
-	/* ---- wood + foliage palette ---- */
+	/* ---- wood + foliage palette. Boughs and roots are bark-brown olive so
+	   the tree reads as WOOD; only foliage stays leaf-green. ---- */
 	.wood {
-		fill: color-mix(in srgb, var(--garden-stem, #3f6d4e) 88%, #20301f);
+		fill: #4e4c33;
 	}
-	.trunkfill {
-		fill: color-mix(in srgb, var(--garden-stem, #3f6d4e) 82%, #241f14);
+	.zone--under .wood {
+		fill: #453f2b;
 	}
-	.sheen {
-		stroke: color-mix(in srgb, #ffffff 26%, var(--garden-stem, #3f6d4e));
-		stroke-width: 2.4;
+	.rimL {
+		stroke: #bfb289;
+		stroke-width: 2;
+		stroke-linecap: round;
+		opacity: 0.4;
+	}
+	.rimR {
+		stroke: #1d2012;
+		stroke-width: 2.6;
 		stroke-linecap: round;
 		opacity: 0.5;
 	}
+	.sheen {
+		stroke: #b3a678;
+		stroke-width: 3;
+		stroke-linecap: round;
+		opacity: 0.3;
+	}
+	.fisD {
+		stroke: #262418;
+		stroke-linecap: round;
+		opacity: 0.42;
+	}
+	.fisL {
+		stroke: #a89c72;
+		stroke-linecap: round;
+		opacity: 0.24;
+	}
 	.bark {
-		stroke: color-mix(in srgb, #10200f 55%, var(--garden-stem, #3f6d4e));
-		stroke-width: 1.6;
+		stroke: #241f14;
+		stroke-width: 1.5;
 		stroke-linecap: round;
 		opacity: 0.4;
+	}
+	.knotO {
+		fill: #2c2a1a;
+		opacity: 0.55;
+	}
+	.knotI {
+		fill: #171509;
+		opacity: 0.6;
 	}
 	.stratum {
 		stroke: #6f6455;
