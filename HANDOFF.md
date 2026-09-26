@@ -60,16 +60,28 @@ on dev/build; if `$lib/paraglide/*` is missing run
   About = Herbarium Folio + **Grove walk**, Projects = VHS rental wall,
   Hobbies = Star Atlas, CV = Sounding Line (depth-as-time). CV's
   education/positions live in `lib/content/cv.ts`.
-- **Grove walk (About)**: chapters grow into view on scroll — a shared
-  IntersectionObserver (`lib/garden/reveal.ts`) flips per-chapter classes,
-  CSS does the animating (transform/opacity one-shots); a margin vine
-  (`lib/garden/Spine.svelte`) draws via stroke-dashoffset scrubbed to scroll
-  (retracts on scroll-up, by design). `Garden.svelte` gained `start` (grow
-  when revealed) + preset overrides (`step`/`iterations`/`angle`/`leafScale`/
+- **The tree (About)** — the page IS one tree, descended crown→underground;
+  scrolling down travels back in time (newest growth up top, oldest parts
+  deepest — owner-agreed structure). Shared vocabulary: **sky** (bluish wash
+  at top) · **crown/canopy** (`lib/garden/Crown.svelte`) · **topmost branch**
+  (LivingLine under the h1) · **leaf bush** (bio's nest Opening) · **bower**
+  (the portrait's woven branch frame) · **trunk**
+  (`lib/garden/Trunk.svelte`, left gutter, tapering, clip-path scrubbed to
+  scroll — retracts on scroll-up by design) · **openings**
+  (`lib/garden/Opening.svelte`: foliage gaps content sits in, boughs
+  connecting to the trunk) · **ground** (soil LivingLine where the trunk
+  ends) · **underground** (earthy wash: roots, mycelium, seed packets).
+  Chapter order lives in `content/about.ts`: heartwood(ADHD) → branches →
+  [ground] → roots → mycelium.
+- Grove chapters grow into view on scroll — a shared IntersectionObserver
+  (`lib/garden/reveal.ts`) flips per-chapter classes, CSS does the animating
+  (transform/opacity one-shots). `Garden.svelte` has `start` (grow when
+  revealed) + preset overrides (`step`/`iterations`/`angle`/`leafScale`/
   `strokeWidth`) — plant params were picked by bbox-scanning seeds (the
-  L-system is deterministic). SSR/no-JS/reduced-motion always get a fully
-  grown page: the hidden `pending` state exists only client-side under
-  `prefers-reduced-motion: no-preference`.
+  L-system is deterministic). Openings' decorative layers are z-index:-1 so
+  the light pools/foliage never wash out prose. SSR/no-JS/reduced-motion
+  always get a fully grown page: the hidden `pending` state exists only
+  client-side under `prefers-reduced-motion: no-preference`.
 - **Living structural lines** (`lib/garden/LivingLine.svelte`): the About
   page's section rules, card/packet borders, note dividers, and soil lines
   are grown wood — seeded wavy paths drawing via stroke-dashoffset with
@@ -87,10 +99,13 @@ on dev/build; if `$lib/paraglide/*` is missing run
   `education[]`/`positions[]` entries (marked "— placeholder"), and the About
   page's optional herbarium fields (epithet/since/link notes — see
   `routes/about/+page.svelte` fallbacks).
-- About `chapters[]` in `lib/content/about.ts` (roots / passions / mycelium /
-  ADHD-as-pioneer): structure + ids are load-bearing, but the prose is
+- About `chapters[]` in `lib/content/about.ts` (heartwood-ADHD / passions /
+  roots / mycelium): structure + ids are load-bearing, but the prose is
   assistant-written placeholder voice — owner should rewrite in their own
   words (en + de).
+- **Portrait photo**: drop it at `static/media/about/portrait-800.webp`
+  (4:5) and uncomment the `portrait` field in `lib/content/about.ts`; a
+  leafy silhouette placeholder renders in the bower until then.
 
 ## Known open items
 
