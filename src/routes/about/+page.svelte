@@ -60,8 +60,11 @@
 <div class="page page--folio" class:living={hydrated}>
 	<!-- THE TREE: one procedural organism spanning the whole page. It measures
 	     every [data-tree] anchor and grows a trunk, crown, an embracing limb
-	     per content block, roots, and a root to the seeds. Behind the prose. -->
+	     per content block, roots, and a root to the seeds. Behind the prose.
+	     A second sparse instance stacks ABOVE the content: the branches and
+	     tufts that grip each card's corners (plus butterfly + ladybug). -->
 	<TreeLayer seed="about-tree" grown={revealed} arrive={hydrated} />
+	<TreeLayer seed="about-tree-grip" overlay grown={revealed} arrive={hydrated} />
 
 	<!-- Everything above ground hangs off the trunk in the left gutter.
 	     Scrolling down descends it — and travels back in time. -->
@@ -665,6 +668,10 @@
 		transform: translateX(-50%);
 		width: 100vw;
 		z-index: -1;
+	}
+	/* the grip instance rides ABOVE the cards (still under the wheel/scene) */
+	.page--folio > :global(.tree-layer.is-over) {
+		z-index: 3;
 	}
 	/* THE TREE + UNDERGROUND: a wide gutter carries the trunk; every content
 	   block hangs off it. */
