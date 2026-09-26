@@ -11,6 +11,7 @@
 	const channel = $derived(project.channel);
 	const title = $derived(resolveLocalized(project.title, locale));
 	const paragraphs = $derived(resolveLocalized(project.body, locale).split(/\n\s*\n/));
+	const sourceLink = $derived(project.links.find((link) => link.rel === 'source'));
 	const selectedVideo = $derived(project.videos[videoIndex]);
 	const watchUrl = $derived(
 		selectedVideo?.provider === 'youtube'
@@ -113,10 +114,33 @@
 	</div>
 
 	<section class="liner" aria-labelledby="channel-about">
-		<h2 id="channel-about">Hello nerds.</h2>
+		<div class="salutation">
+			<h2 id="channel-about">Hello nerds.</h2>
+			<div class="nix-sticker">
+				<img src="/media/projects/luixbits/nix-snowflake.svg" width="80" height="80" alt="" />
+				<span>I use NixOS, btw.</span>
+			</div>
+		</div>
 		<div class="description">
 			{#each paragraphs as paragraph}<p>{paragraph}</p>{/each}
 		</div>
+		{#if sourceLink}
+			<footer class="liner-footer">
+				<a class="liner-source" href={sourceLink.url} target="_blank" rel="noopener">
+					<svg class="ink-arrow" viewBox="0 0 90 35" fill="none" aria-hidden="true">
+						<path
+							d="M4 6c13 23 43 24 77 9m-13-5 15 4-9 12"
+							stroke="currentColor"
+							stroke-width="1.7"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						/>
+					</svg>
+					<span>{m.channel_code_link()}</span><span aria-hidden="true">↗</span>
+				</a>
+				<span class="signature">Luix</span>
+			</footer>
+		{/if}
 	</section>
 {/if}
 
@@ -295,7 +319,7 @@
 		position: relative;
 		display: grid;
 		grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
-		gap: 2rem;
+		gap: 1.3rem 2rem;
 		margin: 3rem 0 0;
 		padding: 2.5rem 3rem;
 		color: #34243f;
@@ -333,6 +357,47 @@
 		padding: 0;
 		border: 0;
 	}
+	.nix-sticker {
+		position: relative;
+		display: grid;
+		justify-items: center;
+		gap: 0.35rem;
+		width: fit-content;
+		max-width: 100%;
+		margin: 1.6rem 0 0 0.4rem;
+		padding: 0.8rem 1.2rem 0.9rem;
+		border: 5px solid #fffaf0;
+		border-radius: 42% 44% 22% 24% / 34% 38% 18% 20%;
+		background: linear-gradient(145deg, #f5f7ff, #dae5f5);
+		box-shadow:
+			0 0 0 1px #463a4930,
+			1px 3px 2px #463a4926,
+			3px 6px 8px #463a491a;
+		transform: rotate(-6deg);
+	}
+	.nix-sticker::after {
+		content: '';
+		position: absolute;
+		right: 0.15rem;
+		bottom: -0.15rem;
+		width: 1.4rem;
+		height: 0.9rem;
+		border-radius: 80% 0 80% 0;
+		background: linear-gradient(150deg, #c7cede 10%, #fffaf0 58%);
+		box-shadow: -1px -1px 1px #463a4917;
+		transform: rotate(-12deg);
+	}
+	.nix-sticker img {
+		display: block;
+		width: 5rem;
+		height: 5rem;
+	}
+	.nix-sticker span {
+		font-size: var(--fs-body);
+		line-height: var(--lh-body);
+		color: #34466d;
+		text-align: center;
+	}
 	.description p {
 		margin: 0;
 		font-size: var(--fs-body);
@@ -340,6 +405,50 @@
 	}
 	.description p + p {
 		margin-top: 1rem;
+	}
+	.liner-footer {
+		grid-column: 1 / -1;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 0.4rem 1rem;
+		border-top: 1px dashed #59415766;
+		padding-top: 0.7rem;
+	}
+	.liner-source {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.6rem;
+		min-height: 44px;
+		max-width: 100%;
+		padding: 0.3rem 0;
+		font-size: var(--fs-body);
+		color: inherit;
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 4px;
+	}
+	.liner-source:hover {
+		text-decoration-thickness: 2px;
+	}
+	.liner-source:focus-visible {
+		outline-color: #34243f;
+	}
+	.ink-arrow {
+		flex: none;
+		width: 4rem;
+		height: 1.75rem;
+		color: #814166;
+	}
+	.signature {
+		margin-left: auto;
+		padding: 0 0.3rem;
+		font-family: Georgia, serif;
+		font-size: var(--fs-h3);
+		font-style: italic;
+		line-height: var(--lh-body);
+		transform: rotate(-8deg);
 	}
 	@media (min-width: 65rem) {
 		.channel-counter {
@@ -385,6 +494,9 @@
 		}
 		.liner::after {
 			left: 0.65rem;
+		}
+		.ink-arrow {
+			width: 2rem;
 		}
 	}
 	@media (prefers-reduced-motion: reduce) {

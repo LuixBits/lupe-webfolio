@@ -34,7 +34,8 @@ export const projects: Project[] = defineProjects([
 			}
 		},
 		links: [
-			{ label: 'YouTube · @LuixBits', url: 'https://www.youtube.com/@LuixBits', rel: 'external' }
+			{ label: 'YouTube · @LuixBits', url: 'https://www.youtube.com/@LuixBits', rel: 'external' },
+			{ label: 'GitHub · LuixBits', url: 'https://github.com/LuixBits', rel: 'source' }
 		],
 		// Public uploads and durations verified against the channel on 2026-09-26.
 		videos: [
