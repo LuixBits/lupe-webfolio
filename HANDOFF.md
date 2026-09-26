@@ -54,8 +54,13 @@ on dev/build; if `$lib/paraglide/*` is missing run
   scaled 0.78 in `CornerScene.svelte` so the L-system never sprawls over text.
 - `lib/decor/*` — per-theme floating decor (GSAP mouse-parallax, deliberately
   gentle — the owner dislikes wobble; hub has NO mouse effect).
-- `lib/components/footer/*` — four bespoke footers (meadow / Hokusai wave /
-  outrun car / planet horizon). Rule: **no SVG sliced mid-shape at the edges**.
+- `lib/components/footer/*` — four bespoke footers (bedrock strata with
+  fossils+crystals for garden / Hokusai wave / outrun car / planet horizon).
+  Rule: **no SVG sliced mid-shape at the edges**. The garden bar uses
+  `--footer-bar-bg` (themes.css) so the rock bar doesn't recolor the wheel
+  hub; the strip's top band matches the About page's deepest rock tone for a
+  seamless join (the page's TreeLayer overshoots main's padding by 2.5rem
+  top+bottom for the same reason).
 - `routes/*/+page.svelte` — each section has a bespoke presentation:
   About = Herbarium Folio + **Grove walk**, Projects = VHS rental wall,
   Hobbies = Star Atlas, CV = Sounding Line (depth-as-time). CV's

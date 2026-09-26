@@ -98,7 +98,9 @@
 		position: relative;
 		z-index: 1;
 		min-height: var(--bar-h);
-		background: var(--hub-bg);
+		/* themes may override the bar independently of the wheel hub (the
+		   garden footer's bedrock needs a rock bar, not the hub green) */
+		background: var(--footer-bar-bg, var(--hub-bg));
 		display: grid;
 		grid-template-columns: 1fr auto 1fr;
 		align-items: center;

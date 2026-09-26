@@ -657,8 +657,10 @@
 	}
 	.page--folio > :global(.tree-layer) {
 		position: absolute;
-		top: 0;
-		bottom: 0;
+		/* overshoot main's padding so no app-background band shows above the
+		   sky or between the page's rock and the footer's bedrock */
+		top: -2.5rem;
+		bottom: -2.5rem;
 		left: 50%;
 		transform: translateX(-50%);
 		width: 100vw;
@@ -687,26 +689,44 @@
 		inset: 0;
 		--line-op: 0.95;
 	}
-	/* content veils: every block floats in its own pool of light, so branches
-	   and foliage can pass behind it without stealing the prose's contrast */
+	/* content cards: field-notebook sheets floating in the tree — warm paper,
+	   a fine double rule (border + offset outline, the herbarium-sheet
+	   language), leaf-lobed corners alternating by side, layered shadow. */
 	.folio-text,
 	.notes-section,
 	.grove-head,
 	.contact-plot,
 	.chapter {
 		position: relative;
-		padding: 1.15rem 1.35rem;
-		border-radius: 18px;
+		padding: 1.35rem 1.5rem 1.25rem;
+		border-radius: 6px 22px;
 		background:
-			radial-gradient(115% 90% at 50% 26%, rgba(255, 251, 232, 0.55), transparent 74%),
-			color-mix(in srgb, var(--bg) 62%, transparent);
+			radial-gradient(120% 85% at 28% 0%, rgba(255, 252, 238, 0.85), rgba(255, 252, 238, 0) 62%),
+			linear-gradient(
+				color-mix(in srgb, var(--bg) 45%, white),
+				color-mix(in srgb, var(--bg) 68%, white)
+			);
+		border: 1px solid color-mix(in srgb, var(--garden-stem, var(--accent)) 32%, transparent);
+		outline: 1px solid color-mix(in srgb, var(--garden-stem, var(--accent)) 15%, transparent);
+		outline-offset: 4px;
+		box-shadow:
+			0 1px 2px color-mix(in srgb, #16301f 16%, transparent),
+			0 28px 46px -30px color-mix(in srgb, #16301f 55%, transparent);
 	}
-	/* deeper soil behind the underground blocks — hold the veil stronger */
+	.side-r {
+		border-radius: 22px 6px;
+	}
+	/* underground sheets: older paper, earth-toned rule */
 	.underground .chapter,
 	.contact-plot {
 		background:
-			radial-gradient(115% 90% at 50% 26%, rgba(255, 251, 232, 0.5), transparent 74%),
-			color-mix(in srgb, var(--bg) 76%, transparent);
+			radial-gradient(120% 85% at 28% 0%, rgba(255, 250, 232, 0.8), rgba(255, 250, 232, 0) 62%),
+			linear-gradient(#f9f2df, #efe5cc);
+		border-color: color-mix(in srgb, #6b5535 42%, transparent);
+		outline-color: color-mix(in srgb, #6b5535 20%, transparent);
+		box-shadow:
+			0 1px 2px color-mix(in srgb, #2b2114 20%, transparent),
+			0 28px 46px -30px color-mix(in srgb, #2b2114 60%, transparent);
 	}
 	.folio-text {
 		margin: 0 -1.35rem;
@@ -714,6 +734,30 @@
 	.notes-section {
 		margin-left: -1.35rem;
 		margin-right: -1.35rem;
+	}
+	/* a small leaf glyph opens every kicker */
+	.kicker::before {
+		content: '';
+		display: inline-block;
+		width: 0.62em;
+		height: 0.95em;
+		margin-right: 0.55em;
+		vertical-align: -0.14em;
+		background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-6 -17 12 18'%3E%3Cpath d='M0 0 C 5 -4 5 -12 0 -16 C -5 -12 -5 -4 0 0 Z' fill='%233f6d4e'/%3E%3C/svg%3E")
+			center / contain no-repeat;
+	}
+	/* chapter titles carry a short hand-set rule */
+	.chapter h3::after {
+		content: '';
+		display: block;
+		width: 3.2rem;
+		height: 2px;
+		margin-top: 0.5rem;
+		border-radius: 2px;
+		background: color-mix(in srgb, var(--garden-stem, var(--accent)) 70%, transparent);
+	}
+	.underground .chapter h3::after {
+		background: color-mix(in srgb, #6b5535 70%, transparent);
 	}
 	/* the desktop weave: blocks alternate around the central trunk.
 	   (.page--folio prefix so these outrank the base block rules below) */
