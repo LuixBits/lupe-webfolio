@@ -60,10 +60,41 @@
 		margin: 0;
 	}
 	.cases li {
+		position: relative;
+		isolation: isolate;
 		display: grid;
 		min-width: 0;
-		padding: 0 0.6rem 0.65rem;
-		border-bottom: 0.65rem solid #624737;
+		padding: 0 0.6rem 1.2rem;
+		background: linear-gradient(#bd9371, #7e5b48 20%, #593b30 78%, #2c2228) bottom / 100% 0.85rem
+			no-repeat;
+		box-shadow: 0 12px 12px -6px #0c0c19b3;
+	}
+	.cases li::before {
+		content: '';
+		position: absolute;
+		z-index: -1;
+		inset: 20% 0 -1.9rem;
+		background: linear-gradient(
+			90deg,
+			transparent 7%,
+			#292432 7% calc(7% + 9px),
+			transparent calc(7% + 10px) calc(93% - 10px),
+			#292432 calc(93% - 9px) 93%,
+			transparent 93%
+		);
+		pointer-events: none;
+	}
+	.cases li::after {
+		content: '';
+		position: absolute;
+		left: 7%;
+		right: 7%;
+		bottom: -1.7rem;
+		height: 5px;
+		background:
+			radial-gradient(circle at 4px 50%, #a494a0 1px, #17131d 2px, transparent 3px),
+			radial-gradient(circle at calc(100% - 4px) 50%, #a494a0 1px, #17131d 2px, transparent 3px);
+		pointer-events: none;
 	}
 	.studio .cases {
 		margin-top: 2rem;
