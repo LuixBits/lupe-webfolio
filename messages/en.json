@@ -91,5 +91,8 @@
 	"channel_visit": "Visit the LuixBits channel",
 	"channel_watch_youtube": "Watch this video on YouTube",
 	"channel_code_link": "My code on GitHub",
+	"workbench_lamp_on": "Turn desk lamp on",
+	"workbench_lamp_off": "Turn desk lamp off",
+	"workbench_watch_hint": "Load the Casio video",
 	"projects_back": "Back to projects"
 }

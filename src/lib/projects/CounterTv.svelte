@@ -10,8 +10,9 @@
 	let {
 		project,
 		locale,
-		videoIndex = $bindable(0)
-	}: { project: Project; locale: string; videoIndex?: number } = $props();
+		videoIndex = $bindable(0),
+		powered = $bindable(true)
+	}: { project: Project; locale: string; videoIndex?: number; powered?: boolean } = $props();
 	const navigation = getContext<ProjectNavigation | undefined>(projectNavigation);
 	const shots = $derived(project.screenshots);
 	const demo = $derived(project.demo?.embed);
@@ -25,7 +26,6 @@
 		return list;
 	});
 	let active = $state<Channel>(untrack(() => channels[0]?.id ?? 'video'));
-	let powered = $state(true);
 	let live = $state(false);
 	let stillIdx = $state(0);
 	let signalVersion = $state(0);
@@ -130,7 +130,7 @@
 	}
 </script>
 
-<section class="deck" aria-label={title}>
+<section class="deck" class:workbench={Boolean(project.channel)} aria-label={title}>
 	<div class="shell" bind:this={shell}>
 		<div class="screen" class:idle={!live} class:off={!powered}>
 			{#if powered}
@@ -661,6 +661,17 @@
 		height: 1px;
 		background: linear-gradient(90deg, var(--sub-bg), #b5cad067, var(--accent));
 		box-shadow: 0 0 16px #96ced833;
+	}
+	.workbench .counter-top {
+		height: 21px;
+		border: 1px solid #987355;
+		border-radius: 2px 2px 4px 4px;
+		background: linear-gradient(#946b50, #6e4a37 5px, #4a3027 6px, #302020);
+		box-shadow: 0 12px 25px #08060db3;
+	}
+	.workbench .counter-top::before {
+		background: linear-gradient(90deg, #a88768, #74c9cb45, #b4957366);
+		box-shadow: none;
 	}
 	.thumbs {
 		display: flex;

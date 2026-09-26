@@ -24,6 +24,8 @@
 	import RadialMenu from '$lib/radial-menu/RadialMenu.svelte';
 	import HubBackdrop from '$lib/portal/HubBackdrop.svelte';
 	import Decor from '$lib/decor/Decor.svelte';
+	import WorkshopWall from '$lib/projects/workbench/WorkshopWall.svelte';
+	import { deLocalizeUrl } from '$lib/paraglide/runtime';
 	import CornerScene from '$lib/scenes/CornerScene.svelte';
 	import GooeyFilter from '$lib/effects/GooeyFilter.svelte';
 	import Footer from '$lib/components/Footer.svelte';
@@ -41,6 +43,7 @@
 	const section = $derived(sectionIdForUrl(page.url));
 	const dataTheme = $derived(dataThemeForSection(section));
 	const showContent = $derived(section !== null);
+	const workbench = $derived(deLocalizeUrl(page.url).pathname === '/projects/my-channel');
 	// Keep the Projects layout alive between shelf/detail routes so its camera
 	// transition can follow real navigation. Other sections keep their entrance.
 	const contentKey = $derived(
@@ -88,7 +91,7 @@
 	}
 </script>
 
-<div class="app" data-theme={dataTheme}>
+<div class="app" class:workbench data-theme={dataTheme}>
 	<a href="#main" class="skip">{m.skip_to_content()}</a>
 
 	<GooeyFilter />
@@ -97,12 +100,23 @@
 		<!-- Section ambience (behind content): botanical/celestial decor + scene.
 		     Each fixed layer gets its own fixed inset-0 wrapper so the transition
 		     transform doesn't re-anchor the fixed children. -->
-		<div class="layer layer--decor" in:scale={settleIn} out:fade={{ duration: reduced ? 0 : 220 }}>
-			<Decor theme={getThemeForSection(section)} />
+		<div
+			class="layer layer--decor"
+			class:room-wall={workbench}
+			in:scale={settleIn}
+			out:fade={{ duration: reduced ? 0 : 220 }}
+		>
+			{#if workbench}<WorkshopWall />{:else}<Decor theme={getThemeForSection(section)} />{/if}
 		</div>
-		<div class="layer layer--scene" in:scale={settleIn} out:fade={{ duration: reduced ? 0 : 220 }}>
-			<CornerScene />
-		</div>
+		{#if !workbench}
+			<div
+				class="layer layer--scene"
+				in:scale={settleIn}
+				out:fade={{ duration: reduced ? 0 : 220 }}
+			>
+				<CornerScene />
+			</div>
+		{/if}
 	{:else}
 		<!-- Home: the four segment-aligned scene squares sit behind the wheel. The
 		     hub flies past the camera on the way in to a section, and settles back
@@ -134,7 +148,12 @@
 	</main>
 
 	{#if showContent && section}
-		<Footer theme={getThemeForSection(section)} {dockCorner} year={data.year}>
+		<Footer
+			theme={getThemeForSection(section)}
+			{dockCorner}
+			year={data.year}
+			variant={workbench ? 'workbench' : 'default'}
+		>
 			{#snippet actions()}
 				<LocaleSwitcher />
 			{/snippet}
@@ -143,6 +162,12 @@
 </div>
 
 <style>
+	.app.workbench {
+		position: relative;
+		--bg: #241924;
+		--footer-bar-bg: #19131b;
+		--fg-muted: #c9b3cb;
+	}
 	.app {
 		min-height: 100vh;
 		min-height: 100svh;
@@ -173,6 +198,9 @@
 	}
 	.layer--decor {
 		z-index: 6;
+	}
+	.layer--decor.room-wall {
+		position: absolute;
 	}
 	.layer--scene {
 		z-index: 12;

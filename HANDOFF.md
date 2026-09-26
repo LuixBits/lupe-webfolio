@@ -24,6 +24,11 @@ npm install
 npm run dev            # Vite prints the port (5173 is often taken by a tunnel)
 # or: npm run check / npm run build
 ```
+
+Use the dev server for visual iteration. Rebuilding underneath a running
+`vite preview` leaves its cached asset filenames stale; restart that preview
+after a build, or validate builds in a separate checkout.
+
 Node 22. Paraglide (i18n) messages compile to `src/lib/paraglide/` (git-ignored)
 on dev/build; if `$lib/paraglide/*` is missing run
 `npx @inlang/paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide`.
@@ -72,6 +77,16 @@ on dev/build; if `$lib/paraglide/*` is missing run
   About = Herbarium Folio + **Grove walk**, Projects = VHS rental wall,
   Hobbies = Star Atlas, CV = Sounding Line (depth-as-time). CV's
   education/positions live in `lib/content/cv.ts`.
+- **LuixBits workbench** (`/projects/my-channel`, including localized routes)
+  keeps the Projects palette and CRT but has its own plaster wall, mounted
+  neon title, wooden desk, and cable footer. The root layout selects this
+  room; other Projects routes keep the rental-wall scenery. Artwork lives in
+  `lib/projects/workbench/`. `ChannelPlayer` binds the TV's `powered` state
+  to the blue wall glow; the desk lamp toggles its warm pool of light. The
+  Casio is one keyboard-accessible button that loads the `casio-nixos` video,
+  scrolls to the TV, and focuses Play. Loading a tape does not start a YouTube
+  embed. The paper remains an even cream colour with the NixOS sticker and
+  coffee ring. Room lighting respects reduced motion.
 - **The tree (About)** — the page IS one tree, descended crown→underground;
   scrolling down travels back in time (newest growth up top, oldest parts
   deepest — owner-agreed structure). It is drawn by ONE component,

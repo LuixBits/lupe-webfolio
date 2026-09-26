@@ -1,18 +1,29 @@
 <script lang="ts">
-	import { tick } from 'svelte';
+	import { getContext, tick, untrack } from 'svelte';
 	import { resolveLocalized, type Project } from '$lib/content/schema';
 	import * as m from '$lib/paraglide/messages';
 	import CounterTv from './CounterTv.svelte';
+	import DeskLamp from './workbench/DeskLamp.svelte';
+	import CasioWatch from './workbench/CasioWatch.svelte';
+	import WorkbenchKeyboard from './workbench/WorkbenchKeyboard.svelte';
+	import FloorPlan from './workbench/FloorPlan.svelte';
+	import { projectNavigation, type ProjectNavigation } from './navigation';
 
 	let { project, locale }: { project: Project; locale: string } = $props();
 	let player = $state<CounterTv>();
 	let deck = $state<HTMLDivElement>();
 	let videoIndex = $state(0);
+	let powered = $state(true);
+	let lampLit = $state(true);
+	const navigation = getContext<ProjectNavigation | undefined>(projectNavigation);
+	const entryDelay = untrack(() => (navigation?.moving ? 640 : 0));
 	const channel = $derived(project.channel);
 	const title = $derived(resolveLocalized(project.title, locale));
 	const paragraphs = $derived(resolveLocalized(project.body, locale).split(/\n\s*\n/));
 	const sourceLink = $derived(project.links.find((link) => link.rel === 'source'));
 	const selectedVideo = $derived(project.videos[videoIndex]);
+	const watchIndex = $derived(project.videos.findIndex((video) => video.id === 'casio-nixos'));
+	const watchVideo = $derived(project.videos[watchIndex]);
 	const watchUrl = $derived(
 		selectedVideo?.provider === 'youtube'
 			? `https://www.youtube.com/watch?v=${selectedVideo.src}`
@@ -22,7 +33,7 @@
 	function duration(seconds: number) {
 		return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
 	}
-	async function loadTape(index: number) {
+	async function loadTape(index: number, focusPlayer = false) {
 		player?.selectVideo(index);
 		await tick();
 		if (!deck) return;
@@ -36,148 +47,231 @@
 			});
 			player?.focusPlay();
 		}
+		if (focusPlayer) player?.focusPlay();
 	}
 </script>
 
 {#if channel}
-	<div class="channel-counter">
-		<div class="deckcol" id="channel-player" bind:this={deck}>
-			<CounterTv {project} {locale} bind:this={player} bind:videoIndex />
-			{#if watchUrl}
-				<a class="watch-link" href={watchUrl} target="_blank" rel="noopener">
-					{m.channel_watch_youtube()} <span aria-hidden="true">↗</span>
+	<div
+		class="workbench-scene"
+		class:screen-lit={powered}
+		class:lamp-lit={lampLit}
+		style:--room-delay="{entryDelay}ms"
+	>
+		<div class="channel-counter">
+			<div class="deckcol" id="channel-player" bind:this={deck}>
+				<div class="screen-spill" aria-hidden="true"><div class="spill-light"></div></div>
+				<svg class="tv-cable" viewBox="0 0 80 320" fill="none" aria-hidden="true">
+					<path
+						d="M27 12c-16 33 38 21 35 64l-8 120c-4 46 27 81-8 106"
+						stroke="#100f17"
+						stroke-width="7"
+					/>
+					<path
+						d="M26 12c-16 33 38 21 35 64l-8 120c-4 46 27 81-8 106"
+						stroke="#6b555f"
+						stroke-width="2"
+					/>
+				</svg>
+				<CounterTv {project} {locale} bind:this={player} bind:videoIndex bind:powered />
+				{#if watchUrl}
+					<a class="watch-link" href={watchUrl} target="_blank" rel="noopener">
+						{m.channel_watch_youtube()} <span aria-hidden="true">↗</span>
+					</a>
+				{/if}
+			</div>
+
+			<section class="programme" aria-labelledby="channel-title">
+				<header class="masthead">
+					{#if channel.avatar}
+						<div class="avatar">
+							<img
+								src={channel.avatar.src}
+								width={channel.avatar.width}
+								height={channel.avatar.height}
+								alt={resolveLocalized(channel.avatar.alt, locale)}
+							/>
+						</div>
+					{/if}
+					<h1 id="channel-title">{title}</h1>
+				</header>
+				<p class="tagline">{resolveLocalized(project.tagline, locale)}</p>
+				<p class="instruction">{m.channel_choose_tape()}</p>
+				<div class="tape-list" role="group" aria-label={m.channel_programme()}>
+					{#each project.videos as video, index (video.id)}
+						<button
+							type="button"
+							class="programme-tape"
+							class:selected={videoIndex === index}
+							aria-pressed={videoIndex === index}
+							aria-controls="channel-player"
+							aria-label={m.channel_load_video({ title: video.title })}
+							onclick={() => loadTape(index)}
+						>
+							{#if video.poster}<img
+									class="thumbnail"
+									src={video.poster}
+									width="1280"
+									height="720"
+									alt=""
+									loading="lazy"
+								/>{/if}
+							<span class="tape-copy">
+								<span class="video-title">{video.title}</span>
+								{#if video.duration}<span class="duration">{duration(video.duration)}</span>{/if}
+							</span>
+							<svg
+								class="selection-mark"
+								class:visible={videoIndex === index}
+								viewBox="0 0 24 24"
+								fill="none"
+								aria-hidden="true"
+							>
+								<path
+									d="m5 12 4 4 10-10"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								/>
+							</svg>
+						</button>
+					{/each}
+				</div>
+				<a class="channel-link" href={channel.url} target="_blank" rel="noopener">
+					<span>{m.channel_visit()}</span><span aria-hidden="true">↗</span>
 				</a>
-			{/if}
+			</section>
 		</div>
 
-		<section class="programme" aria-labelledby="channel-title">
-			<header class="masthead">
-				{#if channel.avatar}
-					<div class="avatar">
-						<img
-							src={channel.avatar.src}
-							width={channel.avatar.width}
-							height={channel.avatar.height}
-							alt={resolveLocalized(channel.avatar.alt, locale)}
+		<div class="desk-surface">
+			<div class="lamp-pool" aria-hidden="true"></div>
+			<div class="bench-tools">
+				<div class="lamp-slot"><DeskLamp bind:lit={lampLit} /></div>
+				<div class="keyboard-notes" aria-hidden="true">
+					<div class="plan-sheet"><FloorPlan /></div>
+					<WorkbenchKeyboard />
+				</div>
+				{#if watchVideo}
+					<div class="watch-slot">
+						<CasioWatch
+							selected={videoIndex === watchIndex}
+							duration={watchVideo.duration ? duration(watchVideo.duration) : ''}
+							videoTitle={watchVideo.title}
+							onloadvideo={() => loadTape(watchIndex, true)}
 						/>
 					</div>
 				{/if}
-				<h1 id="channel-title">{title}</h1>
-			</header>
-			<p class="tagline">{resolveLocalized(project.tagline, locale)}</p>
-			<p class="instruction">{m.channel_choose_tape()}</p>
-			<div class="tape-list" role="group" aria-label={m.channel_programme()}>
-				{#each project.videos as video, index (video.id)}
-					<button
-						type="button"
-						class="programme-tape"
-						class:selected={videoIndex === index}
-						aria-pressed={videoIndex === index}
-						aria-controls="channel-player"
-						aria-label={m.channel_load_video({ title: video.title })}
-						onclick={() => loadTape(index)}
-					>
-						{#if video.poster}<img
-								class="thumbnail"
-								src={video.poster}
-								width="1280"
-								height="720"
-								alt=""
-								loading="lazy"
-							/>{/if}
-						<span class="tape-copy">
-							<span class="video-title">{video.title}</span>
-							{#if video.duration}<span class="duration">{duration(video.duration)}</span>{/if}
-						</span>
-						<svg
-							class="selection-mark"
-							class:visible={videoIndex === index}
-							viewBox="0 0 24 24"
-							fill="none"
-							aria-hidden="true"
-						>
-							<path
-								d="m5 12 4 4 10-10"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							/>
-						</svg>
-					</button>
-				{/each}
 			</div>
-			<a class="channel-link" href={channel.url} target="_blank" rel="noopener">
-				<span>{m.channel_visit()}</span><span aria-hidden="true">↗</span>
-			</a>
-		</section>
-	</div>
-
-	<section class="liner" aria-labelledby="channel-about">
-		<svg class="coffee-ring" viewBox="0 0 180 160" fill="none" aria-hidden="true">
-			<g stroke="#87552e" stroke-linecap="round" stroke-linejoin="round">
-				<path
-					d="M146 55c8 23 2 47-15 64-20 20-57 24-85 5C22 108 14 85 23 61c9-25 32-39 59-39 26-1 49 11 62 27"
-					stroke-width="7"
-					opacity="0.17"
-				/>
-				<path
-					d="M140 45c15 21 14 48-1 65m-8 11c-21 17-55 20-81 4M36 113c-17-17-21-38-12-57m9-17c13-12 30-18 47-19"
-					stroke-width="2.5"
-					opacity="0.4"
-				/>
-				<path
-					d="M137 53c11 22 6 47-13 62-19 16-47 18-71 3-22-13-29-34-21-54m16-27c17-10 40-12 58-4"
-					stroke-width="3"
-					opacity="0.13"
-				/>
-				<path d="m50 127 9 4m61-3 8-5M23 68l-2 10" stroke-width="4" opacity="0.25" />
-			</g>
-			<g fill="#87552e" opacity="0.18">
-				<ellipse cx="148" cy="130" rx="4" ry="2.5" transform="rotate(-28 148 130)" />
-				<circle cx="157" cy="120" r="1.5" />
-				<ellipse cx="35" cy="140" rx="2.5" ry="1.4" />
-			</g>
-		</svg>
-		<div class="salutation">
-			<h2 id="channel-about">Hello nerds.</h2>
-			<div class="nix-sticker">
-				<img src="/media/projects/luixbits/nix-snowflake.svg" width="80" height="80" alt="" />
-				<span>I use NixOS, btw.</span>
-			</div>
-		</div>
-		<div class="description">
-			{#each paragraphs as paragraph}<p>{paragraph}</p>{/each}
-		</div>
-		{#if sourceLink}
-			<footer class="liner-footer">
-				<a class="liner-source" href={sourceLink.url} target="_blank" rel="noopener">
-					<svg class="ink-arrow" viewBox="0 0 90 35" fill="none" aria-hidden="true">
+			<section class="liner" aria-labelledby="channel-about">
+				<svg class="coffee-ring" viewBox="0 0 180 160" fill="none" aria-hidden="true">
+					<g stroke="#87552e" stroke-linecap="round" stroke-linejoin="round">
 						<path
-							d="M4 6c13 23 43 24 77 9m-13-5 15 4-9 12"
-							stroke="currentColor"
-							stroke-width="1.7"
-							stroke-linecap="round"
-							stroke-linejoin="round"
+							d="M146 55c8 23 2 47-15 64-20 20-57 24-85 5C22 108 14 85 23 61c9-25 32-39 59-39 26-1 49 11 62 27"
+							stroke-width="7"
+							opacity="0.17"
 						/>
-					</svg>
-					<span>{m.channel_code_link()}</span><span aria-hidden="true">↗</span>
-				</a>
-				<span class="signature">Luix</span>
-			</footer>
-		{/if}
-	</section>
+						<path
+							d="M140 45c15 21 14 48-1 65m-8 11c-21 17-55 20-81 4M36 113c-17-17-21-38-12-57m9-17c13-12 30-18 47-19"
+							stroke-width="2.5"
+							opacity="0.4"
+						/>
+						<path
+							d="M137 53c11 22 6 47-13 62-19 16-47 18-71 3-22-13-29-34-21-54m16-27c17-10 40-12 58-4"
+							stroke-width="3"
+							opacity="0.13"
+						/>
+						<path d="m50 127 9 4m61-3 8-5M23 68l-2 10" stroke-width="4" opacity="0.25" />
+					</g>
+					<g fill="#87552e" opacity="0.18">
+						<ellipse cx="148" cy="130" rx="4" ry="2.5" transform="rotate(-28 148 130)" />
+						<circle cx="157" cy="120" r="1.5" />
+						<ellipse cx="35" cy="140" rx="2.5" ry="1.4" />
+					</g>
+				</svg>
+				<div class="salutation">
+					<h2 id="channel-about">Hello nerds.</h2>
+					<div class="nix-sticker">
+						<img src="/media/projects/luixbits/nix-snowflake.svg" width="80" height="80" alt="" />
+						<span>I use NixOS, btw.</span>
+					</div>
+				</div>
+				<div class="description">
+					{#each paragraphs as paragraph}<p>{paragraph}</p>{/each}
+				</div>
+				{#if sourceLink}
+					<footer class="liner-footer">
+						<a class="liner-source" href={sourceLink.url} target="_blank" rel="noopener">
+							<svg class="ink-arrow" viewBox="0 0 90 35" fill="none" aria-hidden="true">
+								<path
+									d="M4 6c13 23 43 24 77 9m-13-5 15 4-9 12"
+									stroke="currentColor"
+									stroke-width="1.7"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								/>
+							</svg>
+							<span>{m.channel_code_link()}</span><span aria-hidden="true">↗</span>
+						</a>
+						<span class="signature">Luix</span>
+					</footer>
+				{/if}
+			</section>
+		</div>
+	</div>
 {/if}
 
 <style>
+	.workbench-scene {
+		position: relative;
+		isolation: isolate;
+	}
 	.channel-counter {
 		display: grid;
 		gap: 2.5rem;
 		align-items: center;
 	}
 	.deckcol {
+		position: relative;
+		isolation: isolate;
 		min-width: 0;
 		scroll-margin-top: 1.5rem;
+	}
+	.screen-spill {
+		position: absolute;
+		z-index: -1;
+		inset: -7rem 0 -1rem;
+		pointer-events: none;
+		opacity: 0;
+		transition: opacity 850ms ease;
+	}
+	.screen-lit .screen-spill {
+		opacity: 1;
+	}
+	.spill-light {
+		width: 100%;
+		height: 100%;
+		background: radial-gradient(ellipse at 44% 50%, #54d2da40, #75a1c824 37%, transparent 70%);
+		filter: blur(28px);
+		animation: room-wakes 1250ms ease-out var(--room-delay) both;
+	}
+	.tv-cable {
+		position: absolute;
+		z-index: -1;
+		pointer-events: none;
+		right: 0;
+		top: 40%;
+		width: 12%;
+		height: 52%;
+	}
+	@keyframes room-wakes {
+		0%,
+		30% {
+			opacity: 0;
+		}
+		100% {
+			opacity: 1;
+		}
 	}
 	.watch-link {
 		display: flex;
@@ -199,9 +293,45 @@
 		padding: 1rem 0;
 	}
 	.masthead {
+		position: relative;
+		isolation: isolate;
 		display: flex;
 		align-items: center;
 		gap: 1rem;
+		padding: 1.2rem 1.3rem;
+		border: 1px solid #a38caa55;
+		border-radius: 6px;
+		background: linear-gradient(130deg, #343041cc, #1d1924e6);
+		box-shadow:
+			0 9px 12px #100c1a66,
+			inset 0 1px #e0b8d914,
+			0 0 38px #f955c011;
+	}
+	.masthead::before {
+		content: '';
+		position: absolute;
+		z-index: -1;
+		inset: -7px 18px;
+		background:
+			linear-gradient(#92808b, #534550) left top / 14px 15px no-repeat,
+			linear-gradient(#92808b, #534550) right top / 14px 15px no-repeat,
+			linear-gradient(#534550, #92808b) left bottom / 14px 15px no-repeat,
+			linear-gradient(#534550, #92808b) right bottom / 14px 15px no-repeat;
+		border-radius: 4px;
+		filter: drop-shadow(0 2px 2px #08070e);
+	}
+	.masthead::after {
+		content: '';
+		position: absolute;
+		z-index: -2;
+		right: 1.3rem;
+		top: -4rem;
+		width: 3rem;
+		height: 4rem;
+		border-right: 3px solid #15131c;
+		border-top: 3px solid #15131c;
+		border-radius: 0 12px 0 0;
+		box-shadow: 1px -1px #8a647633;
 	}
 	.avatar {
 		flex: none;
@@ -224,8 +354,10 @@
 		font-size: var(--fs-h1);
 		line-height: var(--lh-tight);
 		text-shadow:
-			-1px 0 #35e6e6,
-			1px 1px #ff5ed1;
+			-1px 0 #9bfff9,
+			0 0 4px #fff4ff,
+			0 0 16px #ff5ed194,
+			0 0 35px #ff5ed14d;
 	}
 	.tagline {
 		color: var(--fg-muted);
@@ -242,6 +374,13 @@
 	.tape-list {
 		display: grid;
 		gap: 0.6rem;
+		padding: 0.8rem;
+		border: 1px solid #89758266;
+		border-radius: 4px;
+		background: linear-gradient(115deg, #2a242d, #16161e);
+		box-shadow:
+			inset 0 2px 4px #08070d99,
+			3px 5px 0 #100e17aa;
 	}
 	.programme-tape {
 		display: flex;
@@ -340,13 +479,83 @@
 		outline: 2px solid var(--sub-bg);
 		outline-offset: 4px;
 	}
+	.desk-surface {
+		position: relative;
+		isolation: isolate;
+		margin: 3.5rem -1.5rem 0;
+		padding: 1rem 1.5rem 2rem;
+		border: 1px solid #ad846263;
+		border-radius: 4px 4px 2px 2px;
+		background:
+			repeating-linear-gradient(1deg, #e1b88909 0 1px, transparent 1px 9px),
+			linear-gradient(105deg, #51373b, #654737 55%, #49343a);
+		box-shadow:
+			inset 0 4px 0 #b3896666,
+			0 15px 30px #0d0b1680;
+	}
+	.desk-surface::after {
+		content: '';
+		position: absolute;
+		inset: auto -1px -17px;
+		height: 17px;
+		border: 1px solid #98725266;
+		border-radius: 0 0 4px 4px;
+		background: linear-gradient(#8a6348, #51372c 3px, #35262a 13px, #251d25);
+		box-shadow: 0 10px 20px #100b1966;
+	}
+	.lamp-pool {
+		position: absolute;
+		z-index: -1;
+		pointer-events: none;
+		inset: 0 20% 0 -5%;
+		background: radial-gradient(ellipse at 23% 34%, #ffc77940, #d799441a 44%, transparent 68%);
+		opacity: 0;
+		transition: opacity 500ms ease;
+	}
+	.lamp-lit .lamp-pool {
+		opacity: 1;
+	}
+	.bench-tools {
+		position: relative;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+		gap: 2rem;
+		align-items: end;
+		height: 13rem;
+		padding: 0 1.4rem;
+	}
+	.lamp-slot {
+		position: relative;
+		z-index: 2;
+		min-width: 0;
+	}
+	.keyboard-notes {
+		position: relative;
+		align-self: end;
+		justify-self: center;
+		width: min(100%, 26rem);
+		margin-bottom: 1.5rem;
+	}
+	.plan-sheet {
+		position: absolute;
+		z-index: -1;
+		width: 10rem;
+		left: -2rem;
+		bottom: 4rem;
+	}
+	.watch-slot {
+		position: relative;
+		justify-self: end;
+		min-width: 0;
+		padding-right: 1.5rem;
+	}
 	.liner {
 		position: relative;
 		isolation: isolate;
 		display: grid;
 		grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
 		gap: 1.3rem 2rem;
-		margin: 3rem 0 0;
+		margin: 1.6rem 0 0;
 		padding: 2.5rem 3rem;
 		color: #34243f;
 		border: 1px solid #f8e3c5;
@@ -509,6 +718,37 @@
 		.programme {
 			padding: 0 0.7rem;
 		}
+		.masthead {
+			padding: 1rem 0.8rem;
+			gap: 0.8rem;
+		}
+		.masthead::after {
+			top: -2rem;
+			height: 2rem;
+		}
+		.tape-list {
+			padding: 0.45rem;
+		}
+		.desk-surface {
+			margin: 3rem -0.2rem 0;
+			padding: 0.6rem 0.3rem 1.5rem;
+		}
+		.bench-tools {
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+			height: 11.5rem;
+			gap: 1rem;
+			padding: 0 0.8rem;
+		}
+		.keyboard-notes {
+			display: none;
+		}
+		.lamp-slot {
+			width: min(100%, 10rem);
+		}
+		.watch-slot {
+			max-width: 100%;
+			padding-right: 0.7rem;
+		}
 		.avatar {
 			width: 3.7rem;
 		}
@@ -526,7 +766,7 @@
 		.liner {
 			grid-template-columns: 1fr;
 			gap: 1.5rem;
-			margin: 2.2rem 0.4rem 0;
+			margin: 1.5rem 0.4rem 0;
 			padding: 2rem 1.5rem;
 		}
 		.liner::after {
@@ -536,7 +776,28 @@
 			width: 2rem;
 		}
 	}
+	@media (max-width: 23rem) {
+		.programme {
+			padding-inline: 0.3rem;
+		}
+		.tape-list {
+			padding: 0.35rem 0.3rem;
+		}
+		.thumbnail {
+			width: 3.3rem;
+		}
+		.selection-mark {
+			display: none;
+		}
+	}
 	@media (prefers-reduced-motion: reduce) {
+		.spill-light {
+			animation: none;
+		}
+		.screen-spill,
+		.lamp-pool {
+			transition: none;
+		}
 		.programme-tape {
 			transition: none;
 		}

@@ -5,10 +5,12 @@
 	import FooterGarden from './footer/FooterGarden.svelte';
 	import FooterVaporwave from './footer/FooterVaporwave.svelte';
 	import FooterCosmos from './footer/FooterCosmos.svelte';
+	import FooterWorkbench from './footer/FooterWorkbench.svelte';
 
 	let {
 		/** Active theme — selects the footer's decoration (water = the wave). */
 		theme = 'garden',
+		variant = 'default',
 		/** The corner the radial menu is docked to, so the bar can clear it. */
 		dockCorner = null,
 		actions,
@@ -20,6 +22,7 @@
 		year = new Date().getFullYear()
 	}: {
 		theme?: ThemeName;
+		variant?: 'default' | 'workbench';
 		dockCorner?: string | null;
 		actions?: Snippet;
 		branding?: Snippet;
@@ -40,11 +43,14 @@
 		vaporwave: FooterVaporwave,
 		cosmos: FooterCosmos
 	};
-	const Decoration = $derived(decorations[theme] ?? FooterGarden);
+	const Decoration = $derived(
+		variant === 'workbench' ? FooterWorkbench : (decorations[theme] ?? FooterGarden)
+	);
 </script>
 
 <footer
 	class="footer"
+	class:workbench={variant === 'workbench'}
 	style="--bar-h:{barHeight}px; --wave-h:{waveHeight}px; --clear-l:{clearLeft}; --clear-r:{clearRight};"
 >
 	<!-- Theme decoration cresting above the bar. Purely decorative. -->
@@ -138,6 +144,9 @@
 		min-width: 0;
 	}
 	@media (max-width: 34rem) {
+		.workbench .copy {
+			white-space: normal;
+		}
 		/* Small screens: stack the bar rows and cap the dock clearance so the
 		   copyright and the locale switcher never collide. */
 		.bar {
