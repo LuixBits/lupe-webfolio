@@ -114,6 +114,31 @@
 	</div>
 
 	<section class="liner" aria-labelledby="channel-about">
+		<svg class="coffee-ring" viewBox="0 0 180 160" fill="none" aria-hidden="true">
+			<g stroke="#87552e" stroke-linecap="round" stroke-linejoin="round">
+				<path
+					d="M146 55c8 23 2 47-15 64-20 20-57 24-85 5C22 108 14 85 23 61c9-25 32-39 59-39 26-1 49 11 62 27"
+					stroke-width="7"
+					opacity="0.17"
+				/>
+				<path
+					d="M140 45c15 21 14 48-1 65m-8 11c-21 17-55 20-81 4M36 113c-17-17-21-38-12-57m9-17c13-12 30-18 47-19"
+					stroke-width="2.5"
+					opacity="0.4"
+				/>
+				<path
+					d="M137 53c11 22 6 47-13 62-19 16-47 18-71 3-22-13-29-34-21-54m16-27c17-10 40-12 58-4"
+					stroke-width="3"
+					opacity="0.13"
+				/>
+				<path d="m50 127 9 4m61-3 8-5M23 68l-2 10" stroke-width="4" opacity="0.25" />
+			</g>
+			<g fill="#87552e" opacity="0.18">
+				<ellipse cx="148" cy="130" rx="4" ry="2.5" transform="rotate(-28 148 130)" />
+				<circle cx="157" cy="120" r="1.5" />
+				<ellipse cx="35" cy="140" rx="2.5" ry="1.4" />
+			</g>
+		</svg>
 		<div class="salutation">
 			<h2 id="channel-about">Hello nerds.</h2>
 			<div class="nix-sticker">
@@ -317,6 +342,7 @@
 	}
 	.liner {
 		position: relative;
+		isolation: isolate;
 		display: grid;
 		grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
 		gap: 1.3rem 2rem;
@@ -325,10 +351,21 @@
 		color: #34243f;
 		border: 1px solid #f8e3c5;
 		border-radius: 3px 3px 12px 3px;
-		background: linear-gradient(104deg, #ead9be, #fff0d7 48%, #eee0c8 49%, #f7e9d3 51%, #f5e6ce);
+		background: #f7e9d3;
 		box-shadow:
 			5px 7px 0 #160b2780,
 			0 18px 35px #09051445;
+	}
+	.coffee-ring {
+		position: absolute;
+		z-index: -1;
+		right: 0.25rem;
+		bottom: 0.5rem;
+		width: 9rem;
+		height: 8rem;
+		opacity: 0.65;
+		transform: rotate(-12deg);
+		pointer-events: none;
 	}
 	.liner::before {
 		content: '';
