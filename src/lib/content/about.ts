@@ -7,16 +7,16 @@ export const about = defineAbout({
 		en: 'Researcher, builder, and open-source contributor exploring systems, visual perception, and digital craft.',
 		de: 'Forscher, Entwickler und Open-Source-Beitragender – Systeme, visuelle Wahrnehmung und digitale Handwerkskunst.'
 	},
-	/* Portrait for the crown's bower — drop a photo at
-	 * static/media/about/portrait-800.webp (4:5 works best), then uncomment:
-	 *
-	 * portrait: {
-	 * 	src: '/media/about/portrait-800.webp',
-	 * 	width: 800,
-	 * 	height: 1000,
-	 * 	alt: { en: 'Portrait of Luiz Perren', de: 'Porträt von Luiz Perren' }
-	 * },
-	 */
+	/* The crown's bower portrait. Derivatives are cut from
+	 * static/media/luiz.jpeg (4:5 crop composed around the face; regenerate
+	 * with ImageMagick if the source photo changes). */
+	portrait: {
+		src: '/media/about/portrait-800.webp',
+		width: 800,
+		height: 1000,
+		thumb: '/media/about/portrait-480.webp',
+		alt: { en: 'Portrait of Luiz Perren', de: 'Porträt von Luiz Perren' }
+	},
 	bio: {
 		en: "I'm driven by curiosity about how systems work — whether computational, biological, or creative. My work spans academic research, open-source projects that solve real problems, and creative explorations through technology and optics. I believe the best ideas live at intersections: where rigorous thinking meets making, where code serves vision.\n\nWhen not researching or building, you'll find me capturing the night sky through astrophotography, piloting drones to reveal hidden perspectives, or filming wildlife in its natural context. These hobbies ground my technical work in observation and wonder.",
 		de: 'Mich treibt die Neugier an, wie Systeme funktionieren – ob rechnerisch, biologisch oder kreativ. Meine Arbeit umfasst akademische Forschung, Open-Source-Projekte, die echte Probleme lösen, und kreative Experimente durch Technologie und Optik. Die besten Ideen entstehen an Schnittstellen: wo rigoroses Denken auf Machen trifft, wo Code der Vision dient.\n\nWenn ich nicht forsche oder baue, fange ich den Nachthimmel per Astrofotografie ein, steuere Drohnen für verborgene Perspektiven oder filme Wildtiere in ihrem natürlichen Kontext. Diese Hobbys verankern meine technische Arbeit in Beobachtung und Staunen.'
