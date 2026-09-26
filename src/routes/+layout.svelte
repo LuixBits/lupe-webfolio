@@ -44,6 +44,7 @@
 	const dataTheme = $derived(dataThemeForSection(section));
 	const showContent = $derived(section !== null);
 	const workbench = $derived(deLocalizeUrl(page.url).pathname === '/projects/my-channel');
+	const overview = $derived(deLocalizeUrl(page.url).pathname === '/projects');
 	// Keep the Projects layout alive between shelf/detail routes so its camera
 	// transition can follow real navigation. Other sections keep their entrance.
 	const contentKey = $derived(
@@ -91,7 +92,7 @@
 	}
 </script>
 
-<div class="app" class:workbench data-theme={dataTheme}>
+<div class="app" class:workbench class:overview data-theme={dataTheme}>
 	<a href="#main" class="skip">{m.skip_to_content()}</a>
 
 	<GooeyFilter />
@@ -102,13 +103,15 @@
 		     transform doesn't re-anchor the fixed children. -->
 		<div
 			class="layer layer--decor"
-			class:room-wall={workbench}
+			class:room-wall={workbench || overview}
 			in:scale={settleIn}
 			out:fade={{ duration: reduced ? 0 : 220 }}
 		>
-			{#if workbench}<WorkshopWall />{:else}<Decor theme={getThemeForSection(section)} />{/if}
+			{#if workbench || overview}<WorkshopWall />{:else}<Decor
+					theme={getThemeForSection(section)}
+				/>{/if}
 		</div>
-		{#if !workbench}
+		{#if !workbench && !overview}
 			<div
 				class="layer layer--scene"
 				in:scale={settleIn}
@@ -128,7 +131,14 @@
 
 	<!-- The one navigation: centered on home (over the squares), glides to the
 	     corner on a section. -->
-	<RadialMenu items={menu} label={m.menu_label()} backLabel={m.menu_back()} />
+	<div class="navigation-placement" class:ledge={overview}>
+		<RadialMenu
+			items={menu}
+			label={m.menu_label()}
+			backLabel={m.menu_back()}
+			overviewLedge={overview}
+		/>
+	</div>
 
 	<main id="main">
 		{#key contentKey}
@@ -152,7 +162,7 @@
 			theme={getThemeForSection(section)}
 			{dockCorner}
 			year={data.year}
-			variant={workbench ? 'workbench' : 'default'}
+			variant={overview ? 'overview' : workbench ? 'workbench' : 'default'}
 		>
 			{#snippet actions()}
 				<LocaleSwitcher />
@@ -167,6 +177,31 @@
 		--bg: #241924;
 		--footer-bar-bg: #19131b;
 		--fg-muted: #c9b3cb;
+	}
+	.app.overview {
+		position: relative;
+		--bg: #2d2030;
+		--footer-bar-bg: #19151e;
+		--fg-muted: #d2bdcd;
+	}
+	.overview main {
+		padding-left: 13.5rem;
+		padding-bottom: 0;
+	}
+	.navigation-placement {
+		z-index: 20;
+	}
+	@media (max-width: 60rem), (max-height: 560px) {
+		.navigation-placement.ledge {
+			position: relative;
+			flex: none;
+			height: 8rem;
+			border-bottom: 1px solid #72526366;
+			background: linear-gradient(90deg, #36273666, transparent 60%);
+		}
+		.overview main {
+			padding: 1.5rem clamp(0.9rem, 3.5vw, 2rem) 0;
+		}
 	}
 	.app {
 		min-height: 100vh;

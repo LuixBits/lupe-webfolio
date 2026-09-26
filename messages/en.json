@@ -33,7 +33,7 @@
 	"hobbies_plates": "plates",
 	"hobbies_signals": "signals",
 	"projects_featured": "Featured",
-	"projects_intro": "Things I've built, filed by channel.",
+	"projects_intro": "Things I build, and the videos behind them.",
 	"cv_education": "Education",
 	"cv_positions": "Positions",
 	"meta_desc_home": "Luiz Perren — researcher and builder. A portfolio of four worlds: about, projects, hobbies, and CV.",
@@ -94,5 +94,6 @@
 	"workbench_lamp_on": "Turn desk lamp on",
 	"workbench_lamp_off": "Turn desk lamp off",
 	"workbench_watch_hint": "Load the Casio video",
-	"projects_back": "Back to projects"
+	"projects_back": "Back to projects",
+	"projects_enter_studio": "Enter the studio"
 }

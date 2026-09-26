@@ -22,7 +22,7 @@
 		year = new Date().getFullYear()
 	}: {
 		theme?: ThemeName;
-		variant?: 'default' | 'workbench';
+		variant?: 'default' | 'workbench' | 'overview';
 		dockCorner?: string | null;
 		actions?: Snippet;
 		branding?: Snippet;
@@ -51,12 +51,13 @@
 <footer
 	class="footer"
 	class:workbench={variant === 'workbench'}
+	class:overview={variant === 'overview'}
 	style="--bar-h:{barHeight}px; --wave-h:{waveHeight}px; --clear-l:{clearLeft}; --clear-r:{clearRight};"
 >
 	<!-- Theme decoration cresting above the bar. Purely decorative. -->
-	<div class="deco" aria-hidden="true">
-		<Decoration />
-	</div>
+	{#if variant !== 'overview'}
+		<div class="deco" aria-hidden="true"><Decoration /></div>
+	{/if}
 
 	<div class="bar">
 		<div class="bar-left">
@@ -82,6 +83,17 @@
 </footer>
 
 <style>
+	.footer.overview {
+		padding-top: 0;
+	}
+	.overview .bar-left {
+		font-size: var(--fs-small);
+	}
+	@media (max-width: 60rem), (max-height: 560px) {
+		.overview .bar {
+			padding-inline: clamp(1rem, 4vw, 2.5rem);
+		}
+	}
 	.footer {
 		position: relative;
 		/* The footer is the ground plane: above the floating decor layer (z6) so

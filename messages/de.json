@@ -33,7 +33,7 @@
 	"hobbies_plates": "Aufnahmen",
 	"hobbies_signals": "Signale",
 	"projects_featured": "Empfohlen",
-	"projects_intro": "Dinge, die ich gebaut habe – sortiert nach Kanal.",
+	"projects_intro": "Meine Projekte und die Videos dahinter.",
 	"cv_education": "Ausbildung",
 	"cv_positions": "Stationen",
 	"meta_desc_home": "Luiz Perren — Forscher und Entwickler. Ein Portfolio aus vier Welten: Über mich, Projekte, Hobbys und Lebenslauf.",
@@ -94,5 +94,6 @@
 	"workbench_lamp_on": "Schreibtischlampe einschalten",
 	"workbench_lamp_off": "Schreibtischlampe ausschalten",
 	"workbench_watch_hint": "Casio-Video laden",
-	"projects_back": "Zurück zu den Projekten"
+	"projects_back": "Zurück zu den Projekten",
+	"projects_enter_studio": "Studio betreten"
 }

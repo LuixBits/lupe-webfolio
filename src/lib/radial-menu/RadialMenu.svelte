@@ -14,12 +14,15 @@
 		size = 400,
 		label = 'Menu',
 		backLabel = 'Back',
+		overviewLedge = false,
 		onnavigate
 	}: {
 		items: MenuItem[];
 		size?: number;
 		label?: string;
 		backLabel?: string;
+		/** Projects overview only: reserve a ledge for the compact wheel. */
+		overviewLedge?: boolean;
 		/** Override navigation (defaults to SvelteKit `goto`). */
 		onnavigate?: (href: string) => void;
 	} = $props();
@@ -128,7 +131,11 @@
 	let isMobile = $state(false);
 	let fanOpen = $state(false);
 	$effect(() => {
-		const mq = window.matchMedia('(max-width: 560px), (max-height: 560px)');
+		const mq = window.matchMedia(
+			overviewLedge
+				? '(max-width: 960px), (max-height: 560px)'
+				: '(max-width: 560px), (max-height: 560px)'
+		);
 		isMobile = mq.matches;
 		const onChange = () => {
 			isMobile = mq.matches;
@@ -151,7 +158,7 @@
 	let scrolling = $state(false);
 	let scrollTimer: ReturnType<typeof setTimeout> | undefined;
 	$effect(() => {
-		if (!(isMobile && mode === 'docked')) {
+		if (!(isMobile && mode === 'docked') || overviewLedge) {
 			scrolling = false;
 			return;
 		}
@@ -196,13 +203,15 @@
 	// Wedges are windows into their worlds: fills echo each theme's actual
 	// environment (pale meadow, dusk purple, dark red-nebula sky, pale water)
 	// instead of a flat toy palette. `accent` drives the themed hover glow.
-	const WEDGE_STYLE: Record<string, { g: [string, string, string]; label: string; accent: string }> =
-		{
-			about: { g: ['#f5faf5', '#d6ebdb', '#aed1b7'], label: '#12251a', accent: '#4f8a63' },
-			projects: { g: ['#4b2a7d', '#2c1454', '#1b0a36'], label: '#ffe9ff', accent: '#ff5ed1' },
-			hobbies: { g: ['#1d2447', '#10142e', '#090c1c'], label: '#e9edff', accent: '#ff7a67' },
-			cv: { g: ['#f4fbfd', '#d3ecf4', '#abd9e7'], label: '#08313b', accent: '#2b9cba' }
-		};
+	const WEDGE_STYLE: Record<
+		string,
+		{ g: [string, string, string]; label: string; accent: string }
+	> = {
+		about: { g: ['#f5faf5', '#d6ebdb', '#aed1b7'], label: '#12251a', accent: '#4f8a63' },
+		projects: { g: ['#4b2a7d', '#2c1454', '#1b0a36'], label: '#ffe9ff', accent: '#ff5ed1' },
+		hobbies: { g: ['#1d2447', '#10142e', '#090c1c'], label: '#e9edff', accent: '#ff7a67' },
+		cv: { g: ['#f4fbfd', '#d3ecf4', '#abd9e7'], label: '#08313b', accent: '#2b9cba' }
+	};
 	const styleFor = (id: string) => WEDGE_STYLE[id] ?? WEDGE_STYLE.about;
 
 	// --- geometry ------------------------------------------------------------
@@ -273,7 +282,14 @@
 				index,
 				path: wedge(cx, cy, radius, start, end),
 				radial: radialPath(cx, cy, radius * rIn, radius * rOut, mid),
-				ring: annularSector(cx, cy, radius + RING_GAP, radius + RING_GAP + RING_W, start + 1.2, end - 1.2),
+				ring: annularSector(
+					cx,
+					cy,
+					radius + RING_GAP,
+					radius + RING_GAP + RING_W,
+					start + 1.2,
+					end - 1.2
+				),
 				ringArc: labelArc(cx, cy, ringMid, start + 2, end - 2),
 				fill: lighten(base, index % 2 ? 0.42 : 0.28),
 				fillHover: lighten(base, 0.14),
@@ -333,9 +349,7 @@
 			[0.3, 225, 1.2]
 		];
 		const stars = starPolar.map(([rf, a, r]) => ({ ...p(rf, a), r }));
-		const constellation = [0, 3, 8, 6, 5]
-			.map((i) => `${stars[i].x},${stars[i].y}`)
-			.join(' ');
+		const constellation = [0, 3, 8, 6, 5].map((i) => `${stars[i].x},${stars[i].y}`).join(' ');
 		// cv (90–180°): seigaiha — small overlapping fans, each a nest of rings.
 		const scallops: { x: number; y: number }[] = [];
 		for (let row = 0; row < 6; row++) {
@@ -406,6 +420,7 @@
 
 <div
 	class="menu-root"
+	class:overview-ledge={overviewLedge}
 	class:fan-open={fanOpen}
 	class:scrolling
 	bind:this={rootEl}
@@ -444,7 +459,6 @@
 			{/each}
 			<path id="back-arc" d={backArc} />
 			<clipPath id="clip-sun"><circle cx={art.sun.x} cy={art.sun.y} r={art.sun.r} /></clipPath>
-
 		</defs>
 
 		<!-- Main wedges. Each is a group: coloured wedge + clipped theme art +
@@ -562,10 +576,8 @@
 				     Very short labels (like "CV") get extra size + tracking. -->
 				<text
 					class="label"
-					style="fill:{styleFor(slice.item.id).label}; {WEDGE_TYPO[slice.item.id] ?? ''}{slice
-						.item.label().length <= 3
-						? 'font-size:1.34rem; letter-spacing:0.14em;'
-						: ''}"
+					style="fill:{styleFor(slice.item.id).label}; {WEDGE_TYPO[slice.item.id] ??
+						''}{slice.item.label().length <= 3 ? 'font-size:1.34rem; letter-spacing:0.14em;' : ''}"
 				>
 					<textPath href="#arc-{slice.item.id}" startOffset="50%" text-anchor="middle">
 						{slice.item.label()}
@@ -943,7 +955,8 @@
 	}
 	.hub-back:hover,
 	.hub-back:focus-visible {
-		filter: brightness(1.25) drop-shadow(0 0 12px color-mix(in srgb, var(--accent, #fff) 55%, transparent));
+		filter: brightness(1.25)
+			drop-shadow(0 0 12px color-mix(in srgb, var(--accent, #fff) 55%, transparent));
 		transform: scale(1.045);
 		stroke-width: 1.75;
 		outline: none;
@@ -1022,6 +1035,29 @@
 		}
 		.menu-root[data-mode='docked']:not(.fan-open) .slice.sub,
 		.menu-root[data-mode='docked']:not(.fan-open) .label.sub {
+			display: none;
+		}
+	}
+
+	/* The visible quarter sits on a normal-flow ledge. Its open fan may
+	   extend below the ledge; the resting wheel scrolls away with it. */
+	@media (max-width: 60rem), (max-height: 560px) {
+		.menu-root.overview-ledge[data-mode='docked'] {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 240px;
+			height: 240px;
+			transform: translateX(-50%);
+			clip-path: inset(0 0 50% 50%);
+			opacity: 1;
+		}
+		.menu-root.overview-ledge[data-mode='docked'].fan-open {
+			width: min(88vw, 400px);
+			height: min(88vw, 400px);
+		}
+		.menu-root.overview-ledge[data-mode='docked']:not(.fan-open) .slice.sub,
+		.menu-root.overview-ledge[data-mode='docked']:not(.fan-open) .label.sub {
 			display: none;
 		}
 	}
