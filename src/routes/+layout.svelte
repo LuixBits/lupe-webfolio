@@ -41,6 +41,13 @@
 	const section = $derived(sectionIdForUrl(page.url));
 	const dataTheme = $derived(dataThemeForSection(section));
 	const showContent = $derived(section !== null);
+	// Keep the Projects layout alive between shelf/detail routes so its camera
+	// transition can follow real navigation. Other sections keep their entrance.
+	const contentKey = $derived(
+		section === 'projects'
+			? page.url.pathname.replace(/\/projects(?:\/.*)?$/, '/projects')
+			: page.url.pathname
+	);
 
 	// Which corner each section docks to (matches RadialMenu), so the footer can
 	// clear the menu quarter on the bottom corners.
@@ -110,10 +117,15 @@
 	<RadialMenu items={menu} label={m.menu_label()} backLabel={m.menu_back()} />
 
 	<main id="main">
-		{#key page.url.pathname}
+		{#key contentKey}
 			<div
 				class="page-shell"
-				in:drop={{ y: 26, from: 0.975, duration: 560, delay: 150 }}
+				in:drop={{
+					y: 26,
+					from: 0.975,
+					duration: section === 'projects' ? 0 : 560,
+					delay: section === 'projects' ? 0 : 150
+				}}
 				out:fade={{ duration: 180 }}
 			>
 				{@render children?.()}
