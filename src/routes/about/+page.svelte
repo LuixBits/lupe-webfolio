@@ -28,6 +28,13 @@
 	// it began). Content order in about.ts is the page order; these split it
 	// at the ground line.
 	const UNDERGROUND = new Set(['roots', 'mycelium']);
+	// Desktop weave: which side of the central trunk each block sits on.
+	const SIDE: Record<string, 'l' | 'r'> = {
+		pioneer: 'r',
+		branches: 'l',
+		roots: 'r',
+		mycelium: 'l'
+	};
 	const canopyChapters = $derived(about.chapters.filter((c) => !UNDERGROUND.has(c.id)));
 	const undergroundChapters = $derived(about.chapters.filter((c) => UNDERGROUND.has(c.id)));
 
@@ -156,7 +163,7 @@
 
 		{#if about.highlights.length}
 			<section
-				class="section notes-section"
+				class="section notes-section side-l"
 				aria-labelledby="notes-h"
 				data-tree="notes"
 				use:revealOnce={() => (revealed['notes'] = true)}
@@ -179,7 +186,7 @@
 			</section>
 		{/if}
 
-		<section id="grove" class="section grove-head" aria-labelledby="grove-h">
+		<section id="grove" class="section grove-head side-l" aria-labelledby="grove-h">
 			<h2 id="grove-h" class="living-h2">
 				{m.about_grove_title()}<LivingLine seed="ul-grove" />
 			</h2>
@@ -194,7 +201,12 @@
 	<!-- UNDERGROUND: past the ground line, time runs deepest — roots, the
 	     mycelium network, and finally seeds to take with you. -->
 	<div class="underground">
-		<div class="ground" data-tree="ground" aria-hidden="true">
+		<div
+			class="ground"
+			data-tree="ground"
+			aria-hidden="true"
+			use:revealOnce={() => (revealed['ground'] = true)}
+		>
 			<LivingLine variant="soil" seed="ground" thickness={2.5} />
 		</div>
 		{#each undergroundChapters as ch (ch.id)}
@@ -203,7 +215,7 @@
 
 		<section
 			id="contact"
-			class="section"
+			class="section contact-plot side-r"
 			data-tree="contact"
 			use:revealOnce={() => (revealed['contact'] = true)}
 		>
@@ -242,7 +254,7 @@
 	{#snippet chapterBlock(ch: Chapter)}
 		{@const paras = resolveLocalized(ch.body, locale).split('\n\n')}
 		<section
-			class="chapter chapter--{ch.id}"
+			class="chapter chapter--{ch.id} side-{SIDE[ch.id] ?? 'l'}"
 			class:pending={hydrated && !revealed[ch.id]}
 			class:in={!!revealed[ch.id]}
 			use:revealOnce={() => (revealed[ch.id] = true)}
@@ -404,7 +416,8 @@
 		}
 		.folio {
 			grid-template-columns: minmax(0, 1fr) 23rem;
-			gap: 3.5rem;
+			/* wide gap: the trunk rises through this corridor */
+			gap: 6.5rem;
 		}
 		.plate {
 			order: 0;
@@ -635,24 +648,10 @@
 	.page--folio {
 		position: relative;
 	}
-	/* SKY: a bluish wash over the crown, full-bleed, fading into the garden. */
-	.page--folio::before {
-		content: '';
-		position: absolute;
-		top: -2rem;
-		left: 50%;
-		transform: translateX(-50%);
-		width: 100vw;
-		height: min(72vh, 640px);
-		background: linear-gradient(
-			color-mix(in srgb, #bcdcee 52%, var(--bg)),
-			color-mix(in srgb, #bcdcee 20%, var(--bg)) 55%,
-			transparent
-		);
-		z-index: -1;
-		pointer-events: none;
-	}
-	/* THE TREE LAYER: one full-bleed organism painted behind all content. */
+	/* (sky + soil atmosphere painted by the TreeLayer itself) */
+	/* THE TREE LAYER: one full-bleed organism painted behind all content —
+	   it also paints the whole atmosphere journey (sky → forest → soil →
+	   rock), so the page itself stays transparent to it. */
 	.page--folio {
 		padding-top: 9.5rem; /* headroom for the canopy */
 	}
@@ -676,21 +675,7 @@
 		padding-bottom: 1rem;
 		margin-bottom: 2rem;
 	}
-	/* earthy wash deepening toward the bottom of the underground */
-	.underground::before {
-		content: '';
-		position: absolute;
-		inset: 0 auto 0 50%;
-		transform: translateX(-50%);
-		width: 100vw;
-		background: linear-gradient(
-			transparent,
-			color-mix(in srgb, #6b5537 8%, transparent) 30%,
-			color-mix(in srgb, #4c3d28 12%, transparent)
-		);
-		z-index: -1;
-		pointer-events: none;
-	}
+	/* (soil/rock atmosphere painted by the TreeLayer) */
 	/* GROUND: the soil line where the trunk meets the earth. */
 	.ground {
 		position: relative;
@@ -706,13 +691,22 @@
 	   and foliage can pass behind it without stealing the prose's contrast */
 	.folio-text,
 	.notes-section,
+	.grove-head,
+	.contact-plot,
 	.chapter {
 		position: relative;
 		padding: 1.15rem 1.35rem;
 		border-radius: 18px;
 		background:
 			radial-gradient(115% 90% at 50% 26%, rgba(255, 251, 232, 0.55), transparent 74%),
-			color-mix(in srgb, var(--bg) 58%, transparent);
+			color-mix(in srgb, var(--bg) 62%, transparent);
+	}
+	/* deeper soil behind the underground blocks — hold the veil stronger */
+	.underground .chapter,
+	.contact-plot {
+		background:
+			radial-gradient(115% 90% at 50% 26%, rgba(255, 251, 232, 0.5), transparent 74%),
+			color-mix(in srgb, var(--bg) 76%, transparent);
 	}
 	.folio-text {
 		margin: 0 -1.35rem;
@@ -720,6 +714,35 @@
 	.notes-section {
 		margin-left: -1.35rem;
 		margin-right: -1.35rem;
+	}
+	/* the desktop weave: blocks alternate around the central trunk.
+	   (.page--folio prefix so these outrank the base block rules below) */
+	@media (min-width: 900px) {
+		.page--folio .tree,
+		.page--folio .underground {
+			padding-left: 1.25rem;
+			padding-right: 1.25rem;
+		}
+		.page--folio .notes-section,
+		.page--folio .grove-head,
+		.page--folio .contact-plot,
+		.page--folio .chapter {
+			max-width: calc(27rem + 2.7rem);
+			margin-left: 0;
+			margin-right: 0;
+		}
+		.page--folio .chapter {
+			margin-bottom: 5.5rem;
+		}
+		.page--folio .grove-head {
+			max-width: calc(24rem + 2.7rem);
+		}
+		.page--folio .side-l {
+			margin-right: auto !important;
+		}
+		.page--folio .side-r {
+			margin-left: auto !important;
+		}
 	}
 	.grove-head {
 		margin-bottom: 1.25rem;
@@ -828,12 +851,11 @@
 		clear: both;
 	}
 	@media (min-width: 900px) {
-		.chapter--pioneer {
-			max-width: calc(44rem + 2.7rem);
-		}
 		.pioneer-fig {
 			float: right;
-			margin: -2rem -0.5rem 0.6rem 2rem;
+			width: 185px;
+			height: 235px;
+			margin: -1.4rem -0.4rem 0.5rem 1.2rem;
 		}
 	}
 	/* Phones: slimmer gutter, tighter veils, less canopy headroom. */

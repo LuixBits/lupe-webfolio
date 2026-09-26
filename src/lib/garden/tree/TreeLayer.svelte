@@ -78,6 +78,10 @@
 	let trunkD = $state('');
 	let sheenD = $state('');
 	let bark = $state<string[]>([]);
+	let atmoStops = $state<{ o: number; c: string }[]>([]);
+	let rocks = $state<{ x: number; y: number; d: string; d2: string; fill: string }[]>([]);
+	let strata = $state<string[]>([]);
+	let airmotes = $state<{ x: number; y: number; r: number; dur: number; delay: number }[]>([]);
 	let falls = $state<{ x: number; y: number; dur: number; delay: number }[]>([]);
 	let trunkTopYS = $state(0);
 	let groundYS = $state(0);
@@ -138,12 +142,36 @@
 		rustlePts = [];
 
 		const gutter = Math.max(40, bio.x0 - wrap.x0);
-		const sizeK = Math.min(1, Math.max(0.52, gutter / 100));
-		const trunkX = wrap.x0 + gutter * 0.52;
+		// Desktop weave: the trunk rises through the corridor between bio and
+		// portrait, content alternating around it. Narrow layouts fall back to
+		// the left-gutter trunk.
+		const portrait0 = a['portrait'];
+		const central = !!(portrait0 && portrait0.x0 - bio.x1 > 70);
+		const sizeK = central ? 1 : Math.min(1, Math.max(0.52, gutter / 100));
 		const trunkTopY = Math.max(26, bio.y0 - 175);
 		const groundY = ground.cy;
 		trunkTopYS = trunkTopY;
 		groundYS = groundY;
+		// The trunk CURVES: it rises through the bio|portrait corridor in the
+		// crown, then bends to the page's center for the weave, so it never
+		// hides behind the side blocks. Every attachment asks trunkXAt for the
+		// bark's true x at its height. A soft S-wiggle keeps it alive.
+		const xTop = central ? (bio.x1 + portrait0.x0) / 2 : wrap.x0 + gutter * 0.52;
+		const xMain = central ? (wrap.x0 + wrap.x1) / 2 : xTop;
+		const bendY0 = Math.max(bio.y1, portrait0 ? portrait0.y1 : bio.y1) + 10;
+		const bendY1 = bendY0 + 280;
+		const sPhase = rand() * Math.PI * 2;
+		const trunkXAt = (y: number) => {
+			const b = Math.min(1, Math.max(0, (y - bendY0) / (bendY1 - bendY0)));
+			const bs = b * b * (3 - 2 * b);
+			return (
+				xTop +
+				(xMain - xTop) * bs +
+				Math.sin(((y - trunkTopY) / Math.max(1, groundY - trunkTopY)) * Math.PI * 1.3 + sPhase) *
+					9 *
+					sizeK
+			);
+		};
 
 		const f = (n: number) => +n.toFixed(1);
 
@@ -152,15 +180,17 @@
 			const rx = size;
 			const ry = size * (0.62 + rand() * 0.16);
 			const leaves: Leaf[] = [];
-			const nl = Math.round(5 + size / 11);
+			// tiny clumps read cleaner as pure lobed masses — edge leaves on a
+			// small body look like flippers
+			const nl = size < 20 ? 0 : Math.round(size / 9);
 			for (let i = 0; i < nl; i++) {
 				const ang = rand() * Math.PI * 2;
-				const rr = 0.9 + rand() * 0.18;
+				const rr = 0.92 + rand() * 0.14;
 				leaves.push({
 					x: f(Math.cos(ang) * rx * rr),
 					y: f(Math.sin(ang) * ry * rr),
-					a: f((ang * 180) / Math.PI + 90 + (rand() - 0.5) * 36),
-					s: +(0.38 + rand() * 0.34).toFixed(2),
+					a: f((ang * 180) / Math.PI + 90 + (rand() - 0.5) * 32),
+					s: +(0.34 + rand() * 0.28).toFixed(2),
 					dark: rand() > 0.5
 				});
 			}
@@ -234,10 +264,8 @@
 			const cl: Pt[] = [];
 			for (let i = 0; i <= n; i++) {
 				const t = i / n;
-				cl.push({
-					x: trunkX + (rand() * 2 - 1) * 6 * sizeK,
-					y: trunkTopY + (groundY - trunkTopY) * t
-				});
+				const y = trunkTopY + (groundY - trunkTopY) * t;
+				cl.push({ x: trunkXAt(y) + (rand() * 2 - 1) * 3.5 * sizeK, y });
 			}
 			const halfW = (t: number) => (8 + 22 * t) * sizeK * (1 + Math.max(0, t - 0.93) * 9);
 			const L: Pt[] = [];
@@ -262,11 +290,64 @@
 			for (let i = 0; i < nB; i++) {
 				const t = 0.15 + (0.75 * i) / Math.max(1, nB - 1) + (rand() - 0.5) * 0.05;
 				const y = trunkTopY + (groundY - trunkTopY) * t;
-				const x = trunkX + (rand() * 2 - 1) * halfW(t) * 0.5;
+				const x = trunkXAt(y) + (rand() * 2 - 1) * halfW(t) * 0.5;
 				const l = 16 + rand() * 22;
 				bk.push(`M${f(x)} ${f(y)} q ${f((rand() * 2 - 1) * 3)} ${f(l / 2)} 0 ${f(l)}`);
 			}
 			bark = bk;
+		}
+
+		// ---------- atmosphere: sky → forest greens/yellows → soil → rock ----
+		{
+			const g = Math.min(0.92, groundY / H);
+			const st = (o: number, c: string) => ({ o: +Math.min(1, Math.max(0, o)).toFixed(4), c });
+			atmoStops = [
+				st(0, '#c7ddef'),
+				st(Math.min(0.08, g * 0.2), '#dbe8e9'),
+				st(Math.min(0.15, g * 0.35), '#eef5ef'),
+				st(g * 0.5, '#e9f1dd'),
+				st(g * 0.8, '#ebefcd'),
+				st(g - 0.02, '#e4d8ad'),
+				st(g - 0.002, '#d5c194'),
+				st(g + 0.004, '#b1976f'),
+				st(g + 0.12, '#a48b6b'),
+				st(Math.min(0.97, g + 0.5), '#93826f'),
+				st(1, '#9e937f')
+			];
+			// buried stones — bigger and greyer the deeper they sit
+			const rk: typeof rocks = [];
+			const nR = Math.min(16, Math.max(8, Math.round(W / 150)));
+			const fills = ['#958a77', '#89806f', '#9d9280', '#8b8274'];
+			for (let i = 0; i < nR; i++) {
+				const t = Math.pow(rand(), 1.3);
+				const size = 12 + rand() * 24 + t * 28;
+				rk.push({
+					x: f(W * rand()),
+					y: f(groundY + 70 + Math.max(60, H - groundY - 180) * t),
+					d: blobPath(rand, size, size * (0.58 + rand() * 0.2), 9),
+					d2: blobPath(rand, size * 0.48, size * 0.3, 8),
+					fill: fills[Math.floor(rand() * fills.length)]
+				});
+			}
+			rocks = rk;
+			// faint strata seams in the earth
+			const sl: string[] = [];
+			for (const tt of [0.34, 0.64]) {
+				const y = groundY + (H - groundY) * tt;
+				const pts: Pt[] = [];
+				const nS = Math.max(6, Math.round(W / 220));
+				for (let i = 0; i <= nS; i++) pts.push({ x: (W * i) / nS, y: y + (rand() * 2 - 1) * 15 });
+				sl.push(`M${smoothOpen(pts)}`);
+			}
+			strata = sl;
+			// drifting light motes under the canopy
+			airmotes = Array.from({ length: 5 }, () => ({
+				x: f(W * (0.1 + rand() * 0.8)),
+				y: f(140 + rand() * 230),
+				r: +(1.5 + rand() * 1.1).toFixed(1),
+				dur: +(10 + rand() * 8).toFixed(1),
+				delay: +(-14 * rand()).toFixed(1)
+			}));
 		}
 
 		const zs: Zone[] = [];
@@ -276,7 +357,7 @@
 			const units: Unit[] = [];
 			const crownBase = trunkTopY + 26;
 			const reachK = Math.min(1, W / 950);
-			const angles = [-56, -28, -6, 22, 48];
+			const angles = central ? [-64, -38, -12, 14, 40, 64] : [-56, -28, -6, 22, 48];
 			angles.forEach((ang, i) => {
 				const u = limb(
 					ang + (rand() * 2 - 1) * 8,
@@ -285,8 +366,9 @@
 					0,
 					i * 150
 				);
-				u.x = f(trunkX + (rand() * 2 - 1) * 5);
-				u.y = f(crownBase + i * 5);
+				const uy = crownBase + i * 5;
+				u.x = f(trunkXAt(uy) + (rand() * 2 - 1) * 4);
+				u.y = f(uy);
 				units.push(u);
 			});
 			// canopy masses crowding (and cropped by) the top edge — you stand
@@ -325,11 +407,19 @@
 			// bottom corners of the bush, hugging the veil
 			units.push(clumpUnit(bx0 + 22, bio.y1 - 4, 24 + rand() * 12, 700));
 			units.push(clumpUnit(bx1 - 40, bio.y1 - 2, 20 + rand() * 12, 780));
-			// the topmost branch: a bough the title sits on
+			// the bush's trunk-side cheek, tucked into the corridor
+			units.push(
+				clumpUnit(bx1 + 8, bio.y0 + (bio.y1 - bio.y0) * (0.4 + rand() * 0.2), 21 + rand() * 10, 600)
+			);
+			// the topmost branch: a bough the title sits on (reaches left when
+			// the trunk is central, right in gutter mode)
 			if (title) {
-				const g = taperedBranch(rand, 91, (title.x1 - trunkX) * 1.04, 12 * sizeK + 3, 2.2, 14);
+				const jx = trunkXAt(title.y1 + 8);
+				const leftward = title.cx < jx;
+				const reach = Math.max(70, Math.abs((leftward ? title.x0 - 16 : title.x1 + 16) - jx));
+				const g = taperedBranch(rand, leftward ? 269 : 91, reach * 1.02, 12 * sizeK + 3, 2.2, 14);
 				const u: Unit = {
-					x: f(trunkX),
+					x: f(jx),
 					y: f(title.y1 + 8),
 					delay: 320,
 					branch: g.d,
@@ -345,7 +435,8 @@
 			if (portrait) {
 				const pw = portrait.x1 - portrait.x0;
 				const ph = portrait.y1 - portrait.y0;
-				const dx = portrait.x0 + 12 - trunkX;
+				const hx = trunkXAt(crownBase);
+				const dx = portrait.x0 + 12 - hx;
 				const dy = portrait.y0 - 6 - crownBase;
 				const hold = taperedBranch(
 					rand,
@@ -355,7 +446,7 @@
 					3,
 					30
 				);
-				units.push({ x: f(trunkX), y: f(crownBase), delay: 240, branch: hold.d, children: [] });
+				units.push({ x: f(hx), y: f(crownBase), delay: 240, branch: hold.d, children: [] });
 				const ring = bowerRing(rand, pw, ph, 8, 24);
 				const ring2 = bowerRing(rand, pw, ph, 1.5, 20);
 				const bower: Unit = {
@@ -393,30 +484,36 @@
 		for (const [anchorKey, zoneKey] of sections) {
 			const s = a[anchorKey];
 			if (!s) continue;
-			// The limb leaves the trunk ABOVE the block and rides in the clear —
-			// anything that crosses the veil gets washed by it, so only the
-			// draping twigs and corner clumps may touch it.
-			const jy = s.y0 - 30;
-			const tgt = { x: s.x0 + (s.x1 - s.x0) * 0.46, y: s.y0 - 16 };
-			const dx = tgt.x - trunkX;
+			// Trees reach UP: the bough starts lower on the trunk and rises out
+			// through the corridor to the block's near shoulder, then keeps
+			// going — a twig along the top edge, an upward shoot past it, and a
+			// draping twig onto the shoulder. Left/right mirrors by which side
+			// of the trunk the block sits on.
+			const left = s.cx < trunkXAt(s.cy);
+			const nearX = left ? s.x1 - 34 : s.x0 + 34;
+			const farX = left ? s.x0 + 26 : s.x1 - 26;
+			const jy = s.y0 + 78;
+			const jx = trunkXAt(jy);
+			const tgt = { x: nearX, y: s.y0 - 16 };
+			const dx = tgt.x - jx;
 			const dy = tgt.y - jy;
 			const main = taperedBranch(
 				rand,
 				(Math.atan2(dy, dx) * 180) / Math.PI + 90,
 				Math.hypot(dx, dy) * 1.02,
-				Math.max(10, (9 + 22 * ((jy - trunkTopY) / (groundY - trunkTopY))) * sizeK),
-				2.8,
-				20
+				Math.max(13, (10 + 24 * ((jy - trunkTopY) / (groundY - trunkTopY))) * sizeK),
+				3,
+				30
 			);
-			const u: Unit = { x: f(trunkX), y: f(jy), delay: 0, branch: main.d, children: [] };
-			// twig continuing along the block's top edge, staying above the veil
+			const u: Unit = { x: f(jx), y: f(jy), delay: 0, branch: main.d, children: [] };
+			// twig running along the block's top edge toward its far corner
 			const twig = taperedBranch(
 				rand,
-				92 + (rand() * 2 - 1) * 5,
-				(s.x1 - tgt.x) * 0.85,
-				5,
-				1.5,
-				12
+				(left ? 272 : 92) + (rand() * 2 - 1) * 4,
+				(s.x1 - s.x0) * 0.6,
+				6.5,
+				1.6,
+				6
 			);
 			const twigU: Unit = {
 				x: f(main.end.x),
@@ -427,8 +524,33 @@
 			};
 			twigU.children.push(clumpUnit(twig.end.x, twig.end.y - 2, 18 + rand() * 8, 360));
 			u.children.push(twigU);
-			// draping twig that falls onto the block's top-left shoulder
-			const droop = taperedBranch(rand, 172 + (rand() * 2 - 1) * 8, 52 + rand() * 30, 4, 1.2, 10);
+			// upward shoot past the block — the bough keeps reaching for light
+			const shoot = taperedBranch(
+				rand,
+				(left ? 322 : 38) + (rand() * 2 - 1) * 10,
+				62 + rand() * 42,
+				4.5,
+				1.3,
+				12
+			);
+			const shootU: Unit = {
+				x: f(main.end.x),
+				y: f(main.end.y),
+				delay: 430,
+				branch: shoot.d,
+				children: []
+			};
+			shootU.children.push(clumpUnit(shoot.end.x, shoot.end.y, 21 + rand() * 10, 300));
+			u.children.push(shootU);
+			// draping twig onto the near shoulder
+			const droop = taperedBranch(
+				rand,
+				(left ? 186 : 174) + (rand() * 2 - 1) * 6,
+				46 + rand() * 26,
+				4,
+				1.2,
+				10
+			);
 			const droopU: Unit = {
 				x: f(main.mid.x),
 				y: f(main.mid.y),
@@ -439,57 +561,90 @@
 			droopU.children.push(clumpUnit(droop.end.x, droop.end.y, 14 + rand() * 6, 300, 7));
 			u.children.push(droopU);
 			u.children.push(clumpUnit(main.end.x, main.end.y - 6, 26 + rand() * 10, 460));
-			u.children.push(clumpUnit(main.mid.x, main.mid.y - 8, 19 + rand() * 8, 560));
-			// a clump resting on the block's top-right corner
-			u.children.push(clumpUnit(s.x1 - trunkX - 28, s.y0 - jy + 2, 17 + rand() * 8, 640));
-			zs.push({ key: zoneKey, clipped: true, units: [u] });
+			u.children.push(clumpUnit(main.mid.x, main.mid.y - 8, 18 + rand() * 8, 560));
+			// tuft resting on the block's far top corner
+			u.children.push(clumpUnit(farX - jx, s.y0 - jy + 2, 17 + rand() * 8, 640));
+			// COUNTER-BOUGH: the tree keeps branching into the open side across
+			// from the block, so the weave never leaves half the page bare.
+			const cjy = s.y0 + (s.y1 - s.y0) * (0.35 + rand() * 0.3);
+			const counter = limb(
+				(left ? 52 : -52) + (rand() * 2 - 1) * 10,
+				(120 + rand() * 90) * Math.min(1, W / 950),
+				Math.max(11, 12 * sizeK),
+				0,
+				160
+			);
+			counter.x = f(trunkXAt(cjy));
+			counter.y = f(cjy);
+			zs.push({ key: zoneKey, clipped: true, units: [u, counter] });
 		}
 
 		// ---------- roots + the long root to the seeds ----------
+		// Gated on the GROUND anchor's own reveal (not the roots chapter, which
+		// sits lower) so the burst is visible right when the trunk arrives.
 		{
+			const baseX = trunkXAt(groundY);
 			const units: Unit[] = [];
-			const rootAngles = [146, 165, 183, 200, 217];
+			const rootAngles = [134, 152, 170, 186, 204, 226];
 			rootAngles.forEach((ang, i) => {
 				const g = taperedBranch(
 					rand,
 					ang + (rand() * 2 - 1) * 6,
-					(60 + rand() * 55) * (1 + sizeK) * 0.9,
-					(10 + rand() * 6) * sizeK,
-					1.2,
-					12
+					(85 + rand() * 70) * (0.9 + sizeK * 0.5),
+					(11 + rand() * 7) * sizeK,
+					1.3,
+					16
 				);
 				const u: Unit = {
-					x: f(trunkX + (i - 2) * 6 * sizeK),
-					y: f(groundY - 8),
-					delay: i * 110,
+					x: f(baseX + (i - 2.5) * 7 * sizeK),
+					y: f(groundY - 6),
+					delay: i * 140,
 					branch: g.d,
 					children: []
 				};
-				if (rand() > 0.4) {
-					const sub = taperedBranch(
+				const sub = taperedBranch(
+					rand,
+					g.endAngle + (rand() > 0.5 ? 24 : -24),
+					40 + rand() * 30,
+					3.4,
+					0.9,
+					9
+				);
+				const subU: Unit = {
+					x: f(g.end.x),
+					y: f(g.end.y),
+					delay: 280,
+					branch: sub.d,
+					children: []
+				};
+				if (rand() > 0.5) {
+					const sub2 = taperedBranch(
 						rand,
-						g.endAngle + (rand() > 0.5 ? 26 : -26),
-						34 + rand() * 22,
-						3,
-						0.8,
-						8
+						sub.endAngle + (rand() > 0.5 ? 20 : -20),
+						24 + rand() * 18,
+						1.8,
+						0.6,
+						6
 					);
-					u.children.push({
-						x: f(g.end.x),
-						y: f(g.end.y),
+					subU.children.push({
+						x: f(sub.end.x),
+						y: f(sub.end.y),
 						delay: 240,
-						branch: sub.d,
+						branch: sub2.d,
 						children: []
 					});
 				}
+				u.children.push(subU);
 				units.push(u);
 			});
-			zs.push({ key: 'roots', clipped: false, units });
+			zs.push({ key: 'ground', clipped: false, units });
 		}
 		{
 			const contact = a['contact'];
 			if (contact) {
-				const dx = contact.x0 - 26 - trunkX;
+				const baseX = trunkXAt(groundY);
+				const cx0 = contact.cx < baseX ? contact.x0 - 20 : contact.x0 - 26;
+				const dx = cx0 - baseX;
 				const dy = contact.y0 + 20 - groundY;
 				const g = taperedBranch(
 					rand,
@@ -499,7 +654,7 @@
 					1,
 					44
 				);
-				const u: Unit = { x: f(trunkX), y: f(groundY + 4), delay: 0, branch: g.d, children: [] };
+				const u: Unit = { x: f(baseX), y: f(groundY + 4), delay: 0, branch: g.d, children: [] };
 				u.children.push(clumpUnit(g.end.x, g.end.y, 12, 500, 0));
 				zs.push({ key: 'contact', clipped: false, units: [u] });
 			}
@@ -662,10 +817,27 @@
 				<clipPath id="{uid}-clip">
 					<rect class="trunk-clip-rect" x="0" y="0" width={W} height={clipHeight} />
 				</clipPath>
+				<linearGradient id="{uid}-atmo" x1="0" y1="0" x2="0" y2="1">
+					{#each atmoStops as s, i (i)}
+						<stop offset={s.o} stop-color={s.c} />
+					{/each}
+				</linearGradient>
 			</defs>
 
-			<!-- underground first: roots + the root to the seeds -->
-			{#each zones.filter((z) => z.key === 'roots' || z.key === 'contact') as z (z.key)}
+			<!-- the atmosphere journey: sky → forest → soil → rock -->
+			<rect width={W} height={Math.max(H, 1)} fill="url(#{uid}-atmo)" />
+			{#each strata as sd, i (i)}
+				<path d={sd} class="stratum" fill="none" />
+			{/each}
+			{#each rocks as r, i (i)}
+				<g transform="translate({r.x} {r.y})">
+					<path d={r.d} fill={r.fill} opacity="0.85" />
+					<path d={r.d2} fill="#b3a892" opacity="0.45" transform="translate(-4 -5)" />
+				</g>
+			{/each}
+
+			<!-- underground next: roots + the root to the seeds -->
+			{#each zones.filter((z) => z.key === 'ground' || z.key === 'contact') as z (z.key)}
 				<g class="zone" class:on={isOn(z.key)}>
 					{#each z.units as u, i (i)}{@render unitG(u)}{/each}
 				</g>
@@ -697,6 +869,17 @@
 						</g>
 					{/each}
 				</g>
+			{/each}
+
+			<!-- light motes drifting under the canopy -->
+			{#each airmotes as mt, i (i)}
+				<circle
+					class="airmote"
+					cx={mt.x}
+					cy={mt.y}
+					r={mt.r}
+					style="--md:{mt.dur}s; --mdel:{mt.delay}s"
+				/>
 			{/each}
 		</svg>
 	{/if}
@@ -734,6 +917,15 @@
 		stroke-width: 1.6;
 		stroke-linecap: round;
 		opacity: 0.4;
+	}
+	.stratum {
+		stroke: #6f6455;
+		stroke-width: 1.5;
+		opacity: 0.14;
+	}
+	.airmote {
+		fill: #fff6d8;
+		opacity: 0;
 	}
 	.woodline {
 		fill: none;
@@ -790,6 +982,25 @@
 			animation: tl-fall var(--fd, 30s) linear var(--fdel, 0s) infinite;
 			opacity: 0;
 		}
+		.airmote {
+			animation: tl-mote var(--md, 12s) ease-in-out var(--mdel, 0s) infinite;
+		}
+	}
+	@keyframes tl-mote {
+		0% {
+			transform: translateY(0);
+			opacity: 0;
+		}
+		18% {
+			opacity: 0.6;
+		}
+		62% {
+			opacity: 0.28;
+		}
+		100% {
+			transform: translateY(-54px);
+			opacity: 0;
+		}
 	}
 	@keyframes tl-sway {
 		from {
@@ -832,6 +1043,9 @@
 	@media (prefers-reduced-motion: reduce) {
 		.fall {
 			display: none;
+		}
+		.airmote {
+			opacity: 0.35;
 		}
 	}
 </style>
