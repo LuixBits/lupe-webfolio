@@ -3,6 +3,12 @@
 A themed **radial-menu portfolio**. SvelteKit + **Svelte 5 (runes)**, adapter-node.
 Repo: `LuixBits/lupe-webfolio` (`main`). Read this before picking up work.
 
+For Projects and future illustrated scenes, read
+[ADR-0007](docs/adr/0007-handcrafted-projects-scenes.md) and the
+[scene-building guide](docs/handcrafted-scenes.md). They record the SVG/CSS
+construction, surface lighting, motion, interaction and browser-review methods
+used for the LuixBits workbench.
+
 ## ⚠️ Work visually
 
 All look-and-feel work must be done **with a browser** — run the app, look at
@@ -118,20 +124,27 @@ class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
   bower · trunk · limbs · ground/verge · underground. Chapter order lives
   in `content/about.ts`: heartwood(ADHD) → branches → [ground] → roots →
   mycelium. Later additions: a dense two-band grass VERGE at the ground
-  line (tufts, daisies/bells/seedheads, three saplings, fallen log +
-  leaves, mushrooms) — the old thin soil LivingLine and the misty horizon
-  treeline are both gone (owner cut the treeline); a resting doe lying in
-  the deep grass whose head turns to FOLLOW THE CURSOR (deerGaze state,
-  CSS-transitioned rotate); a recursive branching root plate (rootRec,
-  depth-tinted `wr0–wr3` wood tones + dark outline underground) plus
+  line (tufts, daisies/bells/seedheads, four saplings, fallen log +
+  leaves, mushrooms, undulating band baselines + a pale feeder-root
+  fringe under the turf — no straight edges) — the old thin soil
+  LivingLine and the misty horizon treeline are both gone (owner cut the
+  treeline); a resting doe lying in the deep grass whose head FOLLOWS
+  THE CURSOR (deerGaze state, CSS-transitioned rotate) and flips over
+  her shoulder when the cursor passes behind her (deerFlip, hysteresis);
+  a recursive branching root plate (rootRec, gravity-biased children,
+  depth-tinted `wr0–wr3` wood tones + dark outline underground —
+  underground growth WINDS out slowly with no overshoot instead of the
+  springy pop, see `.zone--under .grow`) plus
   thick scroll-clipped deep runs; a buried TREASURE CHEST easter egg in
   the roots chapter (click/Enter pops the lid + a "+1 bitcoin" float,
   `btc` counter retriggers via {#key}); an ANT COLONY (chambers with
   larvae/seeds/queen, tunnels with workers animated via CSS offset-path)
-  plus three wiggling worms; and the interactive squirrel (flees the
-  cursor along the bark via trunkXOf/halfWOf, viewport-clamped, never
-  below ground). The garden footer ("the Seed", see footer entry) ends
-  the descent where the tree began.
+  plus three wiggling worms; the deep runs weave in S-curves with side
+  twigs and a sheen line (mkRun); and the interactive squirrel (flees
+  the cursor along the bark via trunkXOf/halfWOf, viewport-clamped,
+  never below ground; solid plume tail that flaps while she bolts —
+  `.running .sq-tailg`). The garden footer ("the Seed", see footer
+  entry) ends the descent where the tree began.
 - Grove chapters grow into view on scroll — a shared IntersectionObserver
   (`lib/garden/reveal.ts`) flips per-chapter classes, CSS does the animating
   (transform/opacity one-shots). `Garden.svelte` has `start` (grow when

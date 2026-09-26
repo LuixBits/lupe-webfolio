@@ -105,7 +105,8 @@
 	let instant = $state(false);
 	// the living details
 	let moss = $state<{ x: number; y: number; d: string; d2: string }[]>([]);
-	let deepRuns = $state<{ d: string }[]>([]);
+	let deepRuns = $state<{ d: string; s?: string }[]>([]);
+	let runTwigs = $state<{ x: number; y: number; d: string }[]>([]);
 	let mushrooms = $state<{ x: number; y: number; s: number; flip: boolean }[]>([]);
 	let perches = $state<{ x: number; y: number; flip: boolean; delay: number }[]>([]);
 	let trunkParams = $state<{
@@ -125,8 +126,10 @@
 	let grassBandBack = $state('');
 	let grassBandMid = $state('');
 	let grassBandFront = $state('');
+	let hairRoots = $state<{ d: string; delay: number }[]>([]);
 	let deer = $state<{ x: number } | null>(null);
 	let deerGaze = $state(-12);
+	let deerFlip = $state(false);
 	let saplings = $state<Unit[]>([]);
 	let chest = $state<{ x: number; y: number } | null>(null);
 	let btc = $state(0);
@@ -587,23 +590,43 @@
 				delay: +(-14 * rand()).toFixed(1)
 			}));
 			// ---------- the grassy verge where trunk becomes root ----------
-			// two filled, spiky grass silhouettes replace the old thin line
-			const mkBand = (hMin: number, hMax: number, step: number) => {
-				const pts: string[] = [`M 0 ${f(groundY + 9)}`];
+			// three filled, spiky grass silhouettes replace the old thin line.
+			// Each band's BASELINE undulates (two slow sines + jitter) and the
+			// blades vary in width, lean and height, so no straight edge shows.
+			const mkBand = (hMin: number, hMax: number, step: number, ph: number) => {
+				const base = (x: number) =>
+					groundY + Math.sin(x * 0.011 + ph) * 4.5 + Math.sin(x * 0.033 + ph * 2.7) * 2;
+				const pts: string[] = [`M 0 ${f(base(0) + 14)}`];
 				let gx = 0;
 				while (gx < W) {
-					const spikeH = hMin + rand() * (hMax - hMin);
-					const lean2 = (rand() * 2 - 1) * 3.5;
-					pts.push(`L ${f(gx + step * 0.5 + lean2)} ${f(groundY - spikeH)}`);
-					pts.push(`L ${f(gx + step)} ${f(groundY + 2 - rand() * 3)}`);
-					gx += step;
+					const s = step * (0.7 + rand() * 0.6);
+					const spikeH = (hMin + rand() * (hMax - hMin)) * (rand() > 0.9 ? 1.35 : 1);
+					const lean2 = (rand() * 2 - 1) * 5;
+					pts.push(`L ${f(gx + s * 0.5 + lean2)} ${f(base(gx + s * 0.5) - spikeH)}`);
+					pts.push(`L ${f(gx + s)} ${f(base(gx + s) + 1 - rand() * 4)}`);
+					gx += s;
 				}
-				pts.push(`L ${f(W)} ${f(groundY + 9)} Z`);
+				pts.push(`L ${f(W)} ${f(base(W) + 14)} Z`);
 				return pts.join(' ');
 			};
-			grassBandBack = mkBand(22, 42, 10);
-			grassBandMid = mkBand(14, 30, 8);
-			grassBandFront = mkBand(8, 20, 7);
+			grassBandBack = mkBand(22, 42, 10, rand() * 7);
+			grassBandMid = mkBand(14, 30, 8, rand() * 7);
+			grassBandFront = mkBand(8, 20, 7, rand() * 7);
+			// fine pale feeder-roots fringing down from the turf into the soil
+			const hairs: { d: string; delay: number }[] = [];
+			const nH = Math.round(W / 24);
+			for (let i = 0; i < nH; i++) {
+				const hx = W * ((i + rand()) / nH);
+				const hy = groundY + 4 + rand() * 6;
+				const hl = 9 + rand() * 22;
+				const s1 = (rand() * 2 - 1) * 6;
+				const s2 = (rand() * 2 - 1) * 8;
+				hairs.push({
+					d: `M ${f(hx)} ${f(hy)} q ${f(s1)} ${f(hl * 0.55)} ${f(s2)} ${f(hl)}`,
+					delay: Math.round(rand() * 900)
+				});
+			}
+			hairRoots = hairs;
 			// young saplings standing in the verge
 			const saps: Unit[] = [];
 			const sapXs = [xMain - 420, xMain + 440, xMain - 230, xMain + 130].map((x, i) =>
@@ -919,15 +942,15 @@
 			const units: Unit[] = [];
 			const rootSpecs = [
 				{ a: 92, l: 540 },
-				{ a: 99, l: 460 },
-				{ a: 116, l: 400 },
-				{ a: 138, l: 330 },
-				{ a: 158, l: 260 },
-				{ a: 178, l: 235 },
-				{ a: 199, l: 268 },
-				{ a: 220, l: 340 },
-				{ a: 243, l: 415 },
-				{ a: 261, l: 470 },
+				{ a: 99, l: 470 },
+				{ a: 116, l: 430 },
+				{ a: 138, l: 400 },
+				{ a: 158, l: 350 },
+				{ a: 178, l: 330 },
+				{ a: 199, l: 360 },
+				{ a: 220, l: 410 },
+				{ a: 243, l: 450 },
+				{ a: 261, l: 480 },
 				{ a: 268, l: 560 }
 			];
 			// Recursive branching: every root forks into daughters (up to three
@@ -959,12 +982,9 @@
 						const at = k === 2 ? g.mid : g.end;
 						const baseA = k === 2 ? g.midAngle : g.endAngle;
 						const spreadA = (k === 0 ? -1 : 1) * (14 + rand() * 26);
-						const child = rootRec(
-							baseA + spreadA,
-							len * (0.55 + rand() * 0.2),
-							w0 * 0.52,
-							depth + 1
-						);
+						// gravity: each generation pulls a little toward straight down
+						const ca = baseA + spreadA + (180 - (baseA + spreadA)) * 0.16;
+						const child = rootRec(ca, len * (0.6 + rand() * 0.22), w0 * 0.52, depth + 1);
 						child.x = f(at.x);
 						child.y = f(at.y);
 						u.children.push(child);
@@ -975,7 +995,7 @@
 			rootSpecs.forEach((sp, i) => {
 				const u = rootRec(
 					sp.a + (rand() * 2 - 1) * 5,
-					sp.l * 0.62 * (0.85 + rand() * 0.3) * spread * (0.55 + sizeK * 0.45),
+					sp.l * 0.72 * (0.85 + rand() * 0.3) * spread * (0.55 + sizeK * 0.45),
 					(20 + rand() * 9) * sizeK,
 					0
 				);
@@ -1012,7 +1032,8 @@
 		// down to the footer's waiting root tips (revealed by the under-clip
 		// as you descend) ----------
 		{
-			const runs: { d: string }[] = [];
+			const runs: { d: string; s?: string }[] = [];
+			const runTwigList: { x: number; y: number; d: string }[] = [];
 			const under = ['ch-roots', 'ch-mycelium', 'contact']
 				.map((k) => a[k])
 				.filter((b): b is Anchor => !!b);
@@ -1035,16 +1056,49 @@
 				});
 			};
 			const mkRun = (off: number, w0: number, blocks: Anchor[], endY: number) => {
-				const pts: Pt[] = [{ x: xMain + off * 0.4, y: groundY + 8 }];
+				const raw: Pt[] = [{ x: xMain + off * 0.4, y: groundY + 8 }];
 				for (const b of blocks) {
 					const lx = laneFor(b, Math.abs(off) * 0.5) + (rand() * 2 - 1) * 8;
-					pts.push({ x: lx, y: b.y0 - 26 });
-					pts.push({ x: lx + (rand() * 2 - 1) * 12, y: b.cy });
-					pts.push({ x: lx + (rand() * 2 - 1) * 8, y: b.y1 + 26 });
+					raw.push({ x: lx, y: b.y0 - 26 });
+					raw.push({ x: lx + (rand() * 2 - 1) * 12, y: b.cy });
+					raw.push({ x: lx + (rand() * 2 - 1) * 8, y: b.y1 + 26 });
 					rootlet(lx, b.cy, lx > xMain ? 116 : 244, 40 + rand() * 34, 4.6);
 				}
-				pts.push({ x: xMain + off * 0.3 + (rand() * 2 - 1) * 12, y: endY });
-				runs.push({ d: taperedPath(pts, w0, 1.5) });
+				raw.push({ x: xMain + off * 0.3 + (rand() * 2 - 1) * 12, y: endY });
+				// weave: an alternating offset midpoint in every long drop turns
+				// the straight cable into S-curves, with side-twigs at the bends
+				const pts: Pt[] = [raw[0]];
+				let sgn = rand() > 0.5 ? 1 : -1;
+				for (let i = 1; i < raw.length; i++) {
+					const p0 = raw[i - 1];
+					const p1 = raw[i];
+					// (the final approach stays straight so the tip lands clean)
+					if (Math.abs(p1.y - p0.y) > 90 && i < raw.length - 1) {
+						sgn = -sgn;
+						const bendX = (p0.x + p1.x) / 2 + sgn * (16 + rand() * 20);
+						const bendY = (p0.y + p1.y) / 2 + (rand() * 2 - 1) * 16;
+						pts.push({ x: bendX, y: bendY });
+						if (rand() > 0.3) {
+							const tb = taperedBranch(
+								rand,
+								sgn > 0 ? 112 + rand() * 36 : 248 - rand() * 36,
+								28 + rand() * 46,
+								Math.min(6, w0 * 0.4),
+								1,
+								12
+							);
+							runTwigList.push({ x: f(bendX), y: f(bendY), d: tb.d });
+						}
+					}
+					pts.push(p1);
+				}
+				// a light sheen line along the sunward edge gives the run a barrel
+				// (upper 3/4 only — it fades out before the thin tip)
+				const sheen = pts.slice(0, Math.max(3, Math.ceil(pts.length * 0.75))).map((p, i2) => ({
+					x: p.x - w0 * (1 - (i2 / (pts.length - 1)) * 0.6) * 0.3,
+					y: p.y
+				}));
+				runs.push({ d: taperedPath(pts, w0, 1.5), s: `M${smoothOpen(sheen)}` });
 			};
 			if (under.length) {
 				// the taproot runs to the layer's very bottom — the layer overshoots
@@ -1055,6 +1109,7 @@
 				mkRun(96, 8, under.slice(0, 2), (under[1] ?? under[0]).y1 + 120);
 			}
 			deepRuns = runs;
+			runTwigs = runTwigList;
 			// mushrooms at the buttress; a worm beside the mycelium block
 			const baseX2 = trunkXAt(groundY);
 			mushrooms = [-46, -24, 36].map((ox, i) => ({
@@ -1283,12 +1338,17 @@
 			const py = my + window.scrollY - layerPageTop;
 			const now = performance.now();
 			// the doe turns her head to follow the cursor (mirrored local space;
-			// constants = head-pivot offset at the deer's 1.55 mirror scale)
+			// constants = head-pivot offset at the deer's 1.55 mirror scale).
+			// When the cursor passes behind her back she flips the head over her
+			// shoulder to keep watching (hysteresis so the flip doesn't jitter).
 			if (deer) {
-				const lx = deer.x - 20.2 - px;
+				const hx = deer.x - 20.2;
 				const ly = py - (groundYS - 26.8);
+				if (!deerFlip && px > hx + 30) deerFlip = true;
+				else if (deerFlip && px < hx + 6) deerFlip = false;
+				const lx = deerFlip ? px - hx : hx - px;
 				const ang = (Math.atan2(ly, lx) * 180) / Math.PI;
-				deerGaze = Math.max(-42, Math.min(40, ang));
+				deerGaze = Math.max(-42, Math.min(38, ang));
 			}
 			// the squirrel bolts along the trunk, away from the cursor
 			if (trunkParams && sqY) {
@@ -1395,8 +1455,13 @@
 
 {#snippet squirrelShape()}
 	<g class="sq-tailg">
-		<path class="sq-tail" d="M 6 3 C 15 1 20 -7 18 -16 C 16 -24 8 -28 3 -24 C -1 -20 1 -14 6 -14" />
-		<path class="sq-tail2" d="M 7 0 C 13 -1 16 -7 15 -13" />
+		<!-- a proper plume: solid, sweeps off the hip and curls up-and-over,
+		     tip hooking toward the head -->
+		<path
+			class="sq-tail"
+			d="M -2.5 1.5 C 8 4 17 -3 18 -10 C 19 -19 15 -27 8 -30 C 4 -32 0 -29 1 -26 C 1.6 -23.5 4 -22.5 6 -24 C 7 -18 6.5 -11 4.5 -5 C 3.5 -1.5 1 1 -2.5 1.5 Z"
+		/>
+		<path class="sq-tail2" d="M 6 -2 C 12 -4 15 -9 15.5 -15 C 16 -21 13.5 -26 9 -28.5" />
 	</g>
 	<circle class="sq-hip" cx="0.5" cy="-5.5" r="6" />
 	<path
@@ -1430,7 +1495,12 @@
 {/snippet}
 
 {#snippet deerHeadShape()}
-	<path class="deer-neck2" d="M 0 2 C 2 -6 5 -12 10 -16 L 16 -11 C 12 -6 10 -2 9 3 Z" />
+	<!-- socket disc keeps the neck rooted in the shoulders at any rotation -->
+	<circle class="deer-neck2" cx="2.5" cy="4.5" r="6.5" />
+	<path
+		class="deer-neck2"
+		d="M -2 9 C -1 -1 3.5 -10.5 10 -16.5 L 16.5 -10.5 C 11 -4.5 9 3 8.5 10 Z"
+	/>
 	<circle class="deer-body" cx="13.5" cy="-17.5" r="4.8" />
 	<path
 		class="deer-muzzle"
@@ -1751,6 +1821,10 @@
 				<g clip-path="url(#{uid}-uclip)">
 					{#each deepRuns as run, i (i)}
 						<path d={run.d} class="rootrun" />
+						{#if run.s}<path d={run.s} class="rootrun-sheen" />{/if}
+					{/each}
+					{#each runTwigs as t, i (i)}
+						<path d={t.d} class="rootrun-twig" transform="translate({t.x} {t.y})" />
 					{/each}
 				</g>
 
@@ -1805,6 +1879,9 @@
 
 				<!-- the grassy verge where trunk turns to root -->
 				<g class="zone" class:on={isOn('ground')}>
+					{#each hairRoots as h, i (i)}
+						<path d={h.d} class="hairroot" style="--gd:{h.delay}ms" />
+					{/each}
 					<path d={grassBandBack} class="grassBack" />
 					{#each saplings as sp2, i (i)}<g class="sapling">{@render unitG(sp2)}</g>{/each}
 					<path d={grassBandMid} class="grassMid" />
@@ -1814,7 +1891,10 @@
 								<g class="deer-rest">
 									{@render deerRestShape()}
 									<g transform="translate(13 -16)">
-										<g class="deer-head" style="transform: rotate({deerGaze}deg)">
+										<g
+											class="deer-head"
+											style="transform: {deerFlip ? 'scaleX(-1) ' : ''}rotate({deerGaze}deg)"
+										>
 											{@render deerHeadShape()}
 										</g>
 									</g>
@@ -2083,8 +2163,18 @@
 		opacity: 0.9;
 	}
 	.rootrun {
-		fill: #443e2b;
+		fill: #4a3d26;
 		opacity: 0.96;
+	}
+	.rootrun-sheen {
+		fill: none;
+		stroke: #8a7148;
+		stroke-width: 1.7;
+		stroke-linecap: round;
+		opacity: 0.5;
+	}
+	.rootrun-twig {
+		fill: #63512f;
 	}
 	/* ---- creatures ---- */
 	.bird-body {
@@ -2104,20 +2194,23 @@
 		stroke-width: 1;
 	}
 	.sq-tail {
-		fill: none;
-		stroke: #8a6142;
-		stroke-width: 8.5;
-		stroke-linecap: round;
+		fill: #8a6142;
+		stroke: #6f4c33;
+		stroke-width: 0.8;
+		stroke-linejoin: round;
 	}
 	.sq-tail2 {
 		fill: none;
 		stroke: #b08a5e;
-		stroke-width: 3.2;
+		stroke-width: 2.6;
 		stroke-linecap: round;
 		opacity: 0.85;
 	}
 	.sq-body {
 		fill: #96714d;
+	}
+	.sq-hip {
+		fill: #8a684a;
 	}
 	.sq-belly {
 		fill: #cfae82;
@@ -2166,6 +2259,22 @@
 	/* young saplings: paler, greener wood than the old tree */
 	.sapling .wood {
 		fill: #71603c;
+	}
+	/* fine feeder-roots fringing under the turf */
+	.hairroot {
+		fill: none;
+		stroke: #b19970;
+		stroke-width: 1.3;
+		stroke-linecap: round;
+		opacity: 0;
+		transition: opacity 800ms ease var(--gd, 0ms);
+	}
+	.zone.on .hairroot {
+		opacity: 0.55;
+	}
+	.instant .hairroot {
+		transition: none;
+		opacity: 0.55;
 	}
 	/* the doe */
 	.deer-body,
@@ -2445,7 +2554,22 @@
 		transform: scale(1);
 		transition: transform var(--gt, 900ms) cubic-bezier(0.32, 1.18, 0.45, 1) var(--gd, 0ms);
 	}
-	.instant .grow {
+	/* underground the wood doesn't spring — it WINDS out and burrows: slower,
+	   no overshoot, uncurling from a slight twist as it pushes through soil */
+	.zone--under .grow {
+		transform: scale(0.02) rotate(-10deg);
+	}
+	.zone--under .grow:nth-child(2n) {
+		transform: scale(0.02) rotate(8deg);
+	}
+	.zone--under.on .grow,
+	.zone--under.on .grow:nth-child(2n) {
+		transform: scale(1) rotate(0deg);
+		transition: transform calc(var(--gt, 900ms) * 1.8) cubic-bezier(0.19, 0.62, 0.22, 1)
+			var(--gd, 0ms);
+	}
+	.instant .grow,
+	.instant .zone--under .grow {
 		transition: none;
 		transform: scale(1);
 	}
@@ -2474,7 +2598,11 @@
 		}
 		.sq-tailg {
 			animation: tl-swish 7s ease-in-out infinite alternate;
-			transform-origin: 0px 0px;
+			transform-origin: 3px 1px;
+		}
+		/* the plume streams and flaps while she bolts */
+		.running .sq-tailg {
+			animation: tl-tailflap 300ms ease-in-out infinite alternate;
 		}
 		.flyerg {
 			animation: tl-drift var(--fd2, 38s) ease-in-out var(--fdel2, 0s) infinite alternate;
@@ -2575,6 +2703,14 @@
 		}
 		to {
 			transform: rotate(7deg);
+		}
+	}
+	@keyframes tl-tailflap {
+		from {
+			transform: rotate(-16deg);
+		}
+		to {
+			transform: rotate(14deg);
 		}
 	}
 	@keyframes tl-drift {
