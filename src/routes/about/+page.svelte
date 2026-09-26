@@ -6,6 +6,7 @@
 	import * as m from '$lib/paraglide/messages';
 	import Garden from '$lib/garden/Garden.svelte';
 	import Spine from '$lib/garden/Spine.svelte';
+	import LivingLine from '$lib/garden/LivingLine.svelte';
 	import { revealOnce } from '$lib/garden/reveal';
 
 	const locale = getLocale();
@@ -37,7 +38,9 @@
 
 <svelte:head><title>{m.nav_about()} — {about.name}</title><meta name="description" content={m.meta_desc_about()} /></svelte:head>
 
-<div class="page page--folio">
+<!-- `living` swaps the static borders for grown LivingLines (JS only, so
+     SSR/no-JS keeps plain borders). -->
+<div class="page page--folio" class:living={hydrated}>
 	<section id="bio" class="section folio">
 		<div class="folio-text">
 			<p class="eyebrow">{m.about_folio_eyebrow()} · {about.name}</p>
@@ -95,12 +98,15 @@
 
 	{#if about.highlights.length}
 		<section class="section" aria-labelledby="notes-h">
-			<h2 id="notes-h">{m.about_notes_title()}</h2>
+			<h2 id="notes-h" class="living-h2">
+				{m.about_notes_title()}<LivingLine seed="ul-notes" />
+			</h2>
 			<ol class="notes">
 				{#each about.highlights as h, i (i)}
 					<li id="note-{i}" style="--d:{i}">
 						<span class="fig-dot fig-dot--static" aria-hidden="true">{i + 1}</span>
 						<div class="note-body">
+							<LivingLine variant="stem" seed="note-{i}" delay={340 + i * 80} />
 							<h3>{resolveLocalized(h.title, locale)}</h3>
 							<p>{resolveLocalized(h.body, locale)}</p>
 						</div>
@@ -111,7 +117,9 @@
 	{/if}
 
 	<section id="grove" class="section grove-head" aria-labelledby="grove-h">
-		<h2 id="grove-h">{m.about_grove_title()}</h2>
+		<h2 id="grove-h" class="living-h2">
+			{m.about_grove_title()}<LivingLine seed="ul-grove" />
+		</h2>
 		<p class="seeds-hint">{m.about_grove_hint()}</p>
 	</section>
 
@@ -159,6 +167,15 @@
 					<ul class="leafcards">
 						{#each ch.sprouts as s, si (si)}
 							<li class="leafcard sprout" style="--d:{2 + paras.length + si}">
+								<LivingLine
+									variant="frame"
+									seed="card-{ch.id}-{si}"
+									radii={si % 2 === 0
+										? { tl: 6, tr: 34, br: 6, bl: 34 }
+										: { tl: 34, tr: 6, br: 34, bl: 6 }}
+									grow={!!revealed[ch.id]}
+									delay={(2 + paras.length + si) * 95 + 250}
+								/>
 								<h4>{resolveLocalized(s.title, locale)}</h4>
 								<p>{resolveLocalized(s.body, locale)}</p>
 							</li>
@@ -169,6 +186,12 @@
 					<!-- The root grammar grows narrow, so the system is composed: a deep
 					     taproot plus two slanted flankers sharing the same soil point. -->
 					<div class="rootbed" aria-hidden="true">
+						<LivingLine
+							variant="soil"
+							seed="soil-roots"
+							grow={!!revealed[ch.id]}
+							delay={(2 + paras.length) * 95}
+						/>
 						<div class="bed-layer">
 							<Garden
 								seed="about-roots-6"
@@ -215,6 +238,12 @@
 					</div>
 				{:else if ch.id === 'mycelium'}
 					<div class="mycelium-bed" aria-hidden="true">
+						<LivingLine
+							variant="soil"
+							seed="soil-mycelium"
+							grow={!!revealed[ch.id]}
+							delay={(2 + paras.length) * 95}
+						/>
 						<!-- Wide 620-unit canvas so the two networks root far apart and
 						     reach toward each other, almost touching mid-bed. -->
 						<div class="bed-layer">
@@ -252,10 +281,10 @@
 	</div>
 
 	<section id="contact" class="section">
-		<h2>{m.nav_about_contact()}</h2>
+		<h2 class="living-h2">{m.nav_about_contact()}<LivingLine seed="ul-contact" /></h2>
 		<p class="seeds-hint">{m.about_seeds_hint()}</p>
 		<ul class="packets">
-			{#each about.links as l (l.url)}
+			{#each about.links as l, i (l.url)}
 				<li>
 					<a
 						class="packet"
@@ -263,6 +292,12 @@
 						target={l.url.startsWith('http') ? '_blank' : undefined}
 						rel={l.url.startsWith('http') ? 'noopener' : undefined}
 					>
+						<LivingLine
+							variant="frame"
+							seed="packet-{i}"
+							radii={{ tl: 3, tr: 3, br: 9, bl: 9 }}
+							delay={i * 150}
+						/>
 						<span class="flap" aria-hidden="true"></span>
 						<svg class="seeds" viewBox="0 0 64 40" aria-hidden="true">
 							<ellipse cx="18" cy="22" rx="3.1" ry="5.4" transform="rotate(-24 18 22)" />
@@ -590,14 +625,16 @@
 		gap: 0.9rem;
 	}
 	.leafcard {
+		position: relative;
 		padding: 0.95rem 1.1rem;
 		background: color-mix(in srgb, var(--bg) 55%, white);
 		border: 1px solid color-mix(in srgb, var(--garden-stem, var(--accent)) 30%, transparent);
-		border-radius: 0.35rem 2.1rem;
+		/* px, not rem: the LivingLine frame path must match these corners */
+		border-radius: 6px 34px;
 		box-shadow: 0 10px 22px -18px color-mix(in srgb, var(--garden-stem, #3f6d4e) 60%, transparent);
 	}
 	.leafcard:nth-child(even) {
-		border-radius: 2.1rem 0.35rem;
+		border-radius: 34px 6px;
 	}
 	.leafcard h4 {
 		margin: 0 0 0.3rem;
@@ -674,6 +711,61 @@
 		.grove > :global(.spine) {
 			left: -0.7rem;
 		}
+	}
+
+	/* ---- living structural lines. Once hydrated (`.living`), the static CSS
+	   borders turn transparent and LivingLine draws grown wood in their place;
+	   SSR/no-JS never gets `.living`, so plain borders remain. ---- */
+	.living .section h2 {
+		border-bottom-color: transparent;
+	}
+	.living .leafcard,
+	.living .packet {
+		border-color: transparent;
+	}
+	.living .note-body {
+		border-left-color: transparent;
+	}
+	.living .rootbed,
+	.living .mycelium-bed {
+		border-top-color: transparent;
+	}
+	.living-h2 {
+		position: relative;
+	}
+	.living-h2 > :global(.living-line) {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: calc(100% - 9px);
+		height: 30px;
+		--line-op: 0.9;
+	}
+	.leafcard > :global(.living-line),
+	.packet > :global(.living-line) {
+		position: absolute;
+		inset: 0;
+		--line-op: 0.6;
+	}
+	.note-body {
+		position: relative;
+	}
+	.note-body > :global(.living-line) {
+		position: absolute;
+		left: -4px;
+		top: 2px;
+		bottom: 2px;
+		width: 14px;
+		--line-op: 0.7;
+	}
+	.rootbed > :global(.living-line),
+	.mycelium-bed > :global(.living-line) {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0; /* line baseline sits ~6px in, right where the roots originate */
+		height: 30px;
+		--line-op: 0.9;
 	}
 
 	/* ---- motion (all of it) — stilled under reduced motion; Garden itself
