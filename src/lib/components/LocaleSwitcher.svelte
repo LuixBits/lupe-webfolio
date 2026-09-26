@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { getLocale, setLocale, locales } from '$lib/paraglide/runtime';
+	import { getLocale, setLocale, locales, deLocalizeUrl } from '$lib/paraglide/runtime';
+	import { markProjectLocaleChange } from '$lib/projects/navigation';
 
 	// Paraglide's setLocale updates the URL/cookie and reloads into the chosen
 	// locale, so the whole tree (menu + content) re-renders translated.
@@ -12,7 +13,11 @@
 			type="button"
 			class:active={loc === current}
 			aria-pressed={loc === current}
-			onclick={() => setLocale(loc)}
+			onclick={() => {
+				if (loc !== current && deLocalizeUrl(new URL(location.href)).pathname === '/projects')
+					markProjectLocaleChange();
+				setLocale(loc);
+			}}
 		>
 			{loc.toUpperCase()}
 		</button>

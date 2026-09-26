@@ -4,11 +4,14 @@
 	let {
 		viewport = false,
 		duration = 820,
-		delay = 0
+		delay = 0,
+		hold = false
 	}: {
 		viewport?: boolean;
 		duration?: number;
 		delay?: number;
+		/** The route owns arrival timing; shutters wait for its completion. */
+		hold?: boolean;
 	} = $props();
 	let active = $state(false);
 	let startDelay = $state(0);
@@ -20,15 +23,18 @@
 		if (preference.matches) return;
 		startDelay = delay;
 		active = true;
-		const timer = window.setTimeout(() => (active = false), duration + startDelay + 40);
 		const stop = () => {
 			if (preference.matches) active = false;
 		};
 		preference.addEventListener('change', stop);
 		return () => {
-			clearTimeout(timer);
 			preference.removeEventListener('change', stop);
 		};
+	});
+	$effect(() => {
+		if (!active || hold) return;
+		const timer = window.setTimeout(() => (active = false), duration + startDelay + 40);
+		return () => clearTimeout(timer);
 	});
 </script>
 
@@ -36,6 +42,7 @@
 	<div
 		class="power-on"
 		class:viewport
+		class:held={hold}
 		style:--power-duration="{duration}ms"
 		style:--power-delay="{startDelay}ms"
 		aria-hidden="true"
@@ -57,6 +64,10 @@
 		position: fixed;
 		z-index: 30;
 		border-radius: 0;
+	}
+	.held .shutter,
+	.held .line {
+		animation-play-state: paused;
 	}
 	.shutter {
 		position: absolute;

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext, tick, untrack } from 'svelte';
+	import { getContext, tick } from 'svelte';
 	import { resolveLocalized, type Project } from '$lib/content/schema';
 	import * as m from '$lib/paraglide/messages';
 	import CounterTv from './CounterTv.svelte';
@@ -17,7 +17,6 @@
 	let powered = $state(true);
 	let lampLit = $state(true);
 	const navigation = getContext<ProjectNavigation | undefined>(projectNavigation);
-	const entryDelay = untrack(() => (navigation?.moving ? 640 : 0));
 	const channel = $derived(project.channel);
 	const title = $derived(resolveLocalized(project.title, locale));
 	const paragraphs = $derived(resolveLocalized(project.body, locale).split(/\n\s*\n/));
@@ -54,7 +53,7 @@
 		class="workbench-scene"
 		class:screen-lit={powered}
 		class:lamp-lit={lampLit}
-		style:--room-delay="{entryDelay}ms"
+		class:arriving={navigation?.moving}
 	>
 		<div class="channel-counter">
 			<div class="deckcol" id="channel-player" bind:this={deck}>
@@ -225,7 +224,10 @@
 		height: 100%;
 		background: radial-gradient(ellipse at 44% 50%, #54d2da40, #75a1c824 37%, transparent 70%);
 		filter: blur(28px);
-		animation: room-wakes 1250ms ease-out var(--room-delay) both;
+		animation: room-wakes 1250ms ease-out both;
+	}
+	.arriving .spill-light {
+		animation-play-state: paused;
 	}
 	.tv-cable {
 		position: absolute;

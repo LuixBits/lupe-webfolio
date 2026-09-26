@@ -189,7 +189,7 @@
 					</div>
 				{/if}
 				{#key signalVersion}
-					<PowerOn duration={revealDuration} delay={navigation?.moving ? 640 : 0} />
+					<PowerOn duration={revealDuration} hold={navigation?.moving ?? false} />
 				{/key}
 			{/if}
 			<span class="glass" aria-hidden="true"></span>
