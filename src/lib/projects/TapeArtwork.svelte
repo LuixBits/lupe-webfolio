@@ -4,7 +4,10 @@
 </script>
 
 <svg viewBox="0 0 70 70" fill="none" aria-hidden="true">
-	{#if project.category === 'youtube'}
+	{#if project.channel?.avatar}
+		<image href={project.channel.avatar.src} x="2" y="2" width="66" height="66" />
+		<rect x="1" y="1" width="68" height="68" rx="2" stroke="currentColor" opacity="0.5" />
+	{:else if project.category === 'youtube'}
 		<rect x="9" y="18" width="52" height="38" rx="8" stroke="currentColor" stroke-width="2" />
 		<path d="M29 28L45 37L29 46Z" fill="currentColor" /><path
 			d="M24 6l12 12L48 6"

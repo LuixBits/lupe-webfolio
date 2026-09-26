@@ -136,6 +136,14 @@ export const projectSchema = z.object({
 	featured: z.boolean().default(false),
 	/** Groups entries within the Projects section (#youtube / #opensource / #web). */
 	category: z.enum(['youtube', 'opensource', 'web']).optional(),
+	/** A creator's channel gets a programme selector and a printed introduction. */
+	channel: z
+		.object({
+			handle: z.string(),
+			url: z.url(),
+			avatar: imageRefSchema.optional()
+		})
+		.optional(),
 	sources: z.array(sourceSchema).default([]),
 	videos: z.array(videoSchema).default([]),
 	links: z.array(linkSchema).default([]),

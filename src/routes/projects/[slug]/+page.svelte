@@ -3,6 +3,7 @@
 	// on the rental counter plus the tape's printed sleeve sheet below/beside it.
 	// (ProjectDetail.svelte remains untouched for the CV route.)
 	import CounterTv from '$lib/projects/CounterTv.svelte';
+	import ChannelPlayer from '$lib/projects/ChannelPlayer.svelte';
 	import TapeJacket from '$lib/projects/TapeJacket.svelte';
 	import { resolveLocalized } from '$lib/content/schema';
 	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
@@ -48,86 +49,90 @@
 		<span class="rw-dest">{m.nav_projects()}</span>
 	</a>
 
-	<div class="counter">
-		{#if hasMedia}
-			<div class="deckcol">
-				{#key project.slug}<CounterTv {project} {locale} />{/key}
-			</div>
-		{/if}
-
-		<section class="sleeve">
-			<header class="masthead">
-				<div class="jacket"><TapeJacket {project} {locale} /></div>
-				<div class="heading">
-					<h1>{title}</h1>
-					<p class="tagline">{tagline}</p>
+	{#if project.channel}
+		{#key project.slug}<ChannelPlayer {project} {locale} />{/key}
+	{:else}
+		<div class="counter">
+			{#if hasMedia}
+				<div class="deckcol">
+					{#key project.slug}<CounterTv {project} {locale} />{/key}
 				</div>
-			</header>
-
-			<p class="printline">
-				<span class="genre">
-					{#each project.tags as t, i (t)}{#if i > 0}<span class="sep" aria-hidden="true">/</span
-							>{/if}<span class="word">{t}</span>{/each}
-				</span>
-				<span class="copy">© {project.year}</span>
-			</p>
-
-			{#if isSample}
-				<p class="sample">{m.tv_sample_note()}</p>
 			{/if}
 
-			<p class="synopsis">{body}</p>
+			<section class="sleeve">
+				<header class="masthead">
+					<div class="jacket"><TapeJacket {project} {locale} /></div>
+					<div class="heading">
+						<h1>{title}</h1>
+						<p class="tagline">{tagline}</p>
+					</div>
+				</header>
 
-			{#if project.stack.length}
-				<section class="specs">
-					<h2 class="boxhead">{m.tv_ch_specs()}</h2>
-					<p class="specline">
-						<span class="k">{m.tv_stack()}</span>
-						<span class="v"
-							>{#each project.stack as s, i (s)}{#if i > 0}<span class="sep" aria-hidden="true"
-										>/</span
-									>{/if}{s}{/each}</span
-						>
-					</p>
-				</section>
-			{/if}
+				<p class="printline">
+					<span class="genre">
+						{#each project.tags as t, i (t)}{#if i > 0}<span class="sep" aria-hidden="true">/</span
+								>{/if}<span class="word">{t}</span>{/each}
+					</span>
+					<span class="copy">© {project.year}</span>
+				</p>
 
-			{#if cardLinks.length}
-				<ul class="card">
-					{#each cardLinks as l (l.url + l.label)}
-						<li>
-							<a href={l.url} target="_blank" rel="noopener">
-								<span class="lbl">{l.label}</span>
-								<span class="rel">{l.rel}</span>
-								<span class="ext" aria-hidden="true">↗</span>
-							</a>
-						</li>
-					{/each}
-				</ul>
-			{/if}
+				{#if isSample}
+					<p class="sample">{m.tv_sample_note()}</p>
+				{/if}
 
-			{#if project.sources.length}
-				<ul class="card srcs">
-					{#each project.sources as s (s.id)}
-						<li>
-							<a href={s.url} target="_blank" rel="noopener">
-								<span class="lbl"
-									>{s.title}{#if s.author}&nbsp;— {s.author}{/if}{#if s.year}&nbsp;({s.year}){/if}</span
-								>
-								<span class="rel">{s.kind}</span>
-								<span class="ext" aria-hidden="true">↗</span>
-							</a>
-						</li>
-					{/each}
-				</ul>
-			{/if}
+				<p class="synopsis">{body}</p>
 
-			<footer class="tail" aria-hidden="true">
-				<span class="barcode"></span>
-				<span class="serial">{project.slug.toUpperCase()} · {project.year}</span>
-			</footer>
-		</section>
-	</div>
+				{#if project.stack.length}
+					<section class="specs">
+						<h2 class="boxhead">{m.tv_ch_specs()}</h2>
+						<p class="specline">
+							<span class="k">{m.tv_stack()}</span>
+							<span class="v"
+								>{#each project.stack as s, i (s)}{#if i > 0}<span class="sep" aria-hidden="true"
+											>/</span
+										>{/if}{s}{/each}</span
+							>
+						</p>
+					</section>
+				{/if}
+
+				{#if cardLinks.length}
+					<ul class="card">
+						{#each cardLinks as l (l.url + l.label)}
+							<li>
+								<a href={l.url} target="_blank" rel="noopener">
+									<span class="lbl">{l.label}</span>
+									<span class="rel">{l.rel}</span>
+									<span class="ext" aria-hidden="true">↗</span>
+								</a>
+							</li>
+						{/each}
+					</ul>
+				{/if}
+
+				{#if project.sources.length}
+					<ul class="card srcs">
+						{#each project.sources as s (s.id)}
+							<li>
+								<a href={s.url} target="_blank" rel="noopener">
+									<span class="lbl"
+										>{s.title}{#if s.author}&nbsp;— {s.author}{/if}{#if s.year}&nbsp;({s.year}){/if}</span
+									>
+									<span class="rel">{s.kind}</span>
+									<span class="ext" aria-hidden="true">↗</span>
+								</a>
+							</li>
+						{/each}
+					</ul>
+				{/if}
+
+				<footer class="tail" aria-hidden="true">
+					<span class="barcode"></span>
+					<span class="serial">{project.slug.toUpperCase()} · {project.year}</span>
+				</footer>
+			</section>
+		</div>
+	{/if}
 </article>
 
 <style>
