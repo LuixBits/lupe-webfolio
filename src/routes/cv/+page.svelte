@@ -6,6 +6,7 @@
 	import * as m from '$lib/paraglide/messages';
 	import { revealOnce } from '$lib/garden/reveal';
 	import Hanko from '$lib/cv/Hanko.svelte';
+	import DiveLayer from '$lib/water/dive/DiveLayer.svelte';
 
 	const locale = getLocale();
 
@@ -59,6 +60,21 @@
 		SIGA: 'SIGA',
 		'Hochschule Luzern': 'HSLU',
 		'Projekt Neptun': 'PN'
+	};
+
+	// The knots' depth tags: depth ≈ (2026.75 − year) × 3 m — TRUE time-derived
+	// numbers (the plan's table), not pixel positions; the layer letters the
+	// line with them. Localized here so the layer stays i18n-free.
+	const depthTags: Record<string, string> = {
+		'siga-dev': `${m.cv_depth_m({ n: 0 })} · 2024 – ${m.cv_today()}`,
+		'siga-trainee': `${m.cv_depth_m({ n: 7 })} · 2021 – 2024`,
+		'hslu-ma': `${m.cv_depth_m({ n: 7 })} · 2021 – 2024`,
+		'hslu-bsc': `${m.cv_depth_m({ n: 15 })} · 2018 – 2021`,
+		neptun: `${m.cv_depth_m({ n: 16 })} · 2019 – 2021`,
+		armee: `${m.cv_depth_m({ n: 26 })} · 2017 – 2018`,
+		efz: `${m.cv_depth_m({ n: 31 })} · 2013 – 2017`,
+		'emvs-lehre': `${m.cv_depth_m({ n: 34 })} · 2013 – 2017`,
+		bm: `${m.cv_depth_m({ n: 37 })} · 2013 – 2017`
 	};
 </script>
 
@@ -148,6 +164,12 @@
 {/snippet}
 
 <div class="page page--dive" class:living={hydrated}>
+	<!-- THE DIVE: one procedural water column painted behind the content
+	     (atmosphere, sounding line, world), plus a sparse overlay instance
+	     above the cards (companions + interactive creatures). -->
+	<DiveLayer seed="cv-dive" grown={revealed} arrive={hydrated} tags={depthTags} />
+	<DiveLayer seed="cv-dive-over" overlay grown={revealed} arrive={hydrated} tags={depthTags} />
+
 	<header class="sky" data-dive="sky">
 		<p class="eyebrow">{m.cv_eyebrow()}</p>
 		<h1>{m.nav_cv()}</h1>
@@ -270,6 +292,23 @@
 		--line-gap: 7rem;
 		position: relative;
 		padding-top: 9rem;
+	}
+	/* THE DIVE LAYER: full-bleed behind everything — it paints the whole
+	   atmosphere, so the page itself stays transparent to it. Overshoots
+	   main's padding so no app-background band shows above the dawn sky or
+	   between the abyss and the footer. */
+	.page--dive > :global(.dive-layer) {
+		position: absolute;
+		top: -2.5rem;
+		bottom: -2.5rem;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 100vw;
+		z-index: -1;
+	}
+	/* the overlay instance rides ABOVE the cards (under wheel + scene) */
+	.page--dive > :global(.dive-layer.is-over) {
+		z-index: 3;
 	}
 	@media (min-width: 900px) {
 		.page--dive {
@@ -614,7 +653,11 @@
 		color: var(--fg-muted);
 		text-align: center;
 	}
-	/* (Phase 3 flips this to foam-on-abyss once the layer darkens the deep) */
+	/* with the layer live (.living), the deep is abyss ink — foam writing */
+	.living .origin-line {
+		color: #cdeef6;
+		text-shadow: 0 1px 12px rgba(4, 20, 31, 0.7);
+	}
 
 	/* ---- growth: buoyant settle — everything underwater arrives through
 	   resistance, no overshoot, and reduced motion lands fully drawn ---- */
