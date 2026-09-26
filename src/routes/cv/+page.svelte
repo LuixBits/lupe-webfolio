@@ -1,890 +1,660 @@
 <script lang="ts">
-	import { research, publications, education, positions } from '$lib/content/cv';
-	import { resolveLocalized, resolveSpan } from '$lib/content/schema';
-	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
+	import { onMount } from 'svelte';
+	import { stations } from '$lib/content/cv';
+	import { resolveLocalized, resolveSpan, type Station } from '$lib/content/schema';
+	import { getLocale } from '$lib/paraglide/runtime';
 	import * as m from '$lib/paraglide/messages';
+	import { revealOnce } from '$lib/garden/reveal';
+	import Hanko from '$lib/cv/Hanko.svelte';
 
 	const locale = getLocale();
-	// Unique id prefix for SVG defs (SSR-safe, mirrors WaterScene).
-	const uid = $props.id();
 
-	// The silhouette koi crossing the water column: fixed literals only —
-	// identical output on server & client, no hydration drift.
-	const KOI_RUNS = [
-		{ top: '22%', w: '6.4rem', dur: '80s', delay: '-34s', rest: '40rem', flip: false },
-		{ top: '58%', w: '4.6rem', dur: '55s', delay: '-12s', rest: '5rem', flip: true }
-	];
-	// Lily-pad rotations per research card (fixed, cycled by index).
-	const PAD_ROTS = [24, 132, -40];
+	/* »Der Tauchgang« — the CV as one continuous dive. The surface is today,
+	 * the seabed is 2013; scrolling is diving. This file is the water column's
+	 * CONTENT: washi paper slips in a two-bank weave (Ausbildung left,
+	 * Erfahrung right, concurrent stations at the same depth). The world
+	 * around them — atmosphere, sounding line, koi — is painted by the
+	 * DiveLayer (Phase 3+), which measures every [data-dive] anchor here. */
+
+	// Dive reveal state — the exact About-grove pattern: `hydrated` gates the
+	// hidden `pending` state to the client so SSR/no-JS readers always get a
+	// fully drawn page; each station settles in once, on first sight.
+	let hydrated = $state(false);
+	let revealed = $state<Record<string, boolean>>({});
+	onMount(() => {
+		hydrated = true;
+	});
+
+	const byId = new Map(stations.map((s) => [s.id, s]));
+	const st = (id: string): Station => byId.get(id)!;
+
+	// The weave, hand-placed (the data is stable and the concurrency IS the
+	// page's information design): grid rows = depth bands, edu col 1, work
+	// col 3. `r` = desktop row, `mr` = mobile row (single column, depth
+	// order), `rspan` for stations that stretch across a whole era.
+	const PLACE: Record<string, { r: number; mr: number; rspan?: number }> = {
+		siga: { r: 2, mr: 2 }, // the grouped employer panel (dev + trainee)
+		'hslu-ma': { r: 2, mr: 3 },
+		'hslu-bsc': { r: 3, mr: 4 },
+		neptun: { r: 3, mr: 5 },
+		armee: { r: 4, mr: 6 },
+		efz: { r: 5, mr: 7 },
+		'emvs-lehre': { r: 5, mr: 8, rspan: 2 },
+		bm: { r: 6, mr: 9 }
+	};
+	const gridStyle = (key: string) => {
+		const p = PLACE[key];
+		return `--r:${p.r}; --r2:${p.r + (p.rspan ?? 1)}; --mr:${p.mr}`;
+	};
+
+	// Deep stations (armee and below) sit in the midnight zone — aged paper.
+	const DEEP = new Set(['armee', 'efz', 'bm', 'emvs-lehre']);
+
+	const workSolo = ['neptun', 'armee', 'emvs-lehre'].map(st);
+	const eduAll = ['hslu-ma', 'hslu-bsc', 'efz', 'bm'].map(st);
+
+	const orgLabel = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+	// Short seal glyphs — a hanko face fits 2-4 characters, not a full name.
+	const GLYPH: Record<string, string> = {
+		SIGA: 'SIGA',
+		'Hochschule Luzern': 'HSLU',
+		'Projekt Neptun': 'PN'
+	};
 </script>
 
-<svelte:head><title>{m.nav_cv()} — Lupe</title><meta name="description" content={m.meta_desc_cv()} /></svelte:head>
+<svelte:head>
+	<title>{m.nav_cv()} — Lupe</title>
+	<meta name="description" content={m.meta_desc_cv()} />
+</svelte:head>
 
-<!-- Seigaiha fan pattern (same construction as the wheel's cv slice + WaterScene):
-     rows painted bottom-up so each row of fans is occluded by the row above. -->
-{#snippet seigaihaDefs(pid: string)}
-	<g id="{pid}-fan">
-		<circle r="22" class="sg-fill" />
-		<circle r="22" class="sg-ring" fill="none" />
-		<circle r="16.5" class="sg-ring" fill="none" />
-		<circle r="11" class="sg-ring" fill="none" />
-		<circle r="5.5" class="sg-ring" fill="none" />
-	</g>
-	<pattern id={pid} width="44" height="22" patternUnits="userSpaceOnUse">
-		<use href="#{pid}-fan" x="22" y="33" />
-		<use href="#{pid}-fan" x="0" y="22" />
-		<use href="#{pid}-fan" x="44" y="22" />
-		<use href="#{pid}-fan" x="22" y="11" />
-		<use href="#{pid}-fan" x="0" y="0" />
-		<use href="#{pid}-fan" x="44" y="0" />
-		<use href="#{pid}-fan" x="22" y="-11" />
-	</pattern>
-{/snippet}
-
-<!-- Top-view koi silhouette: teardrop body, two pectoral fins, forked tail,
-     two darker patches. Nose points +x; flipped via a mirrored wrapper. -->
-{#snippet koiShadow()}
-	<svg class="skoi-svg" viewBox="-36 -19 68 38" aria-hidden="true">
-		<g class="skoi-fig">
-			<g class="skoi-tail">
-				<path
-					d="M-16 0C-22 -3 -26 -8 -32 -11C-29 -6 -29 -3 -27 0C-29 3 -29 6 -32 11C-26 8 -22 3 -16 0Z"
-				/>
-			</g>
-			<path d="M14 7C11 12 6 15 1 16C4 12 7 9 9 7C11 6.6 13 6.6 14 7Z" />
-			<path d="M14 -7C11 -12 6 -15 1 -16C4 -12 7 -9 9 -7C11 -6.6 13 -6.6 14 -7Z" />
-			<path d="M28 0C28 -5 20 -9.5 8 -10C-4 -10.5 -14 -6 -18 0C-14 6 -4 10.5 8 10C20 9.5 28 5 28 0Z" />
-			<circle class="skoi-spot" cx="12" cy="-2" r="4.5" />
-			<circle class="skoi-spot" cx="-4" cy="3.5" r="3.5" />
-		</g>
+<!-- A folded origami crane (senbazuru — healing) resting on the army card.
+     Deliberately NOT a red cross (protected emblem). -->
+{#snippet crane()}
+	<svg class="crane" viewBox="0 0 66 46" aria-hidden="true">
+		<path class="cr-wing" d="M29 3 L45 28 L15 27 Z" />
+		<path class="cr-body" d="M8 34 L30 23 L53 29 L37 42 L15 40 Z" />
+		<path class="cr-fold" d="M30 23 L37 42" />
+		<path class="cr-body" d="M8 34 L3 15 L7 14 L13 30 Z" />
+		<path class="cr-beak" d="M3.6 15.4 L-0 18.5 L5 19 Z" />
+		<path class="cr-tail" d="M53 29 L63 21 L56 33 Z" />
 	</svg>
 {/snippet}
 
-<!-- Vermilion myōjin torii standing in the water: kasagi with upturned ends
-     over a straight shimaki, nuki through two inward-leaning pillars, small
-     gakuzuka strut. A mirrored, gradient-masked copy below the waterline is
-     its reflection; foam rings settle the pillars into the surface. -->
-{#snippet torii(pid: string)}
-	<svg class="torii-svg" viewBox="0 0 140 186" aria-hidden="true">
-		<defs>
-			<linearGradient id="{pid}-fade" x1="0" y1="120" x2="0" y2="182" gradientUnits="userSpaceOnUse">
-				<stop offset="0" stop-color="#fff" stop-opacity="0.62" />
-				<stop offset="1" stop-color="#fff" stop-opacity="0" />
-			</linearGradient>
-			<mask id="{pid}-mask">
-				<rect x="0" y="116" width="140" height="70" fill="url(#{pid}-fade)" />
-				<!-- thin slits: the surface chop breaking the mirror image -->
-				<rect x="0" y="128" width="140" height="2" fill="#000" opacity="0.9" />
-				<rect x="0" y="139" width="140" height="2.6" fill="#000" opacity="0.8" />
-				<rect x="0" y="153" width="140" height="3" fill="#000" opacity="0.7" />
-			</mask>
-			<g id="{pid}-gate">
-				<path class="t-main" d="M25.6 24L34.4 24L29.2 118L19.4 118Z" />
-				<path class="t-main" d="M105.6 24L114.4 24L120.6 118L110.8 118Z" />
-				<path class="t-main" d="M66.4 24.5H73.6V47H66.4Z" />
-				<path class="t-main" d="M7.5 47H132.5V55.5H7.5Z" />
-				<path class="t-dark" d="M10.5 15.5H129.5V24.5H10.5Z" />
-				<path class="t-dark" d="M1 2C36 9 104 9 139 2L136.5 14.5C104 20 36 20 3.5 14.5Z" />
-			</g>
-		</defs>
-		<use href="#{pid}-gate" />
-		<!-- mask on the outer group, mirror on the inner: keeps the fade
-		     anchored to the waterline instead of flipping with the copy -->
-		<g mask="url(#{pid}-mask)">
-			<g transform="translate(0 182.9) scale(1 -0.55)">
-				<use href="#{pid}-gate" />
-			</g>
-		</g>
-		<g class="t-ring" fill="none">
-			<ellipse cx="24.3" cy="119" rx="17" ry="3.2" />
-			<ellipse cx="115.7" cy="119" rx="17" ry="3.2" />
-		</g>
-		<g class="t-collar">
-			<ellipse cx="24.3" cy="118" rx="10" ry="2.5" />
-			<ellipse cx="115.7" cy="118" rx="10" ry="2.5" />
-		</g>
+<!-- A red mizuhiki cord knot — ties the two SIGA role slips into one story. -->
+{#snippet mizuhiki()}
+	<svg class="mizuhiki" viewBox="0 0 76 20" aria-hidden="true">
+		<path class="mz-a" d="M4 10 C 16 -2 32 -2 38 10 C 44 22 60 22 72 10" />
+		<path class="mz-b" d="M4 10 C 16 22 32 22 38 10 C 44 -2 60 -2 72 10" />
+		<circle class="mz-knot" cx="38" cy="10" r="3.1" />
 	</svg>
 {/snippet}
 
-<!-- Notched lily-pad disc peeking from behind a card corner. -->
-{#snippet lilypad(rot: number)}
-	<svg class="pad-svg" viewBox="-56 -56 112 112" aria-hidden="true">
-		<g transform="rotate({rot})">
-			<path class="pad-leaf" d="M0 0L49.9 -20.2A52 52 0 1 0 49.9 20.2Z" />
-			<g class="pad-veins">
-				<line x1="0" y1="0" x2="-31" y2="-31" />
-				<line x1="0" y1="0" x2="0" y2="-44" />
-				<line x1="0" y1="0" x2="-44" y2="0" />
-				<line x1="0" y1="0" x2="-31" y2="31" />
-				<line x1="0" y1="0" x2="0" y2="44" />
-			</g>
-		</g>
-	</svg>
+{#snippet chipsRow(s: Station)}
+	{#if s.location || s.pensum || s.mode}
+		<ul class="chips">
+			{#if s.location}<li class="chip">{resolveLocalized(s.location, locale)}</li>{/if}
+			{#if s.pensum}<li class="chip">
+					{s.pensum === 'full' ? m.cv_pensum_full() : m.cv_pensum_part()}
+				</li>{/if}
+			{#if s.mode}<li class="chip">{resolveLocalized(s.mode, locale)}</li>{/if}
+		</ul>
+	{/if}
 {/snippet}
 
-<div class="page pond">
-	<!-- shared defs: the seigaiha pattern both wave bands reference -->
-	<svg class="defs" aria-hidden="true" focusable="false">
-		<defs>{@render seigaihaDefs(`${uid}-sg`)}</defs>
-	</svg>
+{#snippet skillsRow(s: Station)}
+	{#if s.skills.length}
+		<ul class="skills" aria-label={m.cv_skills()}>
+			{#each s.skills as sk, i (i)}
+				<li class="skill-chip">{resolveLocalized(sk, locale)}</li>
+			{/each}
+		</ul>
+	{/if}
+{/snippet}
 
-	<header class="surface">
+{#snippet spanChip(s: Station)}
+	<p class="span-chip">
+		<span class="span">{resolveSpan(s.span, locale)}</span>{#if s.duration}<span class="dur"
+				>· {resolveLocalized(s.duration, locale)}</span
+			>{/if}
+	</p>
+{/snippet}
+
+{#snippet stationCard(s: Station, side: 'l' | 'r')}
+	<article
+		class="station side-{side}"
+		class:station--deep={DEEP.has(s.id)}
+		class:pending={hydrated && !revealed[s.id]}
+		class:in={!!revealed[s.id]}
+		data-dive="st-{s.id}"
+		aria-labelledby="st-{s.id}-h"
+		style={gridStyle(s.id)}
+		use:revealOnce={() => (revealed[s.id] = true)}
+	>
+		<span class="track-tag" aria-hidden="true"
+			>{s.track === 'education' ? m.cv_education() : m.cv_positions()}</span
+		>
+		<h3 class="role" id="st-{s.id}-h">{resolveLocalized(s.role, locale)}</h3>
+		<p class="org-line">{s.org}</p>
+		{@render spanChip(s)}
+		{@render chipsRow(s)}
+		{@render skillsRow(s)}
+		{#if s.id === 'armee'}{@render crane()}{/if}
+		{#if s.url}
+			<div class="stamps">
+				<Hanko glyph={GLYPH[s.org] ?? s.org} label={orgLabel(s.url)} href={s.url} tilt={-1.6} />
+			</div>
+		{/if}
+	</article>
+{/snippet}
+
+<div class="page page--dive" class:living={hydrated}>
+	<header class="sky" data-dive="sky">
+		<p class="eyebrow">{m.cv_eyebrow()}</p>
 		<h1>{m.nav_cv()}</h1>
-		<div class="band-wrap" aria-hidden="true">
-			<svg class="band band--surface">
-				<rect class="band-tile" x="-48" y="0" width="150%" height="88" fill="url(#{uid}-sg)" />
-			</svg>
-		</div>
-		<!-- the floating gate, standing out in the open water to the right -->
-		<div class="torii torii--surface" aria-hidden="true">
-			{@render torii(`${uid}-tg`)}
-		</div>
+		<p class="lead">{m.cv_lead()}</p>
 	</header>
 
-	<div class="water-column">
-		<!-- the water deepens with depth = time -->
-		<div class="depth-tint" aria-hidden="true"></div>
+	<!-- the waterline: the hard break between dawn air and water -->
+	<div
+		class="waterline"
+		data-dive="waterline"
+		aria-hidden="true"
+		use:revealOnce={() => (revealed['waterline'] = true)}
+	></div>
 
-		<!-- silhouette koi crossing behind the cards -->
-		<div class="koi-layer" aria-hidden="true">
-			{#each KOI_RUNS as k (k.top)}
-				{#if k.flip}
-					<div class="mirror">
-						<div
-							class="skoi"
-							style="top:{k.top}; width:{k.w}; --kdur:{k.dur}; --kdel:{k.delay}; --krest:{k.rest}"
-						>
-							{@render koiShadow()}
-						</div>
-					</div>
-				{:else}
-					<div
-						class="skoi"
-						style="top:{k.top}; width:{k.w}; --kdur:{k.dur}; --kdel:{k.delay}; --krest:{k.rest}"
-					>
-						{@render koiShadow()}
+	<div class="column" data-dive="divewrap">
+		<!-- Erfahrung — the right bank. DOM stays per-track (screen readers hear
+		     each bank whole); the grid interleaves both banks by depth. -->
+		<section class="bank bank--work" aria-labelledby="experience">
+			<h2
+				id="experience"
+				class="bank-head"
+				data-dive="work-head"
+				class:pending={hydrated && !revealed['work-head']}
+				class:in={!!revealed['work-head']}
+				use:revealOnce={() => (revealed['work-head'] = true)}
+			>
+				{m.cv_positions()}
+			</h2>
+
+			<!-- SIGA: one employer, two roles — a grouped washi panel -->
+			<article
+				class="station station--group side-r"
+				class:pending={hydrated && !revealed['siga-dev']}
+				class:in={!!revealed['siga-dev']}
+				data-dive="st-siga-dev"
+				aria-labelledby="st-siga-dev-h"
+				style={gridStyle('siga')}
+				use:revealOnce={() => (revealed['siga-dev'] = true)}
+			>
+				<span class="track-tag" aria-hidden="true">{m.cv_positions()}</span>
+				<header class="panel-head">
+					<p class="org-line org-line--panel">{st('siga-dev').org}</p>
+					{#if st('siga-dev').groupNote}
+						<p class="group-note">{resolveLocalized(st('siga-dev').groupNote!, locale)}</p>
+					{/if}
+				</header>
+				<div class="slip">
+					<h3 class="role" id="st-siga-dev-h">{resolveLocalized(st('siga-dev').role, locale)}</h3>
+					{@render spanChip(st('siga-dev'))}
+					{@render chipsRow(st('siga-dev'))}
+					{@render skillsRow(st('siga-dev'))}
+				</div>
+				<div class="slip-tie" aria-hidden="true">{@render mizuhiki()}</div>
+				<div
+					class="slip"
+					data-dive="st-siga-trainee"
+					use:revealOnce={() => (revealed['siga-trainee'] = true)}
+				>
+					<h3 class="role">{resolveLocalized(st('siga-trainee').role, locale)}</h3>
+					{@render spanChip(st('siga-trainee'))}
+					{@render chipsRow(st('siga-trainee'))}
+					{@render skillsRow(st('siga-trainee'))}
+				</div>
+				{#if st('siga-dev').url}
+					<div class="stamps">
+						<Hanko
+							glyph="SIGA"
+							label={orgLabel(st('siga-dev').url!)}
+							href={st('siga-dev').url}
+							tilt={1.4}
+						/>
 					</div>
 				{/if}
+			</article>
+
+			{#each workSolo as s (s.id)}
+				{@render stationCard(s, 'r')}
 			{/each}
-		</div>
-
-		<!-- the sounding line: a depth gauge with year graduations -->
-		<div class="rail" aria-hidden="true"></div>
-
-		<section id="research" class="section zone zone--midwater">
-			<h2>{m.nav_cv_research()}</h2>
-			<ol class="entries">
-				{#each research as p, i (p.slug)}
-					<li class="entry entry--float" style="--d:{i}">
-						<span class="tick" aria-hidden="true">
-							<i class="dot"></i>
-							<span class="year">{p.year}</span>
-						</span>
-						<span class="stem" aria-hidden="true"></span>
-						<div class="bobwrap">
-							<span class="pad-peek" aria-hidden="true">
-								{@render lilypad(PAD_ROTS[i % PAD_ROTS.length])}
-							</span>
-							<a class="card" href={localizeHref(`/cv/${p.slug}`)}>
-								<h3>{resolveLocalized(p.title, locale)}</h3>
-								<p class="tagline">{resolveLocalized(p.tagline, locale)}</p>
-								<ul class="chips">
-									<li class="chip chip-year">{p.year}</li>
-									{#each p.tags as t (t)}<li class="chip">{t}</li>{/each}
-								</ul>
-							</a>
-						</div>
-					</li>
-				{/each}
-			</ol>
 		</section>
 
-		<!-- thermocline: a faint wave stratum dividing mid-water from the bed -->
-		<div class="thermocline" aria-hidden="true">
-			<svg class="band band--thermo">
-				<rect class="band-tile still" x="-48" y="0" width="150%" height="26" fill="url(#{uid}-sg)" />
-			</svg>
-			<!-- a second gate far off on the thermocline: small and washed pale -->
-			<div class="torii torii--far">
-				{@render torii(`${uid}-tf`)}
-			</div>
-		</div>
-
-		<section id="publications" class="section zone zone--bed">
-			<h2>
-				<span>{m.nav_cv_publications()}</span>
-				<span class="h2-koi" aria-hidden="true">{@render koiShadow()}</span>
+		<!-- Ausbildung — the left bank -->
+		<section class="bank bank--edu" aria-labelledby="education">
+			<h2
+				id="education"
+				class="bank-head"
+				data-dive="edu-head"
+				class:pending={hydrated && !revealed['edu-head']}
+				class:in={!!revealed['edu-head']}
+				use:revealOnce={() => (revealed['edu-head'] = true)}
+			>
+				{m.cv_education()}
 			</h2>
-			<ol class="entries">
-				{#each publications as p (p.slug)}
-					<li class="entry entry--tablet">
-						<span class="tick" aria-hidden="true">
-							<i class="dot"></i>
-							<span class="year">{p.year}</span>
-						</span>
-						<span class="stem" aria-hidden="true"></span>
-						<div class="bobwrap">
-							<a class="card card--tablet" href={localizeHref(`/cv/${p.slug}`)}>
-								<h3>{resolveLocalized(p.title, locale)}</h3>
-								<p class="venue">{resolveLocalized(p.tagline, locale)}</p>
-							</a>
-						</div>
-						<ul class="chips chips--links">
-							<li class="chip chip-year">{p.year}</li>
-							{#each p.links as l (l.url)}
-								<li>
-									<a class="chip chip-link" href={l.url} target="_blank" rel="noopener">{l.label}</a>
-								</li>
-							{/each}
-						</ul>
-					</li>
-				{/each}
-			</ol>
-
-			<!-- bedrock: education + positions as compact sediment strata -->
-			<div class="bedrock">
-				<h3 class="eyebrow stratum-title">{m.cv_education()}</h3>
-				<ul class="strata">
-					{#each education as e, i (i)}
-						<li>
-							<span class="span">{resolveSpan(e.span, locale)}</span>
-							<span class="what">
-								<strong>{resolveLocalized(e.degree, locale)}</strong>
-								<span class="where">· {e.institution}</span>
-								{#if e.note}<span class="note">{resolveLocalized(e.note, locale)}</span>{/if}
-							</span>
-						</li>
-					{/each}
-				</ul>
-
-				<h3 class="eyebrow stratum-title">{m.cv_positions()}</h3>
-				<ul class="strata">
-					{#each positions as pos, i (i)}
-						<li>
-							<span class="span">{resolveSpan(pos.span, locale)}</span>
-							<span class="what">
-								<strong>{resolveLocalized(pos.role, locale)}</strong>
-								<span class="where">· {pos.org}</span>
-								{#if pos.note}<span class="note">{resolveLocalized(pos.note, locale)}</span>{/if}
-							</span>
-						</li>
-					{/each}
-				</ul>
-			</div>
+			{#each eduAll as s (s.id)}
+				{@render stationCard(s, 'l')}
+			{/each}
 		</section>
 	</div>
+
+	<!-- the seabed finale: where the current begins -->
+	<section
+		class="origin"
+		data-dive="origin"
+		class:pending={hydrated && !revealed['origin']}
+		class:in={!!revealed['origin']}
+		use:revealOnce={() => (revealed['origin'] = true)}
+	>
+		<p class="origin-line">{m.cv_origin()}</p>
+	</section>
 </div>
 
 <style>
-	/* How far the pond spills past the text column into the empty right space:
-	   up to 16rem, but never past ~0.75rem from the viewport edge. Percentages
-	   resolve against the (identical-width) column wherever this is used. */
-	.pond {
-		--bleed: max(calc(50% - 50vw + 0.75rem), -16rem);
-		--rail-x: 1.75rem;
-		--gutter: 3.5rem;
-	}
-
-	.defs {
-		position: absolute;
-		width: 0;
-		height: 0;
-		overflow: hidden;
-	}
-
-	/* ---- surface: title + seigaiha band --------------------------------- */
-	.surface {
+	/* ---- the dive page: washi palette, page-local (paper is paper no matter
+	   how dark the water gets — PaperScroll's proven trick) ---- */
+	.page--dive {
+		--paper: #f5efdf;
+		--paper-old: #efe5cc;
+		--ink: #2c241b;
+		--ink-muted: #6b5f4d;
+		--seal: #c43f2a;
+		--line-gap: 7rem;
 		position: relative;
+		padding-top: 9rem;
 	}
-	.surface h1 {
-		margin-bottom: 0.75rem;
-		/* Keep the title clear of the top-left docked wheel when the column
-		   drifts toward the viewport edge (nothing at desktop widths). */
-		margin-left: clamp(0rem, calc(17rem - 50vw + 50%), 17rem);
-	}
-	.band {
-		display: block;
-		overflow: hidden;
-	}
-	.band-wrap {
-		width: calc(100% - var(--bleed));
-		-webkit-mask-image: linear-gradient(to right, #000 82%, transparent);
-		mask-image: linear-gradient(to right, #000 82%, transparent);
-	}
-	.band--surface {
-		width: 100%;
-		height: 64px;
-		opacity: 0.85;
-		-webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent);
-		mask-image: linear-gradient(to bottom, #000 40%, transparent);
-	}
-	.sg-fill {
-		fill: color-mix(in srgb, var(--slice-bg) 30%, var(--bg));
-	}
-	.sg-ring {
-		stroke: var(--water-deep);
-		stroke-opacity: 0.5;
-		stroke-width: 1.3;
+	@media (min-width: 900px) {
+		.page--dive {
+			max-width: 64rem;
+		}
 	}
 
-	/* ---- torii gates ------------------------------------------------------ */
-	.torii {
-		position: absolute;
-		pointer-events: none;
-	}
-	.torii-svg {
-		display: block;
-		width: 100%;
-		height: auto;
-	}
-	/* Standing in the surface band's open water; the reflection runs on
-	   below the header into the top of the water column. */
-	.torii--surface {
-		width: 9.5rem;
-		right: calc(var(--bleed) + 4.5rem);
-		bottom: -2.6rem;
-	}
-	/* Far-off echo on the thermocline: small, washed toward the water. */
-	.torii--far {
-		width: 3.9rem;
-		right: calc(var(--bleed) + 8.5rem);
-		bottom: -1.05rem;
-		opacity: 0.34;
-	}
-	.t-main {
-		fill: #e04530;
-	}
-	.t-dark {
-		fill: #c4321f;
-	}
-	.t-ring ellipse {
-		stroke: color-mix(in srgb, var(--water-deep) 45%, transparent);
-		stroke-width: 1.4;
-	}
-	.t-collar ellipse {
-		fill: var(--water-foam);
-		stroke: color-mix(in srgb, var(--water-deep) 35%, transparent);
-		stroke-width: 1;
-	}
-
-	/* ---- the water column ------------------------------------------------ */
-	.water-column {
+	/* ---- sky: title + lead sit center-right, clear of the docked wheel ---- */
+	.sky {
 		position: relative;
-		margin-top: 1.25rem;
+		margin-left: clamp(2.5rem, calc(19rem - 50vw + 50%), 19rem);
+		max-width: 34rem;
 	}
-	.depth-tint {
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		left: -1.25rem;
-		right: var(--bleed);
-		background: linear-gradient(
-			to bottom,
-			transparent,
-			color-mix(in srgb, var(--water-deep) 4%, transparent) 35%,
-			color-mix(in srgb, var(--water-deep) 12%, transparent)
-		);
-		border-radius: 0 0 1.25rem 1.25rem;
-		-webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 78%, transparent);
-		mask-image: linear-gradient(to right, transparent, #000 4%, #000 78%, transparent);
-		z-index: 0;
-		pointer-events: none;
-	}
-
-	/* ---- sounding line (rail + plumb) ------------------------------------ */
-	.rail {
-		position: absolute;
-		top: 0.35rem;
-		bottom: 0;
-		left: var(--rail-x);
-		width: 2px;
-		margin-left: -1px;
-		background: color-mix(in srgb, var(--water-deep) 35%, transparent);
-		z-index: 1;
-		pointer-events: none;
-	}
-	.rail::after {
-		/* the sounding lead resting on the bed */
-		content: '';
-		position: absolute;
-		left: 50%;
-		bottom: -2px;
-		transform: translateX(-50%);
-		width: 11px;
-		height: 15px;
-		background: color-mix(in srgb, var(--water-deep) 48%, transparent);
-		clip-path: polygon(50% 100%, 100% 32%, 76% 0, 24% 0, 0 32%);
-	}
-
-	/* ---- zones ----------------------------------------------------------- */
-	.zone {
-		position: relative;
-		z-index: 2;
-	}
-	.zone h2 {
-		margin-left: var(--gutter);
-	}
-	.zone--bed h2 {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.75rem;
-	}
-	.h2-koi {
-		width: 2.9rem;
-		flex: none;
-		transform: scaleX(-1) rotate(4deg);
-	}
-	.h2-koi .skoi-svg {
-		opacity: 0.4;
-	}
-
-	.entries {
-		list-style: none;
-		padding: 0;
+	.sky .lead {
 		margin: 0;
-		display: grid;
-		gap: 1.15rem;
 	}
-	.entry {
-		position: relative;
+
+	/* ---- waterline: the ground-line twin; the layer paints the hard break
+	   and the seigaiha band here ---- */
+	.waterline {
+		height: 34px;
+		margin: 2.75rem 0 3.25rem;
+	}
+
+	/* ---- the two-bank weave. The banks stay whole in the DOM; the grid
+	   places both on shared depth rows (concurrent stations side by side).
+	   The middle column is the sounding line's corridor. ---- */
+	.column {
 		display: grid;
-		grid-template-columns: var(--gutter) minmax(0, 1fr);
+		grid-template-columns: 1fr 1fr;
+		column-gap: 1.25rem;
+		row-gap: clamp(4.5rem, 9vh, 7rem);
 		align-items: start;
 	}
-	.tick {
-		grid-column: 1;
+	.bank {
+		display: contents;
+	}
+	.bank-head {
 		grid-row: 1;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		padding-top: 1.15rem;
-		position: relative;
-		z-index: 1;
-	}
-	.dot {
-		width: 0.55rem;
-		height: 0.55rem;
-		border-radius: 50%;
-		background: var(--bg);
-		border: 2px solid var(--accent);
-	}
-	.tick .year {
-		margin-top: 0.35rem;
-		font-size: 0.74rem;
-		color: var(--fg-muted);
-		font-variant-numeric: tabular-nums;
-		background: color-mix(in srgb, var(--bg) 72%, transparent);
-		padding: 0.05rem 0.25rem;
-		border-radius: 4px;
-	}
-	.stem {
-		/* the tether from the card back to the sounding line */
-		position: absolute;
-		left: calc(var(--rail-x) + 0.35rem);
-		width: calc(var(--gutter) - var(--rail-x) - 0.35rem);
-		top: 1.55rem;
-		height: 1px;
-		background: color-mix(in srgb, var(--water-deep) 30%, transparent);
-	}
-
-	/* ---- cards ----------------------------------------------------------- */
-	.bobwrap {
-		grid-column: 2;
-		grid-row: 1;
-		position: relative;
-	}
-	.pad-peek {
-		position: absolute;
-		top: -1.05rem;
-		left: -0.95rem;
-		width: 3.7rem;
-		z-index: 0;
-		pointer-events: none;
-	}
-	.pad-svg {
-		display: block;
-		width: 100%;
-		height: auto;
-	}
-	.pad-leaf {
-		fill: color-mix(in srgb, var(--slice-bg) 30%, transparent);
-		stroke: color-mix(in srgb, var(--water-deep) 35%, transparent);
-		stroke-width: 1.5;
-	}
-	.pad-veins line {
-		stroke: color-mix(in srgb, var(--water-deep) 30%, transparent);
-		stroke-width: 1.5;
-	}
-
-	.card {
-		position: relative;
-		z-index: 1;
-		display: block;
-		padding: 1.05rem 1.25rem;
-		border: 1px solid color-mix(in srgb, var(--slice-bg) 55%, transparent);
-		border-radius: 12px;
-		background: color-mix(in srgb, var(--slice-bg) 14%, transparent);
-		color: inherit;
-		text-decoration: none;
-		transition:
-			transform 0.15s ease,
-			border-color 0.15s ease;
-	}
-	.card:hover,
-	.card:focus-visible {
-		border-color: var(--accent);
-		outline: none;
-	}
-	.card:hover h3,
-	.card:focus-visible h3 {
-		text-decoration: underline;
-		text-decoration-thickness: 1px;
-		text-underline-offset: 3px;
-	}
-	.card::after {
-		/* one ripple ring per hover */
-		content: '';
-		position: absolute;
-		inset: -2px;
-		border-radius: inherit;
-		border: 1.5px solid var(--water-foam);
-		opacity: 0;
-		pointer-events: none;
-	}
-	.card h3 {
-		margin: 0 0 0.3rem;
-		font-size: var(--fs-h3);
-	}
-	.tagline {
-		margin: 0 0 0.75rem;
-		color: var(--fg-muted);
-		font-size: 0.95rem;
-	}
-
-	/* publications: stone tablets on the bed */
-	.card--tablet {
-		border-radius: 8px;
-		border-color: color-mix(in srgb, var(--water-deep) 30%, transparent);
-		background: linear-gradient(
-			color-mix(in srgb, var(--slice-bg) 20%, transparent),
-			color-mix(in srgb, var(--water-deep) 12%, transparent)
-		);
-		box-shadow: inset 0 1px 0 color-mix(in srgb, var(--water-foam) 55%, transparent);
-	}
-	.venue {
 		margin: 0;
+		font-size: var(--fs-h2);
+		scroll-margin-top: 6rem;
+		justify-self: start;
+		/* a washi label tag, not floating text — readable over any water */
+		background:
+			repeating-linear-gradient(
+				0deg,
+				transparent 0 13px,
+				color-mix(in srgb, var(--ink) 2%, transparent) 13px 14px
+			),
+			var(--paper);
+		color: var(--ink);
+		border: 1px solid color-mix(in srgb, var(--ink) 35%, transparent);
+		border-radius: 3px 10px 3px 10px;
+		padding: 0.3rem 1.1rem 0.35rem;
+		box-shadow: 0 10px 22px -14px rgba(4, 20, 31, 0.6);
+	}
+	.bank--work .bank-head {
+		grid-column: 2;
+		justify-self: end;
+		border-radius: 10px 3px 10px 3px;
+	}
+	.bank--edu .bank-head {
+		grid-column: 1;
+	}
+
+	/* mobile-first: single column right of the left-gutter line; both bank
+	   heads share the legend row up top */
+	.station {
+		grid-column: 1 / -1;
+		grid-row: var(--mr);
+	}
+	@media (min-width: 900px) {
+		.column {
+			grid-template-columns: minmax(0, 1fr) var(--line-gap) minmax(0, 1fr);
+			column-gap: 0;
+		}
+		.bank--work .bank-head {
+			grid-column: 3;
+			justify-self: start;
+		}
+		.station {
+			grid-row: var(--r) / var(--r2);
+			max-width: 27rem;
+			width: 100%;
+		}
+		/* stations hug the line — the tie cords are short */
+		.bank--edu .station {
+			grid-column: 1;
+			justify-self: end;
+		}
+		.bank--work .station {
+			grid-column: 3;
+			justify-self: start;
+		}
+		/* the MA rides down its row to sit beside its concurrent twin, the
+		   SIGA trainee slip (the panel's lower half) */
+		.station[data-dive='st-hslu-ma'] {
+			align-self: end;
+		}
+		/* the apprenticeship spans its whole era beside EFZ + BM */
+		.station[data-dive='st-emvs-lehre'] {
+			align-self: center;
+		}
+	}
+
+	/* ---- washi station slips ---- */
+	.station {
+		position: relative;
+		padding: 1.15rem 1.35rem 1.2rem;
+		background:
+			repeating-linear-gradient(
+				0deg,
+				transparent 0 13px,
+				color-mix(in srgb, var(--ink) 2%, transparent) 13px 14px
+			),
+			var(--paper);
+		color: var(--ink);
+		border: 1px solid color-mix(in srgb, var(--ink) 32%, transparent);
+		border-radius: 10px 4px 12px 4px;
+		box-shadow:
+			0 1px 2px rgba(4, 20, 31, 0.18),
+			0 24px 44px -26px rgba(4, 20, 31, 0.65);
+	}
+	.side-r {
+		border-radius: 4px 10px 4px 12px;
+	}
+	.station--deep {
+		background:
+			repeating-linear-gradient(
+				0deg,
+				transparent 0 13px,
+				color-mix(in srgb, var(--ink) 2.5%, transparent) 13px 14px
+			),
+			var(--paper-old);
+	}
+	.role {
+		margin: 0 0 0.15rem;
+		font-size: var(--fs-h3);
+		line-height: 1.25;
+		color: var(--ink);
+	}
+	.org-line {
+		margin: 0 0 0.55rem;
 		font-family: var(--font-display);
 		font-style: italic;
-		font-size: 0.98rem;
-		color: var(--fg-muted);
+		font-size: 0.95rem;
+		color: var(--ink-muted);
 	}
-
-	/* ---- pebble chips ----------------------------------------------------- */
-	.chips {
-		list-style: none;
-		padding: 0;
-		margin: 0;
+	.span-chip {
+		margin: 0 0 0.55rem;
+		font-size: 0.82rem;
+		color: var(--ink);
+		font-variant-numeric: tabular-nums;
 		display: flex;
 		flex-wrap: wrap;
-		align-items: center;
+		gap: 0.35rem;
+		align-items: baseline;
+	}
+	.span-chip .dur {
+		color: var(--ink-muted);
+	}
+
+	.chips,
+	.skills {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
 		gap: 0.4rem;
 		font-size: 0.75rem;
 	}
+	.chips {
+		margin-bottom: 0.55rem;
+	}
 	.chip {
-		display: inline-block;
-		padding: 0.1rem 0.55rem;
+		padding: 0.08rem 0.55rem;
+		border: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
 		border-radius: 999px;
-		background: color-mix(in srgb, var(--slice-bg) 30%, transparent);
+		color: var(--ink-muted);
+		background: color-mix(in srgb, var(--paper) 55%, white);
 	}
-	.chip-year {
-		display: none; /* the year lives on the rail tick; chip form is mobile-only */
-		font-weight: 600;
-		font-variant-numeric: tabular-nums;
-	}
-	.chips--links {
-		grid-column: 2;
-		grid-row: 2;
-		margin-top: 0.55rem;
-	}
-	.chip-link {
-		position: relative;
+	/* mini seal chips: a red hanko tick + the skill (NOT the big Hanko button
+	   — that stays reserved for real links) */
+	.skill-chip {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.28rem;
-		padding: 0.28rem 0.7rem;
-		background: transparent;
-		border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
-		color: var(--accent);
-		text-decoration: none;
-		transition:
-			background-color 0.15s ease,
-			border-color 0.15s ease;
+		gap: 0.34rem;
+		padding: 0.12rem 0.55rem 0.12rem 0.4rem;
+		border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent);
+		border-radius: 3px 8px 3px 8px;
+		color: var(--ink);
+		background: color-mix(in srgb, var(--paper) 40%, white);
 	}
-	.chip-link::before {
-		/* invisible tap-target extension: the anchor's hit area reaches
-		   44x44px even though the pebble itself stays small */
+	.skill-chip::before {
 		content: '';
+		width: 0.5em;
+		height: 0.5em;
+		flex: none;
+		background: var(--seal);
+		border-radius: 1.5px 3px 1.5px 3px;
+		opacity: 0.85;
+	}
+
+	/* the little washi tag naming the card's bank */
+	.track-tag {
 		position: absolute;
-		left: 50%;
-		top: 50%;
-		transform: translate(-50%, -50%);
-		width: max(100%, 2.75rem);
-		height: max(100%, 2.75rem);
+		top: -0.72rem;
+		font-size: 0.62rem;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--ink-muted);
+		background: var(--paper-old);
+		border: 1px solid color-mix(in srgb, var(--ink) 28%, transparent);
+		border-radius: 2px 6px 2px 6px;
+		padding: 0.06rem 0.5rem;
 	}
-	.chip-link::after {
-		/* outward arrow: marks the pebble as a link, unlike the inert chips */
-		content: '\2197\FE0E';
-		font-size: 0.9em;
-		line-height: 1;
+	.side-l .track-tag {
+		left: 0.9rem;
 	}
-	.chip-link:hover,
-	.chip-link:focus-visible {
-		background: color-mix(in srgb, var(--accent) 14%, transparent);
-		border-color: var(--accent);
-		outline: none;
+	.side-r .track-tag {
+		right: 0.9rem;
 	}
 
-	/* ---- thermocline ------------------------------------------------------ */
-	.thermocline {
-		position: relative;
-		z-index: 1;
-		margin: -1.25rem 0 1.75rem;
-	}
-	.band--thermo {
-		width: calc(100% - var(--bleed));
-		height: 26px;
-		opacity: 0.3;
-		-webkit-mask-image: linear-gradient(to right, transparent, #000 14%, #000 82%, transparent);
-		mask-image: linear-gradient(to right, transparent, #000 14%, #000 82%, transparent);
+	.stamps {
+		display: flex;
+		justify-content: flex-end;
+		margin: 0.35rem -0.35rem -0.55rem 0;
 	}
 
-	/* ---- bedrock strata ---------------------------------------------------- */
-	.bedrock {
-		margin: 2.75rem 0 0 var(--gutter);
+	/* ---- the SIGA group panel: two role slips, one employer ---- */
+	.panel-head {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.75rem;
+		margin-bottom: 0.65rem;
 	}
-	.stratum-title {
-		font-family: var(--font-display);
+	.org-line--panel {
+		margin: 0;
+		font-size: 1.05rem;
 		font-weight: 600;
-		margin-bottom: 0.35rem;
+		font-style: normal;
+		font-family: var(--font-display);
+		color: var(--ink);
 	}
-	.strata {
-		list-style: none;
-		padding: 0;
-		margin: 0 0 1.75rem;
-	}
-	.strata li {
-		display: grid;
-		grid-template-columns: 6.25rem minmax(0, 1fr);
-		gap: 0.85rem;
-		padding: 0.6rem 0;
-		border-top: 1px solid color-mix(in srgb, var(--water-deep) 22%, transparent);
-	}
-	.strata li:last-child {
-		border-bottom: 1px solid color-mix(in srgb, var(--water-deep) 22%, transparent);
-	}
-	.strata .span {
-		font-size: 0.8rem;
-		color: var(--fg-muted);
+	.group-note {
+		margin: 0;
+		font-size: 0.74rem;
+		color: var(--ink-muted);
 		font-variant-numeric: tabular-nums;
-		padding-top: 0.2rem;
 		white-space: nowrap;
 	}
-	.strata .what strong {
-		font-weight: 600;
+	.slip + .slip-tie {
+		margin: 0.8rem 0 0.55rem;
 	}
-	.strata .where {
-		color: var(--fg-muted);
+	.slip-tie {
+		position: relative;
+		display: grid;
+		place-items: center;
 	}
-	.strata .note {
-		display: block;
-		font-size: 0.85rem;
-		color: var(--fg-muted);
-		font-style: italic;
-	}
-
-	/* ---- koi layer --------------------------------------------------------- */
-	.koi-layer {
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		left: -1.25rem;
-		right: var(--bleed);
-		overflow: hidden;
-		contain: paint;
-		z-index: 1;
-		pointer-events: none;
-	}
-	.mirror {
-		position: absolute;
-		inset: 0;
-		transform: scaleX(-1);
-	}
-	.skoi {
+	.slip-tie::before {
+		content: '';
 		position: absolute;
 		left: 0;
-		/* static resting spot = the reduced-motion tableau; animation overrides it */
-		transform: translateX(var(--krest, 14rem));
+		right: 0;
+		top: 50%;
+		border-top: 1px dashed color-mix(in srgb, var(--ink) 30%, transparent);
 	}
-	.skoi-svg {
-		display: block;
-		width: 100%;
+	.mizuhiki {
+		position: relative;
+		width: 4.5rem;
+		height: 1.2rem;
+		background: var(--paper);
+	}
+	.mz-a,
+	.mz-b {
+		fill: none;
+		stroke-width: 1.9;
+		stroke-linecap: round;
+	}
+	.mz-a {
+		stroke: var(--seal);
+	}
+	.mz-b {
+		stroke: color-mix(in srgb, var(--seal) 70%, #5c1710);
+	}
+	.mz-knot {
+		fill: var(--seal);
+	}
+
+	/* ---- the origami crane resting on the army card (left corner — the
+	   track tag owns the right one) ---- */
+	.crane {
+		position: absolute;
+		top: -1.55rem;
+		left: 1.2rem;
+		width: 3.4rem;
 		height: auto;
-		opacity: 0.12;
+		transform: rotate(-3deg);
 	}
-	.skoi-fig path,
-	.skoi-fig circle {
-		fill: color-mix(in srgb, var(--water-deep) 60%, var(--fg));
+	.cr-wing {
+		fill: #fbf6e8;
+		stroke: color-mix(in srgb, var(--ink) 45%, transparent);
+		stroke-width: 1;
+		stroke-linejoin: round;
 	}
-	.skoi-spot {
-		fill-opacity: 0.55;
+	.cr-body,
+	.cr-tail {
+		fill: #f1e8d2;
+		stroke: color-mix(in srgb, var(--ink) 45%, transparent);
+		stroke-width: 1;
+		stroke-linejoin: round;
+	}
+	.cr-beak {
+		fill: var(--seal);
+		stroke: none;
+	}
+	.cr-fold {
+		fill: none;
+		stroke: color-mix(in srgb, var(--ink) 30%, transparent);
+		stroke-width: 0.8;
 	}
 
-	/* ---- motion (all of it lives here; base state is the calm tableau) ---- */
+	/* ---- the origin: the caption floats over the seabed the layer paints.
+	   `.living` (JS present → dark atmosphere) flips it to foam light. ---- */
+	.origin {
+		position: relative;
+		min-height: 16rem;
+		margin-top: clamp(5rem, 10vh, 8rem);
+		display: grid;
+		place-items: end center;
+		padding-bottom: 1.5rem;
+		scroll-margin-top: 6rem;
+	}
+	.origin-line {
+		margin: 0;
+		font-family: var(--font-display);
+		font-style: italic;
+		font-size: 1.15rem;
+		color: var(--fg-muted);
+		text-align: center;
+	}
+	/* (Phase 3 flips this to foam-on-abyss once the layer darkens the deep) */
+
+	/* ---- growth: buoyant settle — everything underwater arrives through
+	   resistance, no overshoot, and reduced motion lands fully drawn ---- */
 	@media (prefers-reduced-motion: no-preference) {
-		.skoi {
-			animation: swimAcross var(--kdur, 60s) linear infinite;
-			animation-delay: var(--kdel, 0s);
-			will-change: transform;
-		}
-		.skoi-svg {
-			opacity: 0.16;
-		}
-		.skoi-tail {
-			transform-box: fill-box;
-			transform-origin: 100% 50%;
-			animation: tailSway 1.9s ease-in-out infinite alternate;
-		}
-		.entry--float .bobwrap {
-			animation: bob 8s ease-in-out infinite alternate;
-			animation-delay: calc(var(--d, 0) * -2.7s);
-			will-change: transform;
-		}
-		.card:hover,
-		.card:focus-visible {
-			transform: translateY(-2px);
-		}
-		.card:hover::after,
-		.card:focus-visible::after {
-			animation: rippleRing 0.9s ease-out forwards;
-		}
-		.band--surface .band-tile {
-			animation: bandDrift 30s ease-in-out infinite alternate;
-		}
-	}
-	@keyframes swimAcross {
-		from {
-			transform: translateX(-9rem);
-		}
-		to {
-			transform: translateX(64rem);
-		}
-	}
-	@keyframes tailSway {
-		from {
-			transform: rotate(-7deg);
-		}
-		to {
-			transform: rotate(7deg);
-		}
-	}
-	@keyframes bob {
-		from {
-			transform: translateY(0);
-		}
-		to {
-			transform: translateY(-3px);
-		}
-	}
-	@keyframes rippleRing {
-		from {
-			opacity: 0.9;
-			transform: scale(0.85);
-		}
-		to {
+		.pending {
 			opacity: 0;
-			transform: scale(1.06);
+		}
+		.in {
+			animation: dive-settle 1100ms cubic-bezier(0.22, 0.61, 0.21, 1) backwards;
 		}
 	}
-	@keyframes bandDrift {
+	@keyframes dive-settle {
 		from {
-			transform: translateX(-14px);
-		}
-		to {
-			transform: translateX(14px);
+			opacity: 0;
+			transform: translateY(16px) scale(0.97);
 		}
 	}
 
-	/* ---- mobile ------------------------------------------------------------ */
-	@media (max-width: 700px) {
-		.pond {
-			--rail-x: 1rem;
-			--gutter: 2rem;
+	/* ---- narrow: gutter mode. The line dives down the left gutter; the
+	   cards keep to its right. ---- */
+	@media (max-width: 899.9px) {
+		.page--dive {
+			padding-top: 7.5rem;
 		}
-		.band--surface {
-			height: 46px;
+		.column {
+			padding-left: 3.1rem;
 		}
-		.torii--surface {
-			width: 5.25rem;
-			right: 0.25rem;
-			bottom: -1.4rem;
-		}
-		.torii--far {
-			display: none;
-		}
-		.zone--bed h2 {
-			justify-content: flex-start;
-		}
-		.koi-layer {
-			display: none;
-		}
-		.stem {
-			display: none;
-		}
-		.tick .year {
-			display: none;
-		}
-		.chip-year {
-			display: inline-block;
-		}
-		.pad-peek {
-			width: 3.1rem;
-			left: -0.6rem;
-		}
-		.bedrock {
-			margin-left: var(--gutter);
-		}
-		.strata li {
-			grid-template-columns: 5rem minmax(0, 1fr);
-			gap: 0.6rem;
+		.origin {
+			min-height: 13rem;
 		}
 	}
 	@media (max-width: 560px) {
-		/* Narrow phones: every horizontal rem is measure the cards need back.
-		   The rail stays centered under the tick dots (half the gutter). */
-		.pond {
-			--rail-x: 0.625rem;
-			--gutter: 1.25rem;
-		}
-		/* The shrunken wheel still owns the top-left corner: drop the title
-		   fully below it instead of squeezing it sideways. */
-		.surface {
-			padding-top: calc(min(86vw, 400px) * 0.45);
-		}
-		.surface h1 {
+		/* the shrunken wheel still owns the top-left corner: drop the title
+		   below it instead of squeezing it sideways */
+		.sky {
 			margin-left: 0;
+			padding-top: calc(min(86vw, 400px) * 0.42);
 		}
-		/* Bedrock strata: the 5rem year column starves the text at this width —
-		   stack the span above the degree/role line and pull the block left. */
-		.bedrock {
-			margin-left: 0.5rem;
-		}
-		.strata li {
-			grid-template-columns: 1fr;
-			gap: 0.1rem;
-		}
-		.strata .span {
-			padding-top: 0;
+		.column {
+			padding-left: 2.4rem;
 		}
 	}
 </style>
