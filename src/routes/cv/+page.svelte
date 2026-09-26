@@ -682,6 +682,10 @@
 		.page--dive {
 			padding-top: 7.5rem;
 		}
+		/* clearance so the boat's koinobori pole never pierces the lead */
+		.waterline {
+			margin-top: 4.5rem;
+		}
 		.column {
 			padding-left: 3.1rem;
 		}
