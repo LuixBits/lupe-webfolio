@@ -66,12 +66,18 @@ on dev/build; if `$lib/paraglide/*` is missing run
   `lib/garden/tree/TreeLayer.svelte` (+ `tree/generate.ts`): a full-bleed
   z:-1 layer that measures every `[data-tree]` anchor in the page, then
   procedurally generates the whole organism — canopy masses crowding the top
-  edge, a thick tapered trunk down the gutter (SVG-clip scrubbed to scroll,
-  retracts on scroll-up), the **topmost branch** the title sits on, a **leaf
-  bush** around the bio, a woven **bower** ring around the portrait, one
-  embracing limb per content block (junction ABOVE the block — anything
-  crossing a veil gets washed by it), buttressed **roots** at the ground
-  line, and a long root reaching the seed packets. Growth = nested `<g
+  edge, a thick tapered trunk (SVG-clip scrubbed to scroll, retracts on
+  scroll-up) that rises through the bio|portrait corridor and CURVES to page
+  center for the desktop **weave** (content blocks alternate `.side-l` /
+  `.side-r` around it; every attachment asks `trunkXAt(y)` for the bark's
+  true x), the **topmost branch** the title sits on, a **leaf bush** around
+  the bio, a woven **bower** ring around the portrait, one rising limb per
+  content block plus a **counter-bough** into the opposite open side,
+  buttressed **roots** bursting at the ground line (gated on the ground
+  anchor's own reveal), and a long root reaching the seed packets. The layer
+  also paints the whole **atmosphere**: sky blue → forest greens/yellows →
+  golden grass → soil → rock, with buried stones and strata seams
+  underground; blocks sit on light-pool veils tuned stronger below ground. Growth = nested `<g
   class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
   user units), staggered per generation; per-block limbs gate on the page's
   `revealed` record (which also tracks 'notes'/'contact'). Interactivity:
