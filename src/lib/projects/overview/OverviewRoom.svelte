@@ -42,12 +42,12 @@
 		position: absolute;
 		z-index: -1;
 		inset: -2rem -1rem 2rem;
-		background: radial-gradient(ellipse at 50% 10%, #df5eaf1f, #df5eaf08 35%, transparent 65%);
+		background: radial-gradient(ellipse at 50% 10%, #ed77bd35, #df5eaf0c 35%, transparent 65%);
 		pointer-events: none;
 	}
 	.sign {
 		text-align: center;
-		margin: 0 auto 2.75rem;
+		margin: 0 auto 2.25rem;
 	}
 	.mount {
 		position: relative;
@@ -96,6 +96,7 @@
 		z-index: -1;
 	}
 	.sign h1 {
+		overflow-wrap: anywhere;
 		margin: 0;
 		color: #ffecfa;
 		text-shadow:
@@ -107,11 +108,29 @@
 		margin: 0;
 		color: var(--fg-muted);
 	}
+	@media (prefers-reduced-motion: no-preference) {
+		.sign h1 {
+			animation: neon-hum 7s ease-in-out infinite alternate;
+		}
+	}
+	@keyframes neon-hum {
+		from {
+			text-shadow:
+				0 0 6px #ffafd7,
+				0 0 24px #ff5ed199;
+		}
+		to {
+			text-shadow:
+				0 0 8px #ffd9ed,
+				0 0 34px #ff5ed1bb,
+				0 0 70px #ff5ed130;
+		}
+	}
 	.room-contents {
 		display: grid;
 		grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
 		gap: 2.4rem 2.5rem;
-		align-items: start;
+		align-items: stretch;
 	}
 	.room-floor {
 		position: relative;
@@ -152,11 +171,38 @@
 		}
 	}
 	@media (max-width: 70rem) {
+		@media (prefers-reduced-motion: no-preference) {
+			.sign h1 {
+				animation: neon-hum 7s ease-in-out infinite alternate;
+			}
+		}
+		@keyframes neon-hum {
+			from {
+				text-shadow:
+					0 0 6px #ffafd7,
+					0 0 24px #ff5ed199;
+			}
+			to {
+				text-shadow:
+					0 0 8px #ffd9ed,
+					0 0 34px #ff5ed1bb,
+					0 0 70px #ff5ed130;
+			}
+		}
+		.room-contents {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+	/* Container units also respond when the user enlarges the root text. */
+	@container (max-width: 62rem) {
 		.room-contents {
 			grid-template-columns: minmax(0, 1fr);
 		}
 	}
 	@media (max-width: 40rem) {
+		.workshop-overview::before {
+			inset-inline: 0;
+		}
 		.workshop-overview {
 			padding: 0.5rem 0 0;
 		}
@@ -164,7 +210,7 @@
 			margin-bottom: 2rem;
 		}
 		.mount {
-			padding: 0.9rem 1.2rem;
+			padding: 14px 20px;
 		}
 		.room-floor {
 			margin-inline: 0;

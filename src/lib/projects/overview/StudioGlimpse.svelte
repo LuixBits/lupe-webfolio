@@ -5,17 +5,11 @@
 <!-- A decorative glimpse through the doorway. No player, media request or control. -->
 <svg viewBox="0 0 420 310" fill="none" aria-hidden="true">
 	<defs>
-		<linearGradient id={`${id}-wall`} x2="1" y2="1">
-			<stop stop-color="#20232f" /><stop offset=".65" stop-color="#44313a" /><stop
-				offset="1"
-				stop-color="#28202b"
-			/>
-		</linearGradient>
 		<radialGradient id={`${id}-blue`}
-			><stop stop-color="#91ded9" stop-opacity=".4" /><stop
+			><stop stop-color="#91ded9" stop-opacity=".55" /><stop
 				offset=".5"
 				stop-color="#65aec7"
-				stop-opacity=".14"
+				stop-opacity=".2"
 			/><stop offset="1" stop-color="#65aec7" stop-opacity="0" /></radialGradient
 		>
 		<radialGradient id={`${id}-warm`}
@@ -38,15 +32,9 @@
 			/></linearGradient
 		>
 		<linearGradient id={`${id}-glass`} x2=".25" y2="1"
-			><stop stop-color="#335563" /><stop offset=".45" stop-color="#152635" /><stop
+			><stop stop-color="#6e9ea9" /><stop offset=".45" stop-color="#2f515e" /><stop
 				offset="1"
-				stop-color="#101620"
-			/></linearGradient
-		>
-		<linearGradient id={`${id}-door`} x2="1" y2="0"
-			><stop stop-color="#5c4f60" /><stop offset=".2" stop-color="#403647" /><stop
-				offset="1"
-				stop-color="#211e2b"
+				stop-color="#152634"
 			/></linearGradient
 		>
 		<pattern id={`${id}-vents`} width="5" height="5" patternUnits="userSpaceOnUse"
@@ -60,7 +48,7 @@
 			><path d="M0 .5h4" stroke="#bbe6e6" stroke-opacity=".07" /></pattern
 		>
 	</defs>
-	<path d="M0 0H420V310H0Z" fill={`url(#${id}-wall)`} />
+
 	<path d="M17 26H418M17 28H418" stroke="#9a7085" stroke-opacity=".18" />
 	<path d="M398 0V239L420 266" stroke="#15121f" stroke-width="3" />
 	<ellipse class="blue-light" cx="197" cy="152" rx="212" ry="149" fill={`url(#${id}-blue)`} />
@@ -78,7 +66,7 @@
 		stroke-opacity=".4"
 	/>
 	<path d="M64 258h335m-318 5h301" stroke="#d0a780" stroke-opacity=".19" />
-	<path d="M75 269V310M393 269V310" stroke="#181720" stroke-width="14" />
+	<path d="M75 269v35l36-35m282 0v35l-36-35" stroke="#181720" stroke-width="9" />
 	<path d="M273 237c16 10 3 24 13 35s-4 27 15 38" stroke="#15151f" stroke-width="4" />
 	<ellipse cx="188" cy="250" rx="105" ry="7" fill="#110f1b" opacity=".75" />
 	<!-- Chunky 660:510 cabinet proportions, simplified for this distant view. -->
@@ -117,16 +105,6 @@
 	<path d="M341 150q7-10 17-2l18 28q-11 10-30 8Z" fill="#3c3d48" stroke="#928584" />
 	<path d="M346 184q17 3 30-8" stroke="#ffcd8a" stroke-width="3" />
 	<ellipse cx="333" cy="245" rx="23" ry="5" fill="#25242f" stroke="#9c8472" />
-	<!-- Already open: only the narrow edge of the door interrupts the view. -->
-	<g class="door-panel" data-door-panel>
-		<path d="M4 3 63 28V286L4 310Z" fill={`url(#${id}-door)`} stroke="#928093" />
-		<path d="M14 20 53 38V275l-39 16Z" stroke="#a798aa" stroke-opacity=".2" />
-		<path d="M4 3V310" stroke="#b6bcba" stroke-width="3" />
-		<path d="M10 59v22m0 149v23" stroke="#b6a399" stroke-width="6" />
-		<path d="M48 160v15m0-12-16-3" stroke="#080f19" stroke-width="6" stroke-linecap="round" />
-		<path d="M48 160v13m0-10-15-3" stroke="#c1b59f" stroke-width="3" stroke-linecap="round" />
-		<path d="M59 29V282" stroke="#95e6e2" stroke-opacity=".3" />
-	</g>
 </svg>
 
 <style>
@@ -135,36 +113,21 @@
 		width: 100%;
 		height: 100%;
 	}
-	.door-panel {
-		transform-origin: 4px 155px;
-		transition: transform 220ms ease;
-	}
 	.blue-light {
 		opacity: 0.7;
 		transition: opacity 220ms ease;
-	}
-	:global(.studio-entrance:focus-visible) .door-panel {
-		transform: scaleX(0.72);
 	}
 	:global(.studio-entrance:focus-visible) .blue-light {
 		opacity: 1;
 	}
 	@media (hover: hover) {
-		:global(.studio-entrance:hover) .door-panel {
-			transform: scaleX(0.72);
-		}
 		:global(.studio-entrance:hover) .blue-light {
 			opacity: 1;
 		}
 	}
 	@media (prefers-reduced-motion: reduce) {
-		.door-panel,
 		.blue-light {
 			transition: none;
-		}
-		:global(.studio-entrance:hover) .door-panel,
-		:global(.studio-entrance:focus-visible) .door-panel {
-			transform: none;
 		}
 	}
 </style>

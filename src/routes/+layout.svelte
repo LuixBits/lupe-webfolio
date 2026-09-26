@@ -71,7 +71,11 @@
 	// Zero out the cinematic motion when the user prefers reduced motion.
 	let reduced = $state(false);
 	onMount(() => {
-		reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+		const update = () => (reduced = preference.matches);
+		update();
+		preference.addEventListener('change', update);
+		return () => preference.removeEventListener('change', update);
 	});
 
 	// Opening a section reads as dropping INTO its world, not a crossfade: the
@@ -185,7 +189,8 @@
 		--fg-muted: #d2bdcd;
 	}
 	.overview main {
-		padding-left: 13.5rem;
+		container-type: inline-size;
+		padding-left: 216px;
 		padding-bottom: 0;
 	}
 	.navigation-placement {

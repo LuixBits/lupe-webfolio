@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { resolveLocalized, type Project } from '$lib/content/schema';
 	import { localizeHref } from '$lib/paraglide/runtime';
-	import TapeArtwork from '../TapeArtwork.svelte';
+	import ProjectCover from './ProjectCover.svelte';
 	let { project, locale }: { project: Project; locale: string } = $props();
 </script>
 
@@ -14,23 +14,7 @@
 	class:poker={project.slug === 'scrumpoker'}
 	href={localizeHref(`/projects/${project.slug}`)}
 >
-	<span class="cover" aria-hidden="true">
-		{#if project.slug === 'scrumpoker'}
-			<svg viewBox="0 0 100 80" fill="none"
-				><g transform="rotate(-16 40 40)"
-					><rect x="18" y="9" width="43" height="61" rx="4" fill="#66516b" stroke="#d6b0c3" /><path
-						d="M27 20h12M27 26h7"
-						stroke="#dfc2cc"
-					/></g
-				><g transform="rotate(10 62 43)"
-					><rect x="41" y="11" width="43" height="61" rx="4" fill="#decbaa" stroke="#fff0d8" /><path
-						d="m62 30 9 12-9 12-9-12Z"
-						fill="#715166"
-					/><path d="M48 20h6m17 43h6" stroke="#715166" stroke-width="2" /></g
-				></svg
-			>
-		{:else}<TapeArtwork {project} />{/if}
-	</span>
+	<span class="cover" aria-hidden="true"><ProjectCover {project} /></span>
 	<div class="paper-label">
 		<h3>{resolveLocalized(project.title, locale)}</h3>
 		<p>{resolveLocalized(project.tagline, locale)}</p>
@@ -82,18 +66,15 @@
 	.cover {
 		display: block;
 		flex: none;
-		width: 6rem;
-		height: 5.1rem;
+		width: 100%;
+		height: auto;
+		aspect-ratio: 16 / 9;
 		color: #8de4dd;
-		padding: 0.4rem;
+		padding: 0;
 		border: 1px solid #7c778680;
 		background: radial-gradient(ellipse at 50% 100%, #415564, #191c2a 75%);
 		box-shadow: 1px 2px 2px #0e111a;
-		transform: rotate(-3deg);
-	}
-	.cover svg {
-		width: 100%;
-		height: 100%;
+		transform: rotate(-1.5deg);
 	}
 	.poker .cover {
 		background: linear-gradient(135deg, #523448, #261b2c);
@@ -102,6 +83,7 @@
 		color: #a5e8df;
 	}
 	.paper-label {
+		min-width: 0;
 		flex: 1;
 		padding: 0.7rem 0.8rem;
 		background: linear-gradient(108deg, #f0e6d0, #e6d8be);
@@ -109,6 +91,7 @@
 		box-shadow: 0 2px 3px #0c0c1833;
 	}
 	.paper-label h3 {
+		overflow-wrap: anywhere;
 		margin: 0 0 0.35rem;
 		font-size: var(--fs-h3);
 	}
@@ -146,7 +129,10 @@
 			transition: none;
 		}
 	}
-	@media (min-width: 70rem) {
+	@container (min-width: 36rem) {
+		.portfolio .cover {
+			width: 42%;
+		}
 		.portfolio {
 			flex-direction: row;
 			align-items: center;
@@ -157,14 +143,16 @@
 			flex-direction: row;
 			flex-wrap: wrap;
 			align-items: center;
-			padding: 0.8rem 0.7rem 0.7rem 1rem;
+			padding: 13px 11px 11px 16px;
 		}
 		.cover {
-			width: 3.75rem;
-			height: 3.75rem;
+			width: 100%;
+			max-height: 9rem;
+			height: auto;
 		}
 		.paper-label {
 			flex-basis: 11rem;
+			padding: 11px 13px;
 		}
 	}
 </style>

@@ -89,6 +89,9 @@
 	.overview .bar-left {
 		font-size: var(--fs-small);
 	}
+	.overview :global(.locale button) {
+		font-size: var(--fs-small);
+	}
 	@media (max-width: 60rem), (max-height: 560px) {
 		.overview .bar {
 			padding-inline: clamp(1rem, 4vw, 2.5rem);
@@ -156,7 +159,8 @@
 		min-width: 0;
 	}
 	@media (max-width: 34rem) {
-		.workbench .copy {
+		.workbench .copy,
+		.overview .copy {
 			white-space: normal;
 		}
 		/* Small screens: stack the bar rows and cap the dock clearance so the
