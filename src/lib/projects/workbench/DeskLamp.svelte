@@ -40,6 +40,12 @@
 					stop-color="#212430"
 				/>
 			</linearGradient>
+			<linearGradient id="bench-lamp-base" x1="0" y1="0" x2=".7" y2="1">
+				<stop stop-color="#817875" /><stop offset=".45" stop-color="#44424a" /><stop
+					offset="1"
+					stop-color="#292a35"
+				/>
+			</linearGradient>
 		</defs>
 		<ellipse cx="113" cy="261" rx="76" ry="11" fill="#100d16" opacity=".48" />
 		<path d="M70 245c-35-9-30-39-9-33 19 5 14 40 63 47" stroke="#15151c" stroke-width="5" />
@@ -70,24 +76,35 @@
 		<path d="m151 38-8 48m38-50 15 45" stroke="#c4b59c" stroke-width="1.3" opacity=".28" />
 		<path d="M134 101c23 8 55 3 75-13" stroke="#161a23" stroke-width="7" />
 		<path class="bulb" d="M139 100c20 5 48 1 65-10" stroke="#ffd79b" stroke-width="4" />
-		<path
-			d="M75 235c12-14 61-16 79-2l14 16c-23 12-79 12-107 1Z"
-			fill="url(#bench-lamp-metal)"
-			stroke="#817671"
-			stroke-width="1.5"
+		<path d="M55 240v8c0 20 116 20 116 0v-8Z" fill="#20212b" stroke="#77706d" />
+		<ellipse
+			cx="113"
+			cy="240"
+			rx="58"
+			ry="17"
+			fill="url(#bench-lamp-base)"
+			stroke="#9b8d80"
+			stroke-width="1.4"
 		/>
-		<path d="M65 248c28 9 69 9 98-1" stroke="#b0987d" stroke-width="1.5" opacity=".5" />
+		<path d="M60 244c14 14 81 17 106 1" stroke="#b6a184" opacity=".5" />
+		<ellipse cx="108" cy="234" rx="12" ry="4" fill="#252630" stroke="#82766e" />
+		<!-- The switch shares the base's perspective instead of floating above it. -->
+		<g transform="translate(142 239) rotate(-12) scale(1 .62)">
+			<ellipse cy="2" rx="15" ry="14" fill="#141620" />
+			<circle r="14" fill="#938272" stroke="#c2ac8e" stroke-width="1.2" />
+			<g class="lamp-switch">
+				<circle class="switch-face" r="11.5" fill="#2d3038" stroke="#151923" stroke-width="1.5" />
+				<path d="M-8-3c2-6 12-8 16-1" stroke="#e2c399" opacity=".35" />
+				<path
+					class="switch-icon"
+					d="M0-7v7m-4.5-4a6 6 0 1 0 9 0"
+					stroke="#cbb99e"
+					stroke-width="1.7"
+					stroke-linecap="round"
+				/>
+			</g>
+		</g>
 	</svg>
-	<span class="lamp-switch" aria-hidden="true">
-		<svg viewBox="0 0 20 20" fill="none"
-			><path
-				d="M10 3v6m-4-4a6 6 0 1 0 8 0"
-				stroke="currentColor"
-				stroke-width="1.7"
-				stroke-linecap="round"
-			/></svg
-		>
-	</span>
 </button>
 
 <style>
@@ -119,33 +136,14 @@
 		opacity: 1;
 		filter: drop-shadow(0 3px 7px #ffc77ea6);
 	}
-	.lamp-switch {
-		position: absolute;
-		left: 49%;
-		top: 81.5%;
-		display: grid;
-		place-items: center;
-		width: 22px;
-		height: 20px;
-		border: 1px solid #c5b295;
-		border-radius: 4px;
-		background: #26272c;
-		color: #d2c3b0;
-		box-shadow: 0 2px 0 #0f1118;
+	.lit .switch-icon {
+		stroke: #ffe5b2;
+		filter: drop-shadow(0 0 3px #ffc77e99);
 	}
-	.lamp-switch svg {
-		width: 13px;
-		height: 13px;
-	}
-	.lit .lamp-switch {
-		color: #ffe5b2;
-		box-shadow:
-			0 2px 0 #0f1118,
-			0 0 8px #f0b56c59;
-	}
-	.desk-lamp:hover .lamp-switch {
-		background: #53504d;
-		border-color: #ffe5b2;
+	.desk-lamp:hover .switch-face,
+	.desk-lamp:focus-visible .switch-face {
+		fill: #5c554d;
+		stroke: #c8ae8b;
 	}
 	.desk-lamp:active .lamp-switch {
 		transform: translateY(1px);

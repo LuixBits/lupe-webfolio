@@ -2,12 +2,10 @@
 	import * as m from '$lib/paraglide/messages';
 	let {
 		selected = false,
-		duration,
 		videoTitle,
 		onloadvideo
 	}: {
 		selected?: boolean;
-		duration: string;
 		videoTitle: string;
 		onloadvideo: () => void;
 	} = $props();
@@ -78,7 +76,7 @@
 		<path d="M38 185h15m15 0h21m15 0h17" stroke="#545b69" stroke-width="4" />
 	</svg>
 	<span class="watch-brand" aria-hidden="true">CASIO</span>
-	<span class="watch-screen" aria-hidden="true"><span class="watch-play">▶</span>{duration}</span>
+	<span class="watch-screen" aria-hidden="true">4:20</span>
 	<span class="watch-hint" aria-hidden="true">{m.workbench_watch_hint()}</span>
 </button>
 
@@ -126,9 +124,6 @@
 		font: 700 var(--fs-small) var(--font-body);
 		color: #24392e;
 		line-height: 1;
-	}
-	.watch-play {
-		font-size: var(--fs-small);
 	}
 	.lcd {
 		transition: fill 180ms;

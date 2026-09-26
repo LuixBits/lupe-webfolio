@@ -156,7 +156,6 @@
 					<div class="watch-slot">
 						<CasioWatch
 							selected={videoIndex === watchIndex}
-							duration={watchVideo.duration ? duration(watchVideo.duration) : ''}
 							videoTitle={watchVideo.title}
 							onloadvideo={() => loadTape(watchIndex, true)}
 						/>
@@ -164,6 +163,7 @@
 				{/if}
 			</div>
 			<section class="liner" aria-labelledby="channel-about">
+				<div class="paper-light" aria-hidden="true"></div>
 				<svg class="coffee-ring" viewBox="0 0 180 160" fill="none" aria-hidden="true">
 					<g stroke="#87552e" stroke-linecap="round" stroke-linejoin="round">
 						<path
@@ -225,6 +225,10 @@
 	.workbench-scene {
 		position: relative;
 		isolation: isolate;
+		--lamp-glow: 0;
+	}
+	.lamp-lit {
+		--lamp-glow: 1;
 	}
 	.channel-counter {
 		display: grid;
@@ -505,15 +509,22 @@
 	}
 	.lamp-pool {
 		position: absolute;
-		z-index: -1;
+		z-index: 0;
 		pointer-events: none;
-		inset: 0 20% 0 -5%;
-		background: radial-gradient(ellipse at 23% 34%, #ffc77940, #d799441a 44%, transparent 68%);
-		opacity: 0;
+		inset: 0;
+		border-radius: inherit;
+		background: radial-gradient(
+			ellipse 42% 24rem at 42% 13rem,
+			#ffe6bda3 0%,
+			#ffdc9c73 20%,
+			#f8cb8740 43%,
+			#efb66e19 65%,
+			#efb66e05 83%,
+			#efb66e00 100%
+		);
+		mix-blend-mode: soft-light;
+		opacity: var(--lamp-glow);
 		transition: opacity 500ms ease;
-	}
-	.lamp-lit .lamp-pool {
-		opacity: 1;
 	}
 	.bench-tools {
 		position: relative;
@@ -533,8 +544,8 @@
 		position: relative;
 		align-self: end;
 		justify-self: center;
-		width: min(100%, 26rem);
-		margin-bottom: 1.5rem;
+		width: min(100%, 30rem);
+		margin-bottom: 0.2rem;
 	}
 	.plan-sheet {
 		position: absolute;
@@ -560,10 +571,28 @@
 		color: #34243f;
 		border: 1px solid #f8e3c5;
 		border-radius: 3px 3px 12px 3px;
-		background: #f7e9d3;
+		background: #e6d8c5;
 		box-shadow:
 			5px 7px 0 #160b2780,
 			0 18px 35px #09051445;
+	}
+	.paper-light {
+		position: absolute;
+		z-index: -1;
+		inset: 0;
+		border-radius: inherit;
+		pointer-events: none;
+		background: radial-gradient(
+			ellipse 72% 105% at 32% 0%,
+			#fff5dd 0%,
+			#fff0d2f2 23%,
+			#ffedcdab 44%,
+			#ffebca52 65%,
+			#ffebca14 82%,
+			#ffebca00 100%
+		);
+		opacity: var(--lamp-glow);
+		transition: opacity 500ms ease;
 	}
 	.coffee-ring {
 		position: absolute;
@@ -735,17 +764,27 @@
 		}
 		.bench-tools {
 			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-			height: 11.5rem;
-			gap: 1rem;
+			height: auto;
+			gap: 0.7rem 1rem;
 			padding: 0 0.8rem;
 		}
 		.keyboard-notes {
-			display: none;
+			grid-column: 1 / -1;
+			grid-row: 2;
+			width: min(100%, 26rem);
+			margin: 0;
+		}
+		.plan-sheet {
+			width: 7rem;
+			left: 0;
+			bottom: 2.5rem;
 		}
 		.lamp-slot {
 			width: min(100%, 10rem);
 		}
 		.watch-slot {
+			grid-column: 2;
+			grid-row: 1;
 			max-width: 100%;
 			padding-right: 0.7rem;
 		}
@@ -795,7 +834,8 @@
 			animation: none;
 		}
 		.screen-spill,
-		.lamp-pool {
+		.lamp-pool,
+		.paper-light {
 			transition: none;
 		}
 		.programme-tape {
