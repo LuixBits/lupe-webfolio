@@ -59,15 +59,14 @@
 				</svg>
 			{/snippet}
 			{@render reel(18)}
-			<span class="tape-art">
-				{#if video.poster}
-					<img src={video.poster} width="1280" height="720" alt="" loading="lazy" />
-				{:else}
-					<span class="tape-ribbon"></span>
-				{/if}
-			</span>
+			<span class="tape-ribbon"></span>
 			{@render reel(14)}
 		</span>
+		{#if video.poster}
+			<span class="tape-art" aria-hidden="true">
+				<img src={video.poster} width="1280" height="720" alt="" loading="lazy" />
+			</span>
+		{/if}
 		<span class="case-fasteners" aria-hidden="true"></span>
 	</span>
 </button>
@@ -95,8 +94,8 @@
 		display: flex;
 		flex-direction: column;
 		height: 100%;
-		gap: 0.55rem;
-		padding: 1rem 1rem 0.6rem;
+		gap: 0.35rem;
+		padding: 0.85rem 1rem 0.35rem;
 		border: 1px solid #655866;
 		border-radius: 6px 6px 4px 4px;
 		background:
@@ -146,8 +145,8 @@
 		align-items: center;
 		gap: 0.6rem;
 		flex: 1;
-		min-height: 3.8rem;
-		padding: 0.55rem 0.7rem;
+		min-height: 2.8rem;
+		padding: 0.35rem 0.7rem;
 		border: 1px solid #c8baa2;
 		border-left: 3px solid #95839f;
 		border-radius: 2px;
@@ -190,9 +189,9 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: 0.8rem;
-		width: 82%;
-		margin: 0 auto;
+		gap: 0.35rem;
+		width: calc(100% - 5.1rem);
+		margin: 0 0.2rem;
 		padding: 0.1rem 0.4rem;
 		border: 1px solid #6d627080;
 		border-radius: 7px;
@@ -217,23 +216,28 @@
 	.reel {
 		display: block;
 		flex: none;
-		width: 2.85rem;
-		height: 2.85rem;
+		width: 1.55rem;
+		height: 1.55rem;
 	}
 	.reel-hub {
 		transform-origin: 22px 22px;
 		transition: transform 450ms cubic-bezier(0.2, 0.7, 0.3, 1);
 	}
 	.tape-art {
+		position: absolute;
+		z-index: 1;
+		right: 1.05rem;
+		bottom: -0.2rem;
 		display: block;
 		width: 4.1rem;
-		min-width: 0;
-		padding: 2px;
-		border: 1px solid #b5a9a263;
-		border-radius: 1px;
-		background: #9a8d86;
-		box-shadow: 1px 1px 1px #0008;
-		transform: rotate(-2deg);
+		padding: 2px 2px 4px;
+		border: 1px solid #efe6ce;
+		border-radius: 1px 1px 3px 1px;
+		background: #e8dcc4;
+		box-shadow:
+			1px 2px 2px #09081188,
+			2px 4px 4px #09081140;
+		transform: rotate(4deg);
 	}
 	.tape-art img {
 		display: block;
@@ -244,8 +248,10 @@
 	}
 	.tape-ribbon {
 		display: block;
-		height: 1rem;
-		background: #392a32;
+		flex: 1;
+		height: 0.45rem;
+		border-block: 1px solid #826b6740;
+		background: linear-gradient(#443039, #1c1820);
 	}
 	.case-fasteners {
 		position: absolute;
@@ -305,10 +311,7 @@
 			padding-inline: 0.85rem;
 		}
 		.cassette-label {
-			padding: 0.5rem;
-		}
-		.tape-window {
-			width: 88%;
+			padding: 0.35rem 0.5rem;
 		}
 	}
 	@media (prefers-reduced-motion: reduce) {

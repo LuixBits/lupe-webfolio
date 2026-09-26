@@ -347,7 +347,7 @@
 		position: relative;
 		isolation: isolate;
 		display: grid;
-		gap: 0.8rem;
+		gap: 0.6rem;
 		padding: 0.9rem 1rem 1.1rem;
 		border: 1px solid #89758266;
 		border-radius: 4px;
@@ -358,7 +358,7 @@
 	}
 	.tape-slot {
 		position: relative;
-		padding: 0.3rem 0 0.75rem;
+		padding: 0.2rem 0 0.65rem;
 		perspective: 900px;
 	}
 	.tape-slot::after {
