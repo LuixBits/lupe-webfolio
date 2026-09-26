@@ -80,3 +80,34 @@ recipe and review checklist. The accepted workbench began at `9574d64`; lighting
 and personal objects were refined in `9b0b8b0`, and compact cassettes landed in
 `54814da`. Those commits record this design, not a requirement to copy its theme
 into every future scene.
+
+## Follow-up: workshop overview, 2026-09-27
+
+The [after-hours workshop plan](../plans/projects-after-hours-workshop.md)
+replaces the overview's rental shelves with a studio entrance and a compact
+software display counter. The owner selected this direction and requested a
+larger, more expressive room during implementation. The finished composition
+uses a full doorway, larger printed cover illustrations, a mounted neon sign,
+smoked glass, wood and a tiled threshold. The existing channel room remains the
+destination behind the door.
+
+The technical decisions above remain in effect. Semantic project links keep
+their URLs and return anchors. HTML, SVG and CSS provide the room without a new
+renderer. New objects live in `lib/projects/overview/`; the root layout selects
+the overview wall, navigation ledge and footer separately from the workbench and
+other project detail pages. All four existing projects appear once; empty rental
+slots have been removed.
+
+Navigation now measures the doorway aperture and translates as well as scales
+the departing room. Case selection lifts its software case. Snapshots preserve
+inherited theme variables and remap SVG IDs while remaining inert and hidden
+from assistive technology. The CRT and room light wait for navigation completion
+instead of using separate copies of the route duration. Returns restore scroll
+and the originating link after SvelteKit's queued fragment focus.
+
+Composition, artwork, motion, EN/DE layouts, reduced motion and SSR fallbacks
+were reviewed in Chromium. See the
+[implementation review](../reviews/projects-after-hours-workshop-2026-09-27.md)
+for scoped commits, exact checks, the production preview and the limits of the
+mocked player tests. Final owner review is still pending; the original accepted
+workbench and this ADR's historical context are preserved above.

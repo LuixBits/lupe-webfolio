@@ -1,6 +1,6 @@
 # Building handcrafted scenes
 
-This guide records how the Projects shelves and LuixBits workbench were made.
+This guide records how the Projects workshop and LuixBits workbench were made.
 Use it with [ADR-0007](adr/0007-handcrafted-projects-scenes.md) and
 [HANDOFF.md](../HANDOFF.md). Reuse the construction and review methods; choose
 objects and materials that belong to the next page's content.
@@ -16,7 +16,7 @@ Map the content and interactions before adding detail:
 
 | Content or action                     | Object                                      | Implementation to inspect                                                                              |
 | ------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Categories and project links          | Labelled rental shelves and tape jackets    | [Projects overview](../src/routes/projects/+page.svelte)                                               |
+| Categories and project links          | Studio doorway and supported software cases | [Projects overview](../src/routes/projects/+page.svelte)                                               |
 | Images, videos and demos              | CRT with real HTML media behind its opening | [CounterTv](../src/lib/projects/CounterTv.svelte), [CrtCabinet](../src/lib/projects/CrtCabinet.svelte) |
 | Choose an episode                     | Cassette in a rack                          | [VideoCassette](../src/lib/projects/workbench/VideoCassette.svelte)                                    |
 | Return to the project's shelf         | Remote with a back key                      | [BackToShelf](../src/lib/projects/BackToShelf.svelte)                                                  |
@@ -118,28 +118,46 @@ the room at the bottom, including the whole plug.
 Use a small number of deliberate movements. The channel's props have no idle
 animation loops; the overview retains its existing gentle neon hum.
 
-| Event                          | Accepted implementation                                                                                    |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| Enter a project from its shelf | Zoom from the clicked tape's position over 640ms. The new page settles over 470ms after a 170ms delay.     |
-| Open the CRT                   | Two dark shutters retract from a bright horizontal beam. Power-on takes 820ms; selecting media uses 460ms. |
-| Arrive during the shelf zoom   | Delay the CRT opening by 640ms so the two movements have a readable order.                                 |
-| Toggle the lamp                | Fade the receiving-surface light over 500ms.                                                               |
-| Hover or focus a cassette      | Lift and slightly turn the case over 280ms; turn its reel hubs once over 450ms.                            |
+| Event                      | Current implementation                                                                                       |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Enter the studio           | Measured doorway camera over 640ms on desktop; the 470ms arrival starts at 170ms. Compact entry takes 360ms. |
+| Select a software case     | Lift the case and dissolve into its detail view over 460ms, or 360ms on compact screens.                     |
+| Return to the overview     | Settle around the source object over 420ms, or 260ms on compact screens.                                     |
+| Open the CRT               | Two shutters retract from a horizontal beam. Power-on takes 820ms; selecting media uses 460ms.               |
+| Arrive during route motion | Hold the CRT and room light until the shared `moving` state clears.                                          |
+| Toggle the lamp            | Fade the receiving-surface light over 500ms.                                                                 |
+| Hover or focus a cassette  | Lift and slightly turn the case over 280ms; turn its reels once over 450ms.                                  |
 
-These timings describe the accepted version. Tune the next scene in the browser
-and preserve the relationship between its movements.
+Route timings live in [navigation.ts](../src/lib/projects/navigation.ts). Keep
+the reveal tied to completion when changing these values. The overview door
+opens farther on hover or focus over 220ms; reduced motion retains static focus
+feedback and removes that movement.
 
 [PowerOn](../src/lib/projects/PowerOn.svelte) is an overlay with no pointer
 events. It starts after mount, removes itself when finished and leaves the
-complete image visible for SSR and reduced motion.
+complete image visible for SSR and reduced motion. Its `hold` prop pauses the
+shutters during route movement; clearing that state starts the reveal timer.
 
-The [Projects layout](../src/routes/projects/+layout.svelte) coordinates route
-motion through `onNavigate`. It measures the selected tape for the zoom origin,
-keeps a fixed visual clone of the departing shelf, then animates the arriving
-page. The clone is inert and hidden from assistive technology; its IDs and tape
-lookup attributes are removed. A sequence counter rejects stale completions.
-Cleanup cancels animations and removes the clone on interruption or unmount.
-Return navigation restores focus to the source tape.
+The [Projects layout](../src/routes/projects/+layout.svelte) captures the source
+object in `beforeNavigate` and starts motion after `onNavigate` has committed the
+destination. The source scene is fixed to its departing viewport coordinates.
+Scaling around an off-centre doorway is not enough to centre it: the camera also
+translates by the difference between the aperture centre and viewport centre.
+Compact screens use much less travel.
+
+The clone is inert and hidden from assistive technology. Remove its HTML IDs,
+project lookup hooks and link destinations. Remap SVG IDs and every local paint
+reference together; deleting the IDs alone breaks gradients and patterns. Copy
+computed CSS custom properties before moving the clone outside its themed app.
+Keep doorway frames, furniture, local light and the threshold inside `.page` so
+they move with this snapshot. Only the broad backdrop stays in the route layer.
+
+A sequence counter rejects stale completions. Cleanup cancels animations and
+removes the clone after resize, motion-preference changes, navigation failure,
+superseding navigation and unmount. The remote restores the recorded overview
+scroll position. Browser history retains the router's scroll handling. Return
+focus and geometry measurement run after SvelteKit's queued fragment-focus task;
+otherwise an old hash can steal focus back from the originating project.
 
 The `projectNavigation` context exposes `moving` so the CRT and room can defer
 their reveals. Keep the layout alive between project routes. In the
@@ -240,6 +258,13 @@ under `/tmp` are session artifacts, not a committed test suite. Recreate the
 runner as needed from the checks above. Tests that mock YouTube verify embed
 creation, selection and focus, not real provider playback.
 
-The docked radial menu can still overlap content on narrow screens. That is an
-existing site-wide limitation recorded in the handoff, not a cassette fix or a
-reason to accept new overflow.
+The Projects overview now places the compact wheel in a normal-flow ledge on
+narrow and short screens. Other pages retain the existing corner placement.
+Keep this distinction explicit when testing a new route.
+
+For isolated offline validation, copy `project.inlang/cache/plugins/` alongside
+the tracked source before compiling Paraglide. Without those cached plugins,
+the compiler can warn about failed downloads yet emit an empty message module.
+Verify the compile output and run `npm run check` before treating the build as
+valid. The workshop's [review record](reviews/projects-after-hours-workshop-2026-09-27.md)
+contains the verified preview and temporary browser artifacts.

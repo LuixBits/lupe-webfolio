@@ -1,8 +1,11 @@
 # Projects: the after-hours workshop
 
 Date: 2026-09-27. The owner selected the after-hours workshop direction and
-requested suitable transitions. This document is the design and implementation
-plan for a future session. The application has not been changed for this plan.
+requested suitable transitions. The proposal below was implemented on the same
+date; the owner also requested a larger, more expressive room during the work.
+See the [implementation review](../reviews/projects-after-hours-workshop-2026-09-27.md)
+for the final composition, scoped milestones, preview and completed checks.
+The original proposal is retained below as the design record.
 
 ## Read first
 

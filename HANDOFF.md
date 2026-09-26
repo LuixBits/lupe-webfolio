@@ -39,6 +39,30 @@ Node 22. Paraglide (i18n) messages compile to `src/lib/paraglide/` (git-ignored)
 on dev/build; if `$lib/paraglide/*` is missing run
 `npx @inlang/paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide`.
 
+## Projects workshop — 2026-09-27
+
+The [after-hours workshop plan](docs/plans/projects-after-hours-workshop.md) is
+implemented. Projects now has a studio doorway, illustrated software cases in
+a shared display cabinet, a mounted sign and a tiled threshold. The owner asked
+for a larger, more expressive room during implementation; the final covers and
+cabinet reflect that request. The four existing project links and category
+anchors remain intact.
+
+Stable production review: **http://127.0.0.1:5191/projects**, including `/de/projects`.
+It runs commit `40390dd` from `/tmp/lupe-workshop-validation-2AaOVw` with
+`HOST=127.0.0.1 PORT=5191 node build/index.js`. Shared dev remains on port 5190.
+See the [implementation review](docs/reviews/projects-after-hours-workshop-2026-09-27.md)
+for milestones, the browser matrix and artifact paths. Checks and production
+build passed; YouTube lifecycle tests used a mocked provider response. The live
+service has not been restarted.
+
+The overview wheel uses a normal-flow ledge up to 960px and on short landscape
+screens. Other routes retain their positioning. Project navigation measures the
+doorway/case, preserves themed SVG snapshots and restores the source link and
+scroll. CRT and channel light wait for motion completion. Reduced motion and
+no-JavaScript views retain the complete content. Locale changes and category
+jumps do not replay the overview entrance.
+
 ## Interaction model
 
 - **Home (`/`) = the hub:** four full-bleed themed scene squares (About
@@ -83,13 +107,14 @@ on dev/build; if `$lib/paraglide/*` is missing run
   deepest rock tone for a seamless join (the page's TreeLayer overshoots
   main's padding by 2.5rem top+bottom for the same reason).
 - `routes/*/+page.svelte` — each section has a bespoke presentation:
-  About = Herbarium Folio + **Grove walk**, Projects = VHS rental wall,
+  About = Herbarium Folio + **Grove walk**, Projects = after-hours workshop,
   Hobbies = Star Atlas, CV = Sounding Line (depth-as-time). CV's
   education/positions live in `lib/content/cv.ts`.
 - **LuixBits workbench** (`/projects/my-channel`, including localized routes)
   keeps the Projects palette and CRT but has its own plaster wall, mounted
   neon title, wooden desk, and cable footer. The root layout selects this
-  room; other Projects routes keep the rental-wall scenery. Artwork lives in
+  room; the overview has its own workshop entrance, and other detail routes
+  keep the rental-wall scenery. Artwork lives in
   `lib/projects/workbench/`. `ChannelPlayer` binds the TV's `powered` state
   to the blue wall glow; the desk lamp toggles its warm pool of light. The
   Casio is one keyboard-accessible button that loads the `casio-nixos` video,
@@ -166,8 +191,9 @@ class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
 
 ## Owner to fill (placeholder content)
 
-- Real projects (shelves show ghost "rental slot" placeholders), real hobby
-  photos/videos (Rick Astley + stock shots are placeholders), CV
+- Orbit Toy and Scrum Poker still contain sample project content. The overview
+  renders the actual inventory without empty slots.
+- Real hobby photos/videos (Rick Astley + stock shots are placeholders), CV
   `education[]`/`positions[]` entries (marked "— placeholder"), and the About
   page's optional herbarium fields (epithet/since/link notes — see
   `routes/about/+page.svelte` fallbacks).
@@ -181,8 +207,8 @@ class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
 
 ## Known open items
 
-- Mobile: the docked wheel overlays content mid-scroll on narrow screens
-  (site-wide pattern; consider fading/shrinking the docked wheel on scroll).
+- Outside the Projects overview, the docked wheel can still overlay content
+  mid-scroll on narrow screens. The overview now has its own navigation ledge.
 - Handoff-era open question, still unconfirmed: the wheel docks to the corner
   **opposite** its hub quadrant — confirm the owner wants that end position.
 - Optional i18n nicety: singular `hobbies_plate`/`hobbies_signal` keys would
