@@ -16,7 +16,8 @@
 		grow = undefined,
 		delay = 0,
 		radii = { tl: 6, tr: 34, br: 6, bl: 34 },
-		thickness
+		thickness,
+		leafSide = 'down'
 	}: {
 		/** 'underline' — wavy branch with twigs + hanging leaves (section rules);
 		 *  'frame' — draws around a card's rounded box, leaf at the round corner;
@@ -32,6 +33,9 @@
 		/** Corner radii in px for 'frame'; must match the box's border-radius. */
 		radii?: Radii;
 		thickness?: number;
+		/** underline only: which side its leaves grow from — 'down' hangs them
+		 *  below the rule (default), 'up' perches them on top (title branch). */
+		leafSide?: 'down' | 'up';
 	} = $props();
 
 	/* A structural line that grows like wood instead of appearing: the main
@@ -100,13 +104,14 @@
 				});
 			}
 			if (variant === 'underline') {
+				const up = leafSide === 'up';
 				const nL = Math.min(6, Math.max(2, Math.round(w / 200)));
 				for (let i = 0; i < nL; i++) {
 					const t = 0.12 + (0.8 * i) / Math.max(1, nL - 1) + (rand() - 0.5) * 0.06;
 					lv.push({
 						x: +(1 + (w - 2) * t).toFixed(1),
-						y: y + 1.5,
-						a: +(180 + (rand() * 2 - 1) * 38).toFixed(1),
+						y: up ? y - 1.5 : y + 1.5,
+						a: +((up ? 0 : 180) + (rand() * 2 - 1) * 38).toFixed(1),
 						s: +(0.5 + rand() * 0.22).toFixed(2),
 						t
 					});
@@ -204,7 +209,14 @@
 	});
 </script>
 
-<span class="living-line" class:on={armed} class:ready class:instant bind:this={root} aria-hidden="true">
+<span
+	class="living-line"
+	class:on={armed}
+	class:ready
+	class:instant
+	bind:this={root}
+	aria-hidden="true"
+>
 	{#if d && W > 0}
 		<svg viewBox="0 0 {vbW} {vbH}">
 			<path

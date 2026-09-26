@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { about } from '$lib/content/about';
-	import { resolveLocalized } from '$lib/content/schema';
+	import { resolveLocalized, type Chapter } from '$lib/content/schema';
 	import { getLocale } from '$lib/paraglide/runtime';
 	import * as m from '$lib/paraglide/messages';
 	import Garden from '$lib/garden/Garden.svelte';
-	import Spine from '$lib/garden/Spine.svelte';
+	import Crown from '$lib/garden/Crown.svelte';
+	import Trunk from '$lib/garden/Trunk.svelte';
+	import Opening from '$lib/garden/Opening.svelte';
 	import LivingLine from '$lib/garden/LivingLine.svelte';
 	import { revealOnce } from '$lib/garden/reveal';
 
@@ -24,56 +26,121 @@
 	// "m"), so only grant it when the first word survives ::first-letter intact.
 	const dropcapOk = $derived(!/^\p{L}['’]/u.test(bioParas[0] ?? ''));
 
-	// Circled figure markers pinned to real features of the specimen (low-left
-	// leaf cluster, rightmost branch, crown) — hand-tuned % of the plate art
-	// box, safe because growPlant(seed 'about') is pure + seeded, so server and
-	// client render the identical plant on every visit.
+	// The descent: the page is one tree, crown (today) to underground (where
+	// it began). Content order in about.ts is the page order; these split it
+	// at the ground line.
+	const UNDERGROUND = new Set(['roots', 'mycelium']);
+	const canopyChapters = $derived(about.chapters.filter((c) => !UNDERGROUND.has(c.id)));
+	const undergroundChapters = $derived(about.chapters.filter((c) => UNDERGROUND.has(c.id)));
+
+	// Circled figure markers, pinned over the portrait in the bower — herbarium
+	// annotations of the specimen "Luiz Perren". Hand-tuned % of the bower box.
 	const FIG_POS = [
-		{ x: 33, y: 68.5 },
-		{ x: 64, y: 54.5 },
-		{ x: 46.5, y: 21 }
+		{ x: 26, y: 27 },
+		{ x: 76, y: 47 },
+		{ x: 42, y: 79 }
 	];
 	const figs = $derived(about.highlights.slice(0, FIG_POS.length));
 </script>
 
-<svelte:head><title>{m.nav_about()} — {about.name}</title><meta name="description" content={m.meta_desc_about()} /></svelte:head>
+<svelte:head
+	><title>{m.nav_about()} — {about.name}</title><meta
+		name="description"
+		content={m.meta_desc_about()}
+	/></svelte:head
+>
 
 <!-- `living` swaps the static borders for grown LivingLines (JS only, so
      SSR/no-JS keeps plain borders). -->
 <div class="page page--folio" class:living={hydrated}>
-	<section id="bio" class="section folio">
-		<div class="folio-text">
-			<p class="eyebrow">{m.about_folio_eyebrow()} · {about.name}</p>
-			<h1>{m.nav_about()}</h1>
-			<p class="lead">{resolveLocalized(about.role, locale)}</p>
-			{#each bioParas as para, i (i)}
-				<p class="bio-para" class:dropcap={i === 0 && dropcapOk}>{para}</p>
-			{/each}
-		</div>
+	<!-- SKY + CROWN: the page is one tree; you arrive at the top of it. -->
+	<Crown seed="about-crown" />
 
-		<figure class="plate">
-			<div class="plate-paper">
-				<span class="tape tape--tl" aria-hidden="true"></span>
-				<span class="tape tape--tr" aria-hidden="true"></span>
-				<span class="tape tape--bl" aria-hidden="true"></span>
-				<span class="tape tape--br" aria-hidden="true"></span>
-				<div class="plate-art">
-					<Garden
-						seed="about"
-						width={240}
-						height={260}
-						originX={112}
-						originY={246}
-						heading={0}
-						variant="branch"
-						duration={2600}
-					/>
-					<svg class="pollen" viewBox="0 0 240 260" aria-hidden="true">
-						<circle class="mote" cx="58" cy="84" r="1.7" />
-						<circle class="mote" cx="178" cy="60" r="1.3" />
-						<circle class="mote" cx="196" cy="150" r="1.5" />
-						<circle class="mote" cx="44" cy="196" r="1.2" />
-						<circle class="mote" cx="160" cy="222" r="1.6" />
+	<!-- THE TREE: everything above ground hangs off the trunk in the left
+	     gutter. Scrolling down descends it — and travels back in time. -->
+	<div class="tree">
+		<Trunk seed="about-trunk" />
+
+		<section id="bio" class="section folio">
+			<div class="folio-text">
+				<!-- the leaf bush the bio nests in -->
+				<Opening seed="bush-bio" variant="nest" />
+				<p class="eyebrow">{m.about_folio_eyebrow()} · {about.name}</p>
+				<h1 class="living-h2">
+					{m.nav_about()}<LivingLine seed="topmost-branch" leafSide="up" thickness={3} />
+				</h1>
+				<p class="lead">{resolveLocalized(about.role, locale)}</p>
+				{#each bioParas as para, i (i)}
+					<p class="bio-para" class:dropcap={i === 0 && dropcapOk}>{para}</p>
+				{/each}
+			</div>
+
+			<figure class="plate">
+				<div class="bower-box">
+					<!-- the bower: a square of woven branches and leaves -->
+					<Opening seed="about-bower" variant="bower" light={false} />
+					<div class="portrait">
+						{#if about.portrait}
+							<img
+								src={about.portrait.src}
+								width={about.portrait.width}
+								height={about.portrait.height}
+								alt={resolveLocalized(about.portrait.alt, locale)}
+							/>
+						{:else}
+							<!-- Leafy stand-in until a real photo lands — see the commented
+							     `portrait` field in lib/content/about.ts. -->
+							<svg class="portrait-placeholder" viewBox="0 0 240 300" aria-hidden="true">
+								<defs>
+									<radialGradient id="pp-light" cx="0.5" cy="0.35" r="0.7">
+										<stop offset="0" stop-color="#fffbe8" stop-opacity="0.8" />
+										<stop offset="1" stop-color="#fffbe8" stop-opacity="0" />
+									</radialGradient>
+								</defs>
+								<rect
+									width="240"
+									height="300"
+									fill="color-mix(in srgb, var(--garden-leaf, #6bbf7b) 14%, var(--bg, #eef5ef))"
+								/>
+								<ellipse cx="120" cy="105" rx="120" ry="110" fill="url(#pp-light)" />
+								<circle
+									cx="120"
+									cy="112"
+									r="44"
+									fill="color-mix(in srgb, var(--garden-stem, #3f6d4e) 30%, var(--bg, #eef5ef))"
+								/>
+								<path
+									d="M34 300 C 48 214 82 178 120 178 C 158 178 192 214 206 300 Z"
+									fill="color-mix(in srgb, var(--garden-stem, #3f6d4e) 30%, var(--bg, #eef5ef))"
+								/>
+								<path
+									d="M120 66 C 122 58 126 54 131 52"
+									fill="none"
+									stroke="var(--garden-stem, #3f6d4e)"
+									stroke-width="2"
+									stroke-linecap="round"
+								/>
+								<g transform="translate(120 66) rotate(-16) scale(1.15)">
+									<path
+										d="M0 0 C 5 -4 5 -12 0 -16 C -5 -12 -5 -4 0 0 Z"
+										fill="var(--garden-leaf, #6bbf7b)"
+									/>
+								</g>
+								<g transform="translate(133 55) rotate(26) scale(0.9)">
+									<path
+										d="M0 0 C 5 -4 5 -12 0 -16 C -5 -12 -5 -4 0 0 Z"
+										fill="color-mix(in srgb, var(--garden-leaf, #6bbf7b) 55%, var(--garden-stem, #3f6d4e))"
+									/>
+								</g>
+							</svg>
+						{/if}
+					</div>
+					<svg class="pollen" viewBox="0 0 240 300" aria-hidden="true">
+						<circle class="mote" cx="58" cy="94" r="1.7" />
+						<circle class="mote" cx="178" cy="66" r="1.3" />
+						<circle class="mote" cx="196" cy="170" r="1.5" />
+						<circle class="mote" cx="44" cy="226" r="1.2" />
+						<circle class="mote" cx="160" cy="258" r="1.6" />
 					</svg>
 					{#each figs as h, i (i)}
 						<a
@@ -88,229 +155,234 @@
 						</a>
 					{/each}
 				</div>
-			</div>
-			<figcaption class="plate-label">
-				<span class="latin">{about.name}</span>
-				<span class="det">{m.about_plate_det()}</span>
-			</figcaption>
-		</figure>
-	</section>
-
-	{#if about.highlights.length}
-		<section class="section" aria-labelledby="notes-h">
-			<h2 id="notes-h" class="living-h2">
-				{m.about_notes_title()}<LivingLine seed="ul-notes" />
-			</h2>
-			<ol class="notes">
-				{#each about.highlights as h, i (i)}
-					<li id="note-{i}" style="--d:{i}">
-						<span class="fig-dot fig-dot--static" aria-hidden="true">{i + 1}</span>
-						<div class="note-body">
-							<LivingLine variant="stem" seed="note-{i}" delay={340 + i * 80} />
-							<h3>{resolveLocalized(h.title, locale)}</h3>
-							<p>{resolveLocalized(h.body, locale)}</p>
-						</div>
-					</li>
-				{/each}
-			</ol>
+				<figcaption class="plate-label">
+					<span class="latin">{about.name}</span>
+					<span class="det">{m.about_plate_det()}</span>
+				</figcaption>
+			</figure>
 		</section>
-	{/if}
 
-	<section id="grove" class="section grove-head" aria-labelledby="grove-h">
-		<h2 id="grove-h" class="living-h2">
-			{m.about_grove_title()}<LivingLine seed="ul-grove" />
-		</h2>
-		<p class="seeds-hint">{m.about_grove_hint()}</p>
-	</section>
-
-	<div class="grove">
-		<Spine seed="about-spine" />
-		{#each about.chapters as ch (ch.id)}
-			{@const paras = resolveLocalized(ch.body, locale).split('\n\n')}
-			<section
-				class="chapter chapter--{ch.id}"
-				class:pending={hydrated && !revealed[ch.id]}
-				class:in={!!revealed[ch.id]}
-				use:revealOnce={() => (revealed[ch.id] = true)}
-				aria-labelledby="grove-{ch.id}"
-			>
-				<p class="kicker sprout" style="--d:0">{resolveLocalized(ch.kicker, locale)}</p>
-				<h3 id="grove-{ch.id}" class="sprout" style="--d:1">
-					{resolveLocalized(ch.title, locale)}
-				</h3>
-				{#if ch.id === 'pioneer'}
-					<!-- Floated before the prose so the paragraphs wrap around the tree. -->
-					<div class="pioneer-fig sprout" style="--d:2" aria-hidden="true">
-						<!-- Params picked by bbox scan: fills 240×300 as a tall birch-like
-						     pioneer; smaller leaves keep the dense crown readable. -->
-						<Garden
-							seed="about-pioneer-4"
-							width={240}
-							height={300}
-							originX={120}
-							originY={294}
-							heading={0}
-							iterations={5}
-							step={4.4}
-							angle={36}
-							leafScale={0.5}
-							strokeWidth={4.4}
-							duration={4200}
-							start={!!revealed[ch.id]}
-						/>
-					</div>
-				{/if}
-				{#each paras as para, pi (pi)}
-					<p class="chapter-para sprout" style="--d:{2 + pi}">{para}</p>
-				{/each}
-				{#if ch.sprouts.length}
-					<ul class="leafcards">
-						{#each ch.sprouts as s, si (si)}
-							<li class="leafcard sprout" style="--d:{2 + paras.length + si}">
-								<LivingLine
-									variant="frame"
-									seed="card-{ch.id}-{si}"
-									radii={si % 2 === 0
-										? { tl: 6, tr: 34, br: 6, bl: 34 }
-										: { tl: 34, tr: 6, br: 34, bl: 6 }}
-									grow={!!revealed[ch.id]}
-									delay={(2 + paras.length + si) * 95 + 250}
-								/>
-								<h4>{resolveLocalized(s.title, locale)}</h4>
-								<p>{resolveLocalized(s.body, locale)}</p>
-							</li>
-						{/each}
-					</ul>
-				{/if}
-				{#if ch.id === 'roots'}
-					<!-- The root grammar grows narrow, so the system is composed: a deep
-					     taproot plus two slanted flankers sharing the same soil point. -->
-					<div class="rootbed" aria-hidden="true">
-						<LivingLine
-							variant="soil"
-							seed="soil-roots"
-							grow={!!revealed[ch.id]}
-							delay={(2 + paras.length) * 95}
-						/>
-						<div class="bed-layer">
-							<Garden
-								seed="about-roots-6"
-								width={320}
-								height={190}
-								originX={160}
-								originY={4}
-								variant="root"
-								iterations={5}
-								step={3}
-								strokeWidth={3.4}
-								duration={3400}
-								start={!!revealed[ch.id]}
-							/>
-						</div>
-						<div class="bed-layer">
-							<Garden
-								seed="about-roots-east"
-								width={320}
-								height={190}
-								originX={160}
-								originY={4}
-								variant="root"
-								heading={142}
-								step={4}
-								duration={2800}
-								start={!!revealed[ch.id]}
-							/>
-						</div>
-						<div class="bed-layer">
-							<Garden
-								seed="about-roots-west"
-								width={320}
-								height={190}
-								originX={160}
-								originY={4}
-								variant="root"
-								heading={226}
-								step={3.3}
-								duration={3800}
-								start={!!revealed[ch.id]}
-							/>
-						</div>
-					</div>
-				{:else if ch.id === 'mycelium'}
-					<div class="mycelium-bed" aria-hidden="true">
-						<LivingLine
-							variant="soil"
-							seed="soil-mycelium"
-							grow={!!revealed[ch.id]}
-							delay={(2 + paras.length) * 95}
-						/>
-						<!-- Wide 620-unit canvas so the two networks root far apart and
-						     reach toward each other, almost touching mid-bed. -->
-						<div class="bed-layer">
-							<Garden
-								seed="about-mycelium-east-2"
-								width={620}
-								height={150}
-								originX={110}
-								originY={8}
-								variant="root"
-								heading={115}
-								step={7.5}
-								duration={3200}
-								start={!!revealed[ch.id]}
-							/>
-						</div>
-						<div class="bed-layer">
-							<Garden
-								seed="about-mycelium-west-1"
-								width={620}
-								height={150}
-								originX={510}
-								originY={8}
-								variant="root"
-								heading={245}
-								step={7.5}
-								duration={3600}
-								start={!!revealed[ch.id]}
-							/>
-						</div>
-					</div>
-				{/if}
+		{#if about.highlights.length}
+			<section class="section notes-section" aria-labelledby="notes-h">
+				<Opening seed="open-notes" variant="sparse" bough />
+				<h2 id="notes-h" class="living-h2">
+					{m.about_notes_title()}<LivingLine seed="ul-notes" />
+				</h2>
+				<ol class="notes">
+					{#each about.highlights as h, i (i)}
+						<li id="note-{i}" style="--d:{i}">
+							<span class="fig-dot fig-dot--static" aria-hidden="true">{i + 1}</span>
+							<div class="note-body">
+								<LivingLine variant="stem" seed="note-{i}" delay={340 + i * 80} />
+								<h3>{resolveLocalized(h.title, locale)}</h3>
+								<p>{resolveLocalized(h.body, locale)}</p>
+							</div>
+						</li>
+					{/each}
+				</ol>
 			</section>
+		{/if}
+
+		<section id="grove" class="section grove-head" aria-labelledby="grove-h">
+			<h2 id="grove-h" class="living-h2">
+				{m.about_grove_title()}<LivingLine seed="ul-grove" />
+			</h2>
+			<p class="seeds-hint">{m.about_grove_hint()}</p>
+		</section>
+
+		{#each canopyChapters as ch (ch.id)}
+			{@render chapterBlock(ch)}
 		{/each}
 	</div>
 
-	<section id="contact" class="section">
-		<h2 class="living-h2">{m.nav_about_contact()}<LivingLine seed="ul-contact" /></h2>
-		<p class="seeds-hint">{m.about_seeds_hint()}</p>
-		<ul class="packets">
-			{#each about.links as l, i (l.url)}
-				<li>
-					<a
-						class="packet"
-						href={l.url}
-						target={l.url.startsWith('http') ? '_blank' : undefined}
-						rel={l.url.startsWith('http') ? 'noopener' : undefined}
-					>
-						<LivingLine
-							variant="frame"
-							seed="packet-{i}"
-							radii={{ tl: 3, tr: 3, br: 9, bl: 9 }}
-							delay={i * 150}
-						/>
-						<span class="flap" aria-hidden="true"></span>
-						<svg class="seeds" viewBox="0 0 64 40" aria-hidden="true">
-							<ellipse cx="18" cy="22" rx="3.1" ry="5.4" transform="rotate(-24 18 22)" />
-							<ellipse cx="32" cy="18" rx="3.1" ry="5.4" transform="rotate(10 32 18)" />
-							<ellipse cx="46" cy="23" rx="3.1" ry="5.4" transform="rotate(32 46 23)" />
-							<ellipse cx="27" cy="30" rx="2.5" ry="4.4" transform="rotate(-52 27 30)" />
-						</svg>
-						<span class="packet-label">{l.label}</span>
-					</a>
-				</li>
+	<!-- UNDERGROUND: past the ground line, time runs deepest — roots, the
+	     mycelium network, and finally seeds to take with you. -->
+	<div class="underground">
+		<div class="ground" aria-hidden="true">
+			<LivingLine variant="soil" seed="ground" thickness={2.5} />
+		</div>
+		{#each undergroundChapters as ch (ch.id)}
+			{@render chapterBlock(ch)}
+		{/each}
+
+		<section id="contact" class="section">
+			<h2 class="living-h2">{m.nav_about_contact()}<LivingLine seed="ul-contact" /></h2>
+			<p class="seeds-hint">{m.about_seeds_hint()}</p>
+			<ul class="packets">
+				{#each about.links as l, i (l.url)}
+					<li>
+						<a
+							class="packet"
+							href={l.url}
+							target={l.url.startsWith('http') ? '_blank' : undefined}
+							rel={l.url.startsWith('http') ? 'noopener' : undefined}
+						>
+							<LivingLine
+								variant="frame"
+								seed="packet-{i}"
+								radii={{ tl: 3, tr: 3, br: 9, bl: 9 }}
+								delay={i * 150}
+							/>
+							<span class="flap" aria-hidden="true"></span>
+							<svg class="seeds" viewBox="0 0 64 40" aria-hidden="true">
+								<ellipse cx="18" cy="22" rx="3.1" ry="5.4" transform="rotate(-24 18 22)" />
+								<ellipse cx="32" cy="18" rx="3.1" ry="5.4" transform="rotate(10 32 18)" />
+								<ellipse cx="46" cy="23" rx="3.1" ry="5.4" transform="rotate(32 46 23)" />
+								<ellipse cx="27" cy="30" rx="2.5" ry="4.4" transform="rotate(-52 27 30)" />
+							</svg>
+							<span class="packet-label">{l.label}</span>
+						</a>
+					</li>
+				{/each}
+			</ul>
+		</section>
+	</div>
+
+	{#snippet chapterBlock(ch: Chapter)}
+		{@const paras = resolveLocalized(ch.body, locale).split('\n\n')}
+		<section
+			class="chapter chapter--{ch.id}"
+			class:pending={hydrated && !revealed[ch.id]}
+			class:in={!!revealed[ch.id]}
+			use:revealOnce={() => (revealed[ch.id] = true)}
+			aria-labelledby="grove-{ch.id}"
+		>
+			{#if !UNDERGROUND.has(ch.id)}
+				<!-- an opening in the foliage, connected to the trunk by a bough -->
+				<Opening seed="open-{ch.id}" variant="sparse" bough grow={!!revealed[ch.id]} />
+			{/if}
+			<p class="kicker sprout" style="--d:0">{resolveLocalized(ch.kicker, locale)}</p>
+			<h3 id="grove-{ch.id}" class="sprout" style="--d:1">
+				{resolveLocalized(ch.title, locale)}
+			</h3>
+			{#if ch.id === 'pioneer'}
+				<!-- Floated before the prose so the paragraphs wrap around the tree. -->
+				<div class="pioneer-fig sprout" style="--d:2" aria-hidden="true">
+					<!-- Params picked by bbox scan: fills 240×300 as a tall birch-like
+					     pioneer; smaller leaves keep the dense crown readable. -->
+					<Garden
+						seed="about-pioneer-4"
+						width={240}
+						height={300}
+						originX={120}
+						originY={294}
+						heading={0}
+						iterations={5}
+						step={4.4}
+						angle={36}
+						leafScale={0.5}
+						strokeWidth={4.4}
+						duration={4200}
+						start={!!revealed[ch.id]}
+					/>
+				</div>
+			{/if}
+			{#each paras as para, pi (pi)}
+				<p class="chapter-para sprout" style="--d:{2 + pi}">{para}</p>
 			{/each}
-		</ul>
-	</section>
+			{#if ch.sprouts.length}
+				<ul class="leafcards">
+					{#each ch.sprouts as s, si (si)}
+						<li class="leafcard sprout" style="--d:{2 + paras.length + si}">
+							<LivingLine
+								variant="frame"
+								seed="card-{ch.id}-{si}"
+								radii={si % 2 === 0
+									? { tl: 6, tr: 34, br: 6, bl: 34 }
+									: { tl: 34, tr: 6, br: 34, bl: 6 }}
+								grow={!!revealed[ch.id]}
+								delay={(2 + paras.length + si) * 95 + 250}
+							/>
+							<h4>{resolveLocalized(s.title, locale)}</h4>
+							<p>{resolveLocalized(s.body, locale)}</p>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+			{#if ch.id === 'roots'}
+				<!-- The root grammar grows narrow, so the system is composed: a deep
+				     taproot plus two slanted flankers sharing the same soil point. -->
+				<div class="rootbed" aria-hidden="true">
+					<div class="bed-layer">
+						<Garden
+							seed="about-roots-6"
+							width={320}
+							height={190}
+							originX={160}
+							originY={4}
+							variant="root"
+							iterations={5}
+							step={3}
+							strokeWidth={3.4}
+							duration={3400}
+							start={!!revealed[ch.id]}
+						/>
+					</div>
+					<div class="bed-layer">
+						<Garden
+							seed="about-roots-east"
+							width={320}
+							height={190}
+							originX={160}
+							originY={4}
+							variant="root"
+							heading={142}
+							step={4}
+							duration={2800}
+							start={!!revealed[ch.id]}
+						/>
+					</div>
+					<div class="bed-layer">
+						<Garden
+							seed="about-roots-west"
+							width={320}
+							height={190}
+							originX={160}
+							originY={4}
+							variant="root"
+							heading={226}
+							step={3.3}
+							duration={3800}
+							start={!!revealed[ch.id]}
+						/>
+					</div>
+				</div>
+			{:else if ch.id === 'mycelium'}
+				<div class="mycelium-bed" aria-hidden="true">
+					<!-- Wide 620-unit canvas so the two networks root far apart and
+					     reach toward each other, almost touching mid-bed. -->
+					<div class="bed-layer">
+						<Garden
+							seed="about-mycelium-east-2"
+							width={620}
+							height={150}
+							originX={110}
+							originY={8}
+							variant="root"
+							heading={115}
+							step={7.5}
+							duration={3200}
+							start={!!revealed[ch.id]}
+						/>
+					</div>
+					<div class="bed-layer">
+						<Garden
+							seed="about-mycelium-west-1"
+							width={620}
+							height={150}
+							originX={510}
+							originY={8}
+							variant="root"
+							heading={245}
+							step={7.5}
+							duration={3600}
+							start={!!revealed[ch.id]}
+						/>
+					</div>
+				</div>
+			{/if}
+		</section>
+	{/snippet}
 </div>
 
 <style>
@@ -356,20 +428,31 @@
 		color: var(--garden-stem, var(--accent));
 	}
 
-	/* ---- the specimen sheet ---- */
-	.plate-paper {
+	/* ---- the bower: a square of woven branches and leaves holding the
+	   portrait (the Opening component draws the frame + foliage) ---- */
+	.bower-box {
 		position: relative;
-		padding: 1.3rem 1.3rem 0.6rem;
-		background: color-mix(in srgb, var(--bg) 60%, white);
-		border: 1px solid color-mix(in srgb, var(--garden-stem, var(--accent)) 35%, transparent);
-		outline: 1px solid color-mix(in srgb, var(--garden-stem, var(--accent)) 22%, transparent);
-		outline-offset: 5px;
-		border-radius: 2px;
-		box-shadow: 0 22px 44px -26px color-mix(in srgb, var(--garden-stem, #3f6d4e) 55%, transparent);
+		aspect-ratio: 4 / 5;
 	}
-	.plate-art {
-		position: relative;
-		aspect-ratio: 240 / 260;
+	.portrait {
+		position: absolute;
+		inset: 10px;
+		border-radius: 12px;
+		overflow: hidden;
+		background: color-mix(in srgb, var(--garden-leaf, #6bbf7b) 12%, var(--bg));
+		box-shadow: inset 0 0 36px -10px color-mix(in srgb, #16301f 45%, transparent);
+	}
+	.portrait img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+	.portrait-placeholder {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
 	}
 	.pollen {
 		position: absolute;
@@ -381,36 +464,6 @@
 	.mote {
 		fill: var(--garden-leaf, var(--accent));
 		opacity: 0.45;
-	}
-
-	/* mounting tape across each corner */
-	.tape {
-		position: absolute;
-		width: 3.3rem;
-		height: 1rem;
-		background: color-mix(in srgb, var(--slice-bg) 30%, transparent);
-		box-shadow: 0 1px 2px color-mix(in srgb, var(--garden-stem, #3f6d4e) 12%, transparent);
-		z-index: 3;
-	}
-	.tape--tl {
-		top: -0.1rem;
-		left: -1.15rem;
-		transform: rotate(-45deg);
-	}
-	.tape--tr {
-		top: -0.1rem;
-		right: -1.15rem;
-		transform: rotate(45deg);
-	}
-	.tape--bl {
-		bottom: -0.1rem;
-		left: -1.15rem;
-		transform: rotate(45deg);
-	}
-	.tape--br {
-		bottom: -0.1rem;
-		right: -1.15rem;
-		transform: rotate(-45deg);
 	}
 
 	/* herbarium determination label */
@@ -580,14 +633,93 @@
 		font-size: 0.98rem;
 	}
 
-	/* ---- the grove walk ---- */
-	.grove-head {
-		margin-bottom: 1.25rem;
+	/* ---- the tree: sky above, crown, trunk gutter, ground, underground ---- */
+	.page--folio {
+		position: relative;
 	}
-	.grove {
+	/* SKY: a bluish wash over the crown, full-bleed, fading into the garden. */
+	.page--folio::before {
+		content: '';
+		position: absolute;
+		top: -2rem;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 100vw;
+		height: min(72vh, 640px);
+		background: linear-gradient(
+			color-mix(in srgb, #bcdcee 52%, var(--bg)),
+			color-mix(in srgb, #bcdcee 20%, var(--bg)) 55%,
+			transparent
+		);
+		z-index: -1;
+		pointer-events: none;
+	}
+	/* CROWN: the canopy band spans the full viewport over the sky. */
+	.page--folio > :global(.crown) {
+		position: relative;
+		height: clamp(110px, 18vw, 190px);
+		margin: -3.5rem calc(50% - 50vw) 0.75rem;
+	}
+	/* THE TREE + UNDERGROUND: both keep the trunk gutter so every opening
+	   hangs off the same line. */
+	.tree,
+	.underground {
 		position: relative;
 		padding-left: clamp(2.6rem, 8vw, 4.25rem);
-		margin-bottom: 3.5rem;
+	}
+	.underground {
+		padding-bottom: 1rem;
+		margin-bottom: 2rem;
+	}
+	/* earthy wash deepening toward the bottom of the underground */
+	.underground::before {
+		content: '';
+		position: absolute;
+		inset: 0 auto 0 50%;
+		transform: translateX(-50%);
+		width: 100vw;
+		background: linear-gradient(
+			transparent,
+			color-mix(in srgb, #6b5537 8%, transparent) 30%,
+			color-mix(in srgb, #4c3d28 12%, transparent)
+		);
+		z-index: -1;
+		pointer-events: none;
+	}
+	/* GROUND: the soil line where the trunk meets the earth. */
+	.ground {
+		position: relative;
+		height: 34px;
+		margin: -1.5rem 0 2.5rem calc(-1 * clamp(2.6rem, 8vw, 4.25rem));
+	}
+	.ground > :global(.living-line) {
+		position: absolute;
+		inset: 0;
+		--line-op: 0.95;
+	}
+	/* openings: the foliage gaps content blocks sit in. z-index -1 keeps the
+	   light pool + foliage BEHIND the prose (positioned elements would
+	   otherwise paint over static text and wash it out). */
+	.folio-text {
+		position: relative;
+	}
+	.folio-text > :global(.opening) {
+		inset: -1.5rem -1.9rem;
+		z-index: -1;
+	}
+	.notes-section {
+		position: relative;
+	}
+	.notes-section > :global(.opening) {
+		inset: -0.8rem -1.1rem;
+		z-index: -1;
+	}
+	.chapter > :global(.opening) {
+		inset: -1rem -1.3rem;
+		z-index: -1;
+	}
+	.grove-head {
+		margin-bottom: 1.25rem;
 	}
 	.chapter {
 		position: relative;
@@ -651,7 +783,6 @@
 		position: relative;
 		height: 175px;
 		margin-top: 0.6rem;
-		border-top: 1.5px solid color-mix(in srgb, var(--garden-stem, var(--accent)) 45%, transparent);
 		overflow: clip;
 		/* underground palette: paler than the canopy above */
 		--garden-stem: #6f927d;
@@ -664,7 +795,6 @@
 		position: relative;
 		height: 150px;
 		margin-top: 0.6rem;
-		border-top: 1.5px solid color-mix(in srgb, var(--garden-stem, var(--accent)) 40%, transparent);
 		overflow: clip;
 		--garden-stem: #93b2a0;
 		--garden-leaf: #b9d8c2;
@@ -703,13 +833,21 @@
 			margin: -2rem -0.5rem 0.6rem 2rem;
 		}
 	}
-	/* Phones: tuck the vine into the margin so its leaves stay off the prose. */
+	/* Phones: tuck the trunk into the margin so its boughs stay off the prose. */
 	@media (max-width: 720px) {
-		.grove {
+		.tree,
+		.underground {
 			padding-left: 3rem;
 		}
-		.grove > :global(.spine) {
-			left: -0.7rem;
+		.tree > :global(.trunk) {
+			left: -1.1rem;
+		}
+		.page--folio > :global(.crown) {
+			height: 96px;
+			margin-top: -2.5rem;
+		}
+		.folio-text > :global(.opening) {
+			inset: -0.9rem -0.7rem;
 		}
 	}
 
@@ -725,10 +863,6 @@
 	}
 	.living .note-body {
 		border-left-color: transparent;
-	}
-	.living .rootbed,
-	.living .mycelium-bed {
-		border-top-color: transparent;
 	}
 	.living-h2 {
 		position: relative;
@@ -757,15 +891,6 @@
 		bottom: 2px;
 		width: 14px;
 		--line-op: 0.7;
-	}
-	.rootbed > :global(.living-line),
-	.mycelium-bed > :global(.living-line) {
-		position: absolute;
-		left: 0;
-		right: 0;
-		top: 0; /* line baseline sits ~6px in, right where the roots originate */
-		height: 30px;
-		--line-op: 0.9;
 	}
 
 	/* ---- motion (all of it) — stilled under reduced motion; Garden itself

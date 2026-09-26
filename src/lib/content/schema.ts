@@ -221,9 +221,7 @@ export const chapterSchema = z.object({
 	title: localizedString,
 	/** Paragraphs, split on blank lines at render time. */
 	body: localizedString,
-	sprouts: z
-		.array(z.object({ title: localizedString, body: localizedString }))
-		.default([])
+	sprouts: z.array(z.object({ title: localizedString, body: localizedString })).default([])
 });
 export type Chapter = z.infer<typeof chapterSchema>;
 
@@ -232,9 +230,10 @@ export const aboutSchema = z.object({
 	name: z.string(),
 	role: localizedString,
 	bio: localizedString,
-	highlights: z
-		.array(z.object({ title: localizedString, body: localizedString }))
-		.default([]),
+	/** Portrait shown in the crown's bower (branch frame). Optional — a leafy
+	 *  placeholder renders until a real photo is provided. */
+	portrait: imageRefSchema.optional(),
+	highlights: z.array(z.object({ title: localizedString, body: localizedString })).default([]),
 	/** The grove walk — personal chapters that grow into view on scroll. */
 	chapters: z.array(chapterSchema).default([]),
 	links: z.array(linkSchema).default([])
