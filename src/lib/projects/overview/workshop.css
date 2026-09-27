@@ -23,12 +23,17 @@
 	isolation: isolate;
 	/* Keep the same responsive composition when this room becomes a route snapshot. */
 	container-type: inline-size;
-	overflow: clip;
+	overflow: visible;
 	--room-side: clamp(22px, 6vw, 100px);
 	background:
 		radial-gradient(ellipse at 85% 18%, #35e6e622, transparent 32%),
 		radial-gradient(ellipse at 18% 22%, #d144bc35, transparent 40%),
 		linear-gradient(#302046, #352348 38%, #41304b 62%, #201a35);
+}
+.workshop-overview .room-interior {
+	position: relative;
+	isolation: isolate;
+	overflow: clip;
 }
 .workshop-overview::before {
 	content: '';
@@ -1020,7 +1025,7 @@
 	padding: 0;
 	margin: 0;
 	color: var(--ink);
-	box-shadow: 0 0 90px #120c2c80;
+	box-shadow: 0 0 30px #120c2c55;
 }
 .workshop-overview.cool {
 	--warm: 0;

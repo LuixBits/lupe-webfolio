@@ -735,6 +735,21 @@
 		}
 	}
 
+	/* Projects stay within reach of the 2000px room, even on very large displays.
+	   The compact ledge below still owns phone and short-landscape placement. */
+	.menu-root.projects-ledge[data-mode='docked'] {
+		transform: translate(-50%, -50%) translate(max(-50vw, -1240px), min(50vh, 600px));
+	}
+	@supports (height: 1dvh) {
+		.menu-root.projects-ledge[data-mode='docked'] {
+			transform: translate(-50%, -50%) translate(max(-50dvw, -1240px), min(50dvh, 600px));
+		}
+	}
+	/* Once the dial moves inside the viewport, keep only the useful quarter of its rim. */
+	.menu-root.projects-ledge .rim.docked {
+		clip-path: polygon(50% 0, 100% 0, 100% 50%, 50% 50%);
+	}
+
 	svg.wheel {
 		/* Padded canvas: the hover ring lives outside the wheel, so the svg is
 		   larger than the (unchanged) menu-root box. 22% pad = PAD 88 at size 400;

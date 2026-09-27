@@ -6,6 +6,7 @@ export function createWorkshopState() {
 	const room = $state({
 		lampOn: true,
 		catAwake: false,
+		duckRevealed: false,
 		openDrawer: null as WorkshopDrawer | null
 	});
 	return room;

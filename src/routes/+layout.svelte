@@ -187,7 +187,7 @@
 	}
 	.app.overview {
 		position: relative;
-		--workshop-max-width: 1600px;
+		--workshop-max-width: 2000px;
 		--workshop-gutter: max(0px, calc((100vw - var(--workshop-max-width)) / 2));
 		--bg: #24153c;
 		--footer-bar-bg: #180f29;
