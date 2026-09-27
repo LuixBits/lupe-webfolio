@@ -373,6 +373,18 @@
 	</g>
 {/snippet}
 
+<!-- the very first craft: an origami paper boat, just set out at the
+     gate — 2013 is where the IT voyage launches, not a birth year -->
+{#snippet paperBoat()}
+	<g class="pboat">
+		<path class="pb-hull" d="M -16 0 L -9 8 L 9 8 L 16 0 Z" />
+		<path class="pb-sail" d="M 0 -0.5 L 0 -11 L 8 -0.5 Z" />
+		<path class="pb-sail pb-sail--l" d="M 0 -0.5 L 0 -11 L -8 -0.5 Z" />
+		<path class="pb-fold" d="M -15 0 L 15 0" />
+		<g class="vx-reflect2"><path d="M -10 14 L 9 14" style="stroke-width:2" /></g>
+	</g>
+{/snippet}
+
 {#snippet seal()}
 	<g class="seal" transform="rotate(-2)">
 		<rect x="-13" y="-13" width="26" height="26" rx="4" />
@@ -624,6 +636,10 @@
 		</g>
 		<g class="drift-b" transform="translate(80 788)">{@render kasumi(250)}</g>
 
+		<g transform="translate(395 846) scale(1.1)">
+			<g class="bob" style="--bd:7.6s; --bdel:-3.2s">{@render paperBoat()}</g>
+		</g>
+
 		{@render play('pano')}
 
 		<rect y={PANO.h - 30} width={PANO.w} height="30" fill="url(#pd-out)" />
@@ -696,6 +712,10 @@
 		<g transform="translate(334 312)">
 			<ellipse class="ring" rx="22" ry="6" style="--rd:0s" />
 			<ellipse class="ring" rx="22" ry="6" style="--rd:4.5s" />
+		</g>
+
+		<g transform="translate(135 808) scale(0.9)">
+			<g class="bob" style="--bd:7.2s; --bdel:-2.4s">{@render paperBoat()}</g>
 		</g>
 
 		{@render play('quay')}
@@ -775,6 +795,26 @@
 	}
 	.kasumi.k2 {
 		opacity: 0.32;
+	}
+	.pb-hull {
+		fill: #f6f1e1;
+		stroke: rgba(44, 36, 27, 0.55);
+		stroke-width: 1.1;
+		stroke-linejoin: round;
+	}
+	.pb-sail {
+		fill: #fdfaf2;
+		stroke: rgba(44, 36, 27, 0.45);
+		stroke-width: 1;
+		stroke-linejoin: round;
+	}
+	.pb-sail--l {
+		fill: #efe8d2;
+	}
+	.pb-fold {
+		fill: none;
+		stroke: rgba(44, 36, 27, 0.35);
+		stroke-width: 0.8;
 	}
 	.origin-cap {
 		font:
