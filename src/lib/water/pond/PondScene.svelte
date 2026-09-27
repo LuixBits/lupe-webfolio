@@ -5,7 +5,7 @@
 	 *  **Ausbildung grows as lily pads on the left bank, Erfahrung floats as
 	 *  boats on the right** — and every craft hangs on two mooring ropes
 	 *  tied to the years its chapter began and ended. The "heute" bollard
-	 *  opens the line, the far vermilion gate closes it (2013 — where the
+	 *  opens the line, the far wooden harbor gate closes it (2013 — where the
 	 *  current begins). Every craft is a real link: step aboard.
 	 *
 	 *  Two fixed compositions share the fleet: the wide PANORAMA and, under
@@ -344,6 +344,7 @@
 	{@const cx = d * 21}
 	<g transform="scale({s})">
 		<path class="nb-pole" d="M 0 -10 L 0 186" />
+		<circle class="nb-finial" cy="-11" r="3.1" />
 		<path class="nb-rod" d="M 0 0 L {d * 42} 0" />
 		<g class="nb-flutter" style="--nd:{flip ? -2.6 : 0}s">
 			<path
@@ -351,8 +352,7 @@
 				d="M {d * 4} 2 L {d * 38} 2 L {d * 38} 164 L {d * 30} 158 L {d * 21} 165 L {d *
 					12} 158 L {d * 4} 164 Z"
 			/>
-			<circle class="nb-mon" {cx} cy="18" r="7" />
-			<text class="nb-text" x={cx} y="40">
+			<text class="nb-text" x={cx} y="34">
 				{#each text.toUpperCase().split('') as ch, i (i)}
 					<tspan x={cx} dy={i === 0 ? 0 : 13.2}>{ch}</tspan>
 				{/each}
@@ -362,6 +362,14 @@
 		<g class="vx-reflect2">
 			<path d="M {d * -6} 194 L {d * 7} 194" style="stroke-width:2.6" />
 		</g>
+	</g>
+{/snippet}
+
+<!-- a small woodblock wave mark: two crests and a short echo -->
+{#snippet wavelet(w: number)}
+	<g class="wv">
+		<path d="M {-w} 0 Q {-w * 0.5} {-w * 0.34} 0 0 Q {w * 0.5} {-w * 0.34} {w} 0" />
+		<path d="M {-w * 0.5} 7 Q {-w * 0.1} {7 - w * 0.26} {w * 0.3} 7" />
 	</g>
 {/snippet}
 
@@ -572,6 +580,13 @@
 		<rect class="sg-patch p2" x="430" y="121" width="150" height="24" rx="9" fill="url(#pd-sg)" />
 		<rect class="sg-patch p3" x="720" y="121" width="250" height="30" rx="9" fill="url(#pd-sg)" />
 		<rect class="sg-patch p4" x="360" y="816" width="280" height="30" rx="10" fill="url(#pd-sg)" />
+		<g transform="translate(140 250)">{@render wavelet(15)}</g>
+		<g transform="translate(925 300)">{@render wavelet(12)}</g>
+		<g transform="translate(60 470)">{@render wavelet(14)}</g>
+		<g transform="translate(350 585)">{@render wavelet(11)}</g>
+		<g transform="translate(940 560)">{@render wavelet(13)}</g>
+		<g transform="translate(80 700)">{@render wavelet(12)}</g>
+		<g transform="translate(640 785)">{@render wavelet(15)}</g>
 
 		<g class="drift-a" transform="translate(300 205)">{@render kasumi(430)}</g>
 
@@ -653,6 +668,12 @@
 		<path class="horizon" d="M0 120 L 420 120" />
 		<rect class="sg-patch" x="16" y="121" width="150" height="24" rx="8" fill="url(#pq-sg)" />
 		<rect class="sg-patch p2" x="300" y="121" width="110" height="20" rx="8" fill="url(#pq-sg)" />
+		<g transform="translate(40 250)">{@render wavelet(12)}</g>
+		<g transform="translate(370 330)">{@render wavelet(11)}</g>
+		<g transform="translate(45 505)">{@render wavelet(12)}</g>
+		<g transform="translate(368 505)">{@render wavelet(10)}</g>
+		<g transform="translate(52 590)">{@render wavelet(11)}</g>
+		<g transform="translate(350 785)">{@render wavelet(12)}</g>
 
 		<g class="under">
 			<Koi
@@ -795,8 +816,10 @@
 		stroke: rgba(44, 36, 27, 0.5);
 		stroke-width: 1.1;
 	}
-	.nb-mon {
-		fill: #c43f2a;
+	.nb-finial {
+		fill: #8a6a4d;
+		stroke: #4a3524;
+		stroke-width: 1;
 	}
 	.nb-text {
 		fill: #2c241b;
@@ -809,6 +832,15 @@
 		fill: none;
 		stroke: #8a6a42;
 		stroke-width: 1.2;
+	}
+
+	/* ---- small wave marks (still, like the print) ---- */
+	.wv path {
+		fill: none;
+		stroke: #eefafd;
+		stroke-width: 1.7;
+		stroke-linecap: round;
+		opacity: 0.5;
 	}
 
 	/* ---- craft links ---- */

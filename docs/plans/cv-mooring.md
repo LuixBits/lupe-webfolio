@@ -78,7 +78,15 @@ question): the bank boards became vertical NOBORI banners at the scene's
 outer edges (stacked letters, red mon, scallop hem, faint skewX flutter),
 another ~12% size pass on taller canvases (pano 1000×920 / quay 420×1020),
 and Shippori Mincho became the water theme's `--font-display` (Spectral
-fallback, Karla body). Baseline phases: — P1 content+routes+wheel → P2 panorama +
+fallback, Karla body). **v4 after review round 3** ("too hard on the
+Japanese side… maybe remove the japanese red dot marker"; "look for
+improvements… small waves, the footer"): the identity-claiming emblems
+became harbor vernacular — banner mon removed, vermilion torii → weathered
+wooden harbor gate with a hanging channel lamp, koinobori → furled sail +
+one red masthead pennant, paper lanterns → glass lamps, footer geta →
+straw hat — plus hull sheer highlights, braced/nailed stake signs, still
+wave marks everywhere, and the footer rebuilt so the pond's water runs in
+(foam scallop, edge board, pile heads, plank joints and knots). Baseline phases: — P1 content+routes+wheel → P2 panorama +
 compact `/cv` + dive removal → P3 quay + life + play → P4 hardening (the dive's assertion matrix, minus
 scrub/dive-specific checks, plus scene link hit-targets) + HANDOFF.
 

@@ -102,6 +102,10 @@
 					<Koi robe="asagi" scale={0.34} motion="tail" shadow={false} wag={2.1} />
 				</g>
 			</g>
+			<g class="wv">
+				<path d="M 48 138 Q 56 133.5 64 138 Q 72 133.5 80 138" />
+				<path d="M 528 158 Q 536 153.5 544 158 Q 552 153.5 560 158" />
+			</g>
 			<text class="berth-tag" x="576" y="128">{resolveSpan(vessel.span, locale)}</text>
 		</svg>
 	</div>
@@ -169,6 +173,13 @@
 		fill: none;
 		stroke: rgba(255, 255, 255, 0.5);
 		stroke-width: 1.2;
+	}
+	.wv path {
+		fill: none;
+		stroke: #eefafd;
+		stroke-width: 1.6;
+		stroke-linecap: round;
+		opacity: 0.55;
 	}
 	.berth-tag {
 		font:

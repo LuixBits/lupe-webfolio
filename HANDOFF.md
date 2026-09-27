@@ -192,12 +192,13 @@ class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
   `cv-koi-dive.md`, whose asset library it reuses). **Work floats,
   education grows — split by bank:** Ausbildung as lily pads on the LEFT,
   Erfahrung as boats on the RIGHT of one central timeline current, each
-  bank flying its NOBORI banner — vertical stacked-letter cloth on a
-  pole at the scene's outer edge (sky strip, clear of every craft), red
-  mon, hemmed scallop, a barely-there skewX flutter from the hanging rod. Six bespoke crafts in `lib/water/pond/Vessel.svelte`
-  — the SIGA flagship (two lashed cargo crates = the two roles, mizuhiki
-  cord, koinobori, lit chōchin), the HSLU lotus raft (MA + BSc pads in
-  bloom, stake sign, tombo dragonfly), the Neptun skiff (trident
+  bank flying its cloth BANNER — vertical stacked letters on a finial
+  pole at the scene's outer edge (sky strip, clear of every craft),
+  hemmed scallop, a barely-there skewX flutter from the hanging rod. Six bespoke crafts in `lib/water/pond/Vessel.svelte`
+  — the SIGA flagship (two lashed cargo crates = the two roles under
+  their red cord, furled sail + red signal pennant on the stern mast,
+  lit bow lamp), the HSLU lotus raft (MA + BSc pads in
+  bloom, braced stake sign, tombo dragonfly), the Neptun skiff (trident
   boat-hook), the Armee punt (origami crane — deliberately NOT a red
   cross), the weathered EMVs rowboat (Lehre only), and the young
   EFZ · BM pad cluster (slug 'schule' — the apprenticeship's school side,
@@ -223,9 +224,11 @@ class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
   the **Logbuch** of washi station slips (PaperScroll palette); the
   future thesis scroll hangs off the HSLU MA slip via `stations.detail`.
   Wheel CV children: SIGA / HSLU / Neptun (routes, no hash anchors).
-  `/cv` ends on **FooterJetty** — the dock you stand on: stretch-safe
-  plank rows, water lapping the edge, and a fixed center vignette (the
-  mooring rope onto its cleat, the coil, a breathing chōchin, geta) —
+  `/cv` ends on **FooterJetty** — the dock you stand on: the pond's own
+  water runs into the footer and laps a foam scallop against the edge
+  board, pile heads carry stretch-safe plank rows (joints, knots), and
+  a fixed center vignette holds the mooring rope on its cleat, the
+  coil, a breathing glass lamp and a straw hat set down to watch —
   while the /cv/* deck and scroll pages out on the water keep the
   Hokusai `FooterWave` (route-scoped in `Footer.svelte`).
   Reduced motion = a finished still print (koi parked at `--rest`
@@ -240,6 +243,15 @@ class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
   700) set as `--font-display` for `[data-theme='water']` in
   `themes.css` — an engraved mincho that matches the woodblock print;
   Spectral stays as fallback, Karla keeps body/small text.
+  **v4 (owner: "too hard on the Japanese side")**: identity-claiming
+  emblems traded for harbor vernacular — banner mon removed, the
+  vermilion torii is now the weathered WOODEN harbor gate (corner
+  knees, hanging channel lamp), the koinobori carps became a furled
+  sail + one red masthead pennant (flying clear below the heute tag on
+  the quay), paper-rib lanterns became glass lamps, the footer geta a
+  straw hat. Plus a polish pass: sheer highlights on every hull,
+  struts + nails on the stake signs, still small wave marks across
+  pond, berth band and footer.
 - Grove chapters grow into view on scroll — a shared IntersectionObserver
   (`lib/garden/reveal.ts`) flips per-chapter classes, CSS does the animating
   (transform/opacity one-shots). `Garden.svelte` has `start` (grow when

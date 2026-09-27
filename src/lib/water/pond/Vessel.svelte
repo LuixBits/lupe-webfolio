@@ -41,18 +41,6 @@
 	const rw = $derived(REFLECT[slug] ?? 50);
 </script>
 
-<!-- a carp streamer: mouth ring at (0,0), tail forking at +len -->
-{#snippet carp(tone: string, len: number)}
-	{@const k = len / 58}
-	<path
-		class="kn-body {tone}"
-		d="M 0 -7 C {16 * k} -11 {34 * k} -11 {46 * k} -6 L {58 * k} -12 C {54 * k} -4 {54 * k} 4 {58 *
-			k} 12 L {46 * k} 6 C {34 * k} 11 {16 * k} 11 0 7 C -2.5 4 -2.5 -4 0 -7 Z"
-	/>
-	<ellipse class="kn-mouth" cx="0.5" cy="0" rx="2.2" ry="6.2" />
-	<circle class="kn-eye" cx={9 * k} cy="-2" r="1.4" />
-{/snippet}
-
 <!-- a lashed cargo crate, base at (0,0), w×h upward -->
 {#snippet crate(w: number, h: number)}
 	<rect class="vx-crate" x={-w / 2} y={-h} width={w} height={h} rx="1.5" />
@@ -91,13 +79,16 @@
 
 <g class="vessel vessel--{slug}" aria-hidden="true">
 	{#if slug === 'siga'}
-		<!-- koinobori pole off the stern -->
-		<path class="vx-pole" d="M -76 -12 L -71 -86" />
-		<g transform="translate(-69 -80)"
-			><g class="kn-flow" style="--kdur:4.4s">{@render carp('kn-red', 46)}</g></g
-		>
-		<g transform="translate(-69 -60) scale(0.78)">
-			<g class="kn-flow" style="--kdur:3.7s; --kd:-1.6s">{@render carp('kn-blue', 44)}</g>
+		<!-- the stern mast: yard with the sail furled, signal pennants flying -->
+		<path class="vx-pole" d="M -76 -12 L -71 -84" />
+		<path class="vx-yard" d="M -89 -52 L -55 -58" />
+		<path
+			class="vx-sail"
+			d="M -87 -51 C -80 -44 -63 -45 -57 -56 C -62 -49 -68 -47 -73 -47 C -79 -47 -84 -48 -87 -51 Z"
+		/>
+		<path class="vx-sail-tie" d="M -80 -49 L -79 -44 M -71 -47 L -70 -42 M -63 -50 L -62 -45" />
+		<g class="pn-sway" style="--kdur:4.6s">
+			<path class="vx-pennant" d="M -71 -82 L -46 -77 L -55 -73 L -46 -69 L -71 -72 Z" />
 		</g>
 		<!-- cargo: the two roles, lashed and tied together -->
 		<g transform="translate(28 -8)">{@render crate(46, 30)}</g>
@@ -111,20 +102,23 @@
 			d="M -92 -16 C -78 4 -40 11 4 11 C 46 11 76 4 94 -23 C 76 -8 46 -3 4 -3 C -40 -3 -72 -6 -92 -16 Z"
 		/>
 		<path class="vx-plank" d="M -82 -10 C -50 -1 40 2 80 -9" />
+		<path class="vx-sheer" d="M -84 -13 C -60 -6 -36 -4 4 -4 C 44 -4 70 -8 88 -20" />
 		<path class="vx-stem" d="M 94 -23 C 90 -15 85 -10 78 -7" />
 		{#if name}<text class="vx-name" x="4" y="7">{name}</text>{/if}
-		<!-- the lit chōchin at the bow -->
+		<!-- the lit lamp at the bow -->
 		<path class="vx-pole" d="M 80 -8 L 92 -30" />
 		<g transform="translate(94 -26)">
 			<circle class="vx-chochin-glow" r="12" />
 			<ellipse class="vx-chochin" rx="5.2" ry="6.4" />
-			<path class="vx-chochin-rib" d="M -5.2 0 L 5.2 0 M -4.4 -3 L 4.4 -3 M -4.4 3 L 4.4 3" />
 			<rect class="vx-chochin-cap" x="-2.6" y="-8.4" width="5.2" height="2.2" rx="0.8" />
 		</g>
 	{:else if slug === 'hslu'}
 		<!-- the stake sign -->
 		<path class="vx-stake" d="M -58 6 L -56 -34" />
+		<path class="vx-stake" style="stroke-width:1.7" d="M -58 -8 L -70 -30" />
 		<rect class="vx-sign" x="-78" y="-48.8" width="44" height="16.5" rx="2" />
+		<circle class="vx-nail" cx="-74" cy="-40.5" r="0.9" />
+		<circle class="vx-nail" cx="-38" cy="-40.5" r="0.9" />
 		{#if name}<text class="vx-name vx-name--sign" x="-56" y="-37">{name}</text>{/if}
 		<!-- two pads in bloom: MA (big) + BSc -->
 		<g transform="translate(-14 0)">
@@ -143,6 +137,11 @@
 			d="M -52 -12 C -42 3 -18 8 4 8 C 26 8 44 3 54 -14 C 42 -5 26 -2 4 -2 C -18 -2 -38 -4 -52 -12 Z"
 		/>
 		<path class="vx-plank" d="M -44 -8 C -20 -1 24 0 46 -7" />
+		<path
+			class="vx-sheer"
+			style="stroke:#8fa9ba"
+			d="M -47 -10 C -34 -4 -16 -3 4 -3 C 24 -3 38 -6 49 -12"
+		/>
 		<!-- the trident boat-hook, shipped across the gunwale -->
 		<path class="vx-pole" d="M -38 -4 L 34 -30" />
 		<path class="vx-trident" d="M 34 -30 L 42 -33 M 36 -35 L 42 -33 M 34 -27 L 42 -33" />
@@ -151,6 +150,7 @@
 		<g transform="translate(8 -32) scale(0.62)"><Crane /></g>
 		<path class="vx-hull vx-hull--armee" d="M -46 -15 L -40 8 L 38 8 L 46 -17 L 37 -6 L -37 -6 Z" />
 		<path class="vx-plank" d="M -36 1 L 34 1" />
+		<path class="vx-sheer" style="stroke:#93936f" d="M -34 -7 L 34 -7" />
 		<rect class="vx-pack" x="-30" y="-13" width="16" height="7" rx="2.5" />
 		{#if name}<text class="vx-name vx-name--small" x="0" y="4">{name}</text>{/if}
 	{:else if slug === 'emvs'}
@@ -160,6 +160,11 @@
 		/>
 		<rect class="vx-patch" x="-30" y="-1" width="14" height="7" rx="1" />
 		<path class="vx-plank" d="M -48 -8 C -24 -1 22 0 44 -8" />
+		<path
+			class="vx-sheer"
+			style="stroke:#a08d75"
+			d="M -53 -11 C -38 -5 -20 -3 2 -3 C 22 -3 38 -6 47 -13"
+		/>
 		<!-- the shipped oar -->
 		<path class="vx-pole" d="M -44 -16 L 30 -4" />
 		<path class="vx-oar" d="M -44 -16 C -52 -18 -56 -16 -58 -12 C -54 -10 -49 -11 -44 -16 Z" />
@@ -167,7 +172,10 @@
 	{:else if slug === 'schule'}
 		<!-- the school years: two young pads under their own stake sign -->
 		<path class="vx-stake" d="M -48 6 L -46 -30" />
+		<path class="vx-stake" style="stroke-width:1.7" d="M -48 -6 L -60 -26" />
 		<rect class="vx-sign" x="-75" y="-44.8" width="58" height="16.5" rx="2" />
+		<circle class="vx-nail" cx="-71" cy="-36.5" r="0.9" />
+		<circle class="vx-nail" cx="-21" cy="-36.5" r="0.9" />
 		{#if name}<text class="vx-name vx-name--sign" x="-46" y="-33">{name}</text>{/if}
 		<g transform="translate(-8 0)">
 			{@render pad(30, 32)}
@@ -357,39 +365,43 @@
 		stroke-linecap: round;
 		opacity: 0.9;
 	}
-	.kn-body {
-		stroke-width: 0.9;
-		stroke-linejoin: round;
-	}
-	.kn-body.kn-red {
-		fill: #d9604a;
-		stroke: #a53d2c;
-	}
-	.kn-body.kn-blue {
-		fill: #5b87a6;
-		stroke: #3d617c;
-	}
-	.kn-mouth {
+	.vx-yard {
 		fill: none;
-		stroke: #f4ead8;
-		stroke-width: 1.2;
+		stroke: #4a3524;
+		stroke-width: 1.6;
+		stroke-linecap: round;
+	}
+	.vx-sail {
+		fill: #e8d6ab;
+		stroke: #a8895c;
+		stroke-width: 0.9;
+	}
+	.vx-sail-tie {
+		fill: none;
+		stroke: #8a6a42;
+		stroke-width: 1;
 		opacity: 0.9;
 	}
-	.kn-eye {
-		fill: #f4ead8;
-		stroke: #26333a;
-		stroke-width: 0.6;
+	.vx-pennant {
+		fill: #c2543f;
+		stroke: #93392a;
+		stroke-width: 0.8;
+		stroke-linejoin: round;
+	}
+	.vx-sheer {
+		fill: none;
+		stroke: #b08a5e;
+		stroke-width: 1.1;
+		stroke-linecap: round;
+		opacity: 0.75;
+	}
+	.vx-nail {
+		fill: #8a7358;
 	}
 	.vx-chochin {
 		fill: #f6dfae;
 		stroke: #b98a4a;
 		stroke-width: 1;
-	}
-	.vx-chochin-rib {
-		fill: none;
-		stroke: #b98a4a;
-		stroke-width: 0.6;
-		opacity: 0.7;
 	}
 	.vx-chochin-cap {
 		fill: #5c4527;
@@ -404,19 +416,19 @@
 		stroke-linecap: round;
 	}
 
-	/* the carps ripple; the water rocks nothing else here — vessels bob via
+	/* the pennants stir; the water rocks nothing else here — vessels bob via
 	   the scene so hero + pond can pace themselves */
 	@media (prefers-reduced-motion: no-preference) {
-		.kn-flow {
-			animation: vx-flow var(--kdur, 4s) ease-in-out var(--kd, 0s) infinite alternate;
+		.pn-sway {
+			animation: vx-sway var(--kdur, 4s) ease-in-out var(--kd, 0s) infinite alternate;
 		}
 	}
-	@keyframes vx-flow {
+	@keyframes vx-sway {
 		from {
-			transform: scaleX(1) rotate(0deg);
+			transform: skewX(-1.4deg);
 		}
 		to {
-			transform: scaleX(0.93) rotate(2.4deg);
+			transform: skewX(1.6deg);
 		}
 	}
 </style>
