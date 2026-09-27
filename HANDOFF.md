@@ -253,8 +253,18 @@ class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
   blink + bubbles + "+1 ruhige See" — never a screen shake), and die
   Flaschenpost (placeholder washi tag until `cvPdf` is set, then the
   download). Each craft opens `/cv/<slug>` (`lib/cv/VesselDeck.svelte`):
-  a berth band with the SAME craft floating (shared art component), then
-  the station content. **Three presentation demos run side by side for
+  THE ZOOM (`lib/cv/DeckAboard.svelte`): the page background IS the
+  craft, seen from above at deck height — boats render their own
+  planking edge to edge (gunwales + pond water at the sides, a koi in
+  its ripple, the arrival line cleated top center, the hull name
+  painted faintly underfoot, each boat's gear about: crates/coil/lamp,
+  trident/bucket, big origami crane/blanket/pack, oar/patch), the
+  education crafts render the great lily pad (veins, dew, lotus
+  blooms, stake sign; schule adds its young pad). Full-bleed absolute
+  layer behind the content, ending above the jetty; one landing zoom
+  on entry (reduce = already ashore). Page chrome is paint on the
+  deck (cream headings, lightened hanko labels). Then the station
+  content lies on the surface. **Three presentation demos run side by side for
   the owner's pick (2026-09-27)**: /cv/schule = the open LOGBUCH spread
   (`DeckLog`), /cv/emvs = the CARGO MANIFEST with tags strung off the
   boat (`DeckCargo`, replaces the berth band), /cv/neptun = the RIGGING
