@@ -1,9 +1,23 @@
 # CV — »Der Tauchgang« (The Dive)
 
-**Plan written 2026-09-27. Status: all open decisions resolved by the owner the
-same day (see §9) — cleared for implementation.**
-Rollback point before any work: `c79db38` (clean HEAD at planning time —
-re-check `git log` before starting and note the then-current hash).
+**Plan written 2026-09-27. Status: IMPLEMENTED — all ten phases built,
+verified and committed the same night (Phases 0–9, commits
+`f34b337 … 892716c` + the docs commit; the actual rollback hash before work
+was `53dc1c1`, Codex's projects commits having landed after `c79db38`).**
+Every §9 decision shipped as resolved; §8's gates and assertion matrix ran
+green (0 svelte-check errors, build passing, no overflow 320–1440 en+de,
+anchors, scrub, reduced-motion tableau, no-JS, determinism, unique ids,
+one page IO, zero long tasks at 6× CPU throttle, all twelve interaction
+assertions). Owner to-fill items are listed in HANDOFF.md. Judgment calls
+taken in the browser: atmosphere stops as authored in §3.1 (washi cards
+carried the contrast at every depth, no darkening needed); grid-over-
+interleave CHOSEN (display:contents banks + shared depth rows, MA
+bottom-aligned beside the trainee slip; the aria-labelledby fallback was
+never needed); the egg clutch moved to the plumb lead's landing (the plan's
+"beside the torii" reading — the line ends where it all began, and the
+footer's center vignette aligns); concurrent-pair knots lift into open
+water so their tags breathe; tags drop their lettering on layouts with no
+open water (the band twin still carries it).
 
 ## Run instructions for the implementing session (owner is asleep)
 
