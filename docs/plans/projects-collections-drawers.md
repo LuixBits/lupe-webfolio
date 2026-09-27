@@ -102,3 +102,6 @@ at 1600px, redraws the Defy and removes the subtitle, rain and motion button.
 The subsequent [side-wall refinement](../reviews/projects-side-walls-2026-09-27.md)
 raises that cap to 2000px, fills the surrounding space with perspective walls
 and framed jokes, and bounds the navigation's distance on large displays.
+The [responsive-room refinement](../reviews/projects-responsive-room-2026-09-27.md)
+connects project hover/focus to the workstation artwork, deepens the studio
+doorway, mounts the navigation and adds neon reflections to receiving surfaces.

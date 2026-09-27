@@ -71,7 +71,7 @@ remain removed at the owner's request.
 **Use <http://localhost:5173/projects>**, or `/de/projects`, for the current
 shared development preview. The old standalone study redirects here. The local
 production preview at <http://localhost:5191/projects> also contains this room;
-see the [side-wall review](docs/reviews/projects-side-walls-2026-09-27.md)
+see the [responsive-room review](docs/reviews/projects-responsive-room-2026-09-27.md)
 for the build, browser checks and temporary artifact paths. The published site
 has not been changed. Final visual approval remains with the owner.
 
@@ -103,6 +103,20 @@ key layout and curved thumb clusters using Dygma's photo as a reference. These
 are original SVG illustrations. Narrow project labels stack
 their emblem above the copy to preserve readable text at enlarged sizes.
 
+The [responsive-room refinement](docs/reviews/projects-responsive-room-2026-09-27.md)
+connects the seven Web, Neovim and Desktop project files to their illustrations.
+Hover or focus changes the nearby display; keyboard movement takes over even
+when the pointer rests on another file. Project links remain ordinary links,
+including single-tap navigation on phones. Restored focus also restores the
+matching preview. These are decorative SVG studies; the upcoming Magic Mouse
+app retains its status and has no claimed released interface.
+
+The Studio doorway now contains recessed walls, a perspective floor, a framed
+print and light on its threshold. Neon colour reaches the cabinet rails,
+shelf edges and floor. The desktop navigation has a bevelled metal backing
+plate with fasteners and a contact shadow; compact screens keep the existing
+ledge. None of these additions introduces an ambient animation loop.
+
 The [floor and typography refinement](docs/reviews/projects-floor-and-type-2026-09-27.md)
 redraws the cat, stool, plant, basket, rug and shared floor-plan sheet. The six
 font-size roles are documented in the typography guide above. Enlarged text
@@ -115,7 +129,7 @@ motion stop them. The sunset window is static and has no visibility observer.
 Static project links and drawer disclosures work without
 JavaScript. The desktop wheel clears the content; phones and short landscape
 screens use its normal-flow ledge. The channel player's controls retain their
-behavior. See the [side-wall review](docs/reviews/projects-side-walls-2026-09-27.md)
+behavior. See the [responsive-room review](docs/reviews/projects-responsive-room-2026-09-27.md)
 for the current build and checks, and the
 [collections review](docs/reviews/projects-collections-2026-09-27.md) for earlier
 real-provider playback observations.
