@@ -230,7 +230,14 @@ class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
   Flaschenpost (placeholder washi tag until `cvPdf` is set, then the
   download). Each craft opens `/cv/<slug>` (`lib/cv/VesselDeck.svelte`):
   a berth band with the SAME craft floating (shared art component), then
-  the **Logbuch** of washi station slips (PaperScroll palette); the
+  the station content. **Three presentation demos run side by side for
+  the owner's pick (2026-09-27)**: /cv/schule = the open LOGBUCH spread
+  (`DeckLog`), /cv/emvs = the CARGO MANIFEST with tags strung off the
+  boat (`DeckCargo`, replaces the berth band), /cv/neptun = the RIGGING
+  line (`DeckRig`); siga/hslu/armee keep the baseline washi slips —
+  once chosen, one becomes the presentation for all six. Stations may
+  carry optional localized `story` + `takeaway` (first-person voice
+  instead of certificates — the owner wants no diplomas uploaded); the
   future thesis scroll hangs off the HSLU MA slip via `stations.detail`.
   Wheel CV children: SIGA / HSLU / Neptun (routes, no hash anchors).
   `/cv` ends on **FooterJetty** — the dock you stand on: the pond's own
