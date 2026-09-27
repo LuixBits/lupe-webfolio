@@ -1,15 +1,18 @@
 <script lang="ts">
 	/** »Der Anlegesteg« — the whole CV as one pond at dawn, composed like a
-	 *  woodblock print. Time is distance: the SIGA flagship rides big in the
-	 *  foreground, the beginnings wait small and hazy by the far torii, and
-	 *  one mooring current ties every craft to the "heute" bollard. Every
-	 *  vessel is a real link — step aboard for the Logbuch.
+	 *  woodblock print. One mooring current runs down the middle of the
+	 *  water, threaded with washi YEAR CHIPS; the fleet is split by track —
+	 *  **Ausbildung grows as lily pads on the left bank, Erfahrung floats as
+	 *  boats on the right** — and every craft hangs on two mooring ropes
+	 *  tied to the years its chapter began and ended. The "heute" bollard
+	 *  opens the line, the far vermilion gate closes it (2013 — where the
+	 *  current begins). Every craft is a real link: step aboard.
 	 *
-	 *  Two fixed compositions share the same fleet: the wide PANORAMA and,
-	 *  under 700px, the vertical QUAY. Both render (SSR-safe, links work
-	 *  without JS); a media query shows one. Print devices on purpose:
-	 *  kumo cloud bars, kasumi mist, seigaiha patches, dash-stylized
-	 *  reflections, and the artist's seal in the corner. */
+	 *  Two fixed compositions share the fleet: the wide PANORAMA and, under
+	 *  700px, the narrow QUAY. Both render (SSR-safe, links work without
+	 *  JS); a media query shows one. Print devices throughout: kumo cloud
+	 *  bars, kasumi mist, seigaiha patches, dash-stylized reflections, the
+	 *  artist's seal. */
 	import { onMount } from 'svelte';
 	import { cvPdf, HULL_NAME, vessels, vesselStations } from '$lib/content/cv';
 	import { resolveLocalized, resolveSpan, type Vessel as VesselT } from '$lib/content/schema';
@@ -35,33 +38,110 @@
 		);
 	};
 
-	interface Moor {
+	/** A year knot threaded on the timeline current. */
+	interface Knot {
+		key: string;
+		x: number;
+		y: number;
+	}
+	/** One craft moored beside its era, roped to its start & end knots.
+	 *  `ax` = rope attach offset from the craft's center (line-facing). */
+	interface Craft {
 		slug: VesselT['slug'];
 		x: number;
 		y: number;
 		s: number;
-		/** float-tag offset from the mooring point */
-		tx: number;
-		ty: number;
-		haze?: boolean;
+		ax: number;
+		from: string;
+		to: string;
 	}
-	// the panorama: newest large in front-left, oldest small by the far gate
-	const PANO: Moor[] = [
-		{ slug: 'siga', x: 330, y: 378, s: 1.18, tx: 168, ty: 26 },
-		{ slug: 'hslu', x: 575, y: 306, s: 0.92, tx: 118, ty: 30 },
-		{ slug: 'neptun', x: 755, y: 252, s: 0.8, tx: -128, ty: 20 },
-		{ slug: 'armee', x: 890, y: 208, s: 0.68, tx: -118, ty: 18, haze: true },
-		{ slug: 'emvs', x: 985, y: 176, s: 0.58, tx: -136, ty: 32, haze: true }
-	];
+	interface Layout {
+		w: number;
+		h: number;
+		waterY: number;
+		knots: Knot[];
+		crafts: Craft[];
+		gate: { x: number; y: number; s: number };
+		signL: { x: number; y: number };
+		signR: { x: number; y: number };
+	}
 
-	// the quay: the same fleet re-moored down a vertical line for phones
-	const QUAY: Moor[] = [
-		{ slug: 'siga', x: 215, y: 226, s: 0.95, tx: 118, ty: 4 },
-		{ slug: 'hslu', x: 200, y: 398, s: 0.95, tx: 128, ty: -6 },
-		{ slug: 'neptun', x: 225, y: 552, s: 0.95, tx: -132, ty: -6 },
-		{ slug: 'armee', x: 205, y: 692, s: 0.95, tx: 122, ty: -8 },
-		{ slug: 'emvs', x: 175, y: 812, s: 0.9, tx: -108, ty: -32 }
-	];
+	const PANO: Layout = {
+		w: 1000,
+		h: 880,
+		waterY: 120,
+		knots: [
+			{ key: 'heute', x: 500, y: 175 },
+			{ key: '2024', x: 489, y: 268 },
+			{ key: '2021', x: 509, y: 372 },
+			{ key: '2019', x: 497, y: 452 },
+			{ key: '2018', x: 486, y: 528 },
+			{ key: '2017', x: 505, y: 612 },
+			{ key: '2013', x: 496, y: 742 }
+		],
+		crafts: [
+			{ slug: 'siga', x: 740, y: 224, s: 1.22, ax: -96, from: 'heute', to: '2021' },
+			{ slug: 'neptun', x: 735, y: 412, s: 1.22, ax: -56, from: '2021', to: '2019' },
+			{ slug: 'armee', x: 742, y: 570, s: 1.18, ax: -48, from: '2018', to: '2017' },
+			{ slug: 'emvs', x: 738, y: 677, s: 1.2, ax: -60, from: '2017', to: '2013' },
+			{ slug: 'hslu', x: 255, y: 385, s: 1.18, ax: 74, from: '2024', to: '2018' },
+			{ slug: 'schule', x: 262, y: 677, s: 1.15, ax: 44, from: '2017', to: '2013' }
+		],
+		gate: { x: 441, y: 650, s: 0.78 },
+		signL: { x: 240, y: 152 },
+		signR: { x: 760, y: 152 }
+	};
+
+	const QUAY: Layout = {
+		w: 420,
+		h: 980,
+		waterY: 120,
+		knots: [
+			{ key: 'heute', x: 205, y: 172 },
+			{ key: '2024', x: 198, y: 258 },
+			{ key: '2021', x: 212, y: 348 },
+			{ key: '2019', x: 200, y: 428 },
+			{ key: '2018', x: 194, y: 500 },
+			{ key: '2017', x: 210, y: 578 },
+			{ key: '2013', x: 202, y: 690 }
+		],
+		crafts: [
+			{ slug: 'siga', x: 312, y: 215, s: 0.8, ax: -80, from: 'heute', to: '2021' },
+			{ slug: 'neptun', x: 312, y: 388, s: 0.8, ax: -48, from: '2021', to: '2019' },
+			{ slug: 'armee', x: 314, y: 540, s: 0.78, ax: -42, from: '2018', to: '2017' },
+			{ slug: 'emvs', x: 312, y: 634, s: 0.8, ax: -52, from: '2017', to: '2013' },
+			{ slug: 'hslu', x: 106, y: 380, s: 0.78, ax: 52, from: '2024', to: '2018' },
+			{ slug: 'schule', x: 110, y: 634, s: 0.78, ax: 34, from: '2017', to: '2013' }
+		],
+		gate: { x: 161, y: 622, s: 0.58 },
+		signL: { x: 86, y: 92 },
+		signR: { x: 334, y: 92 }
+	};
+
+	const knotOf = (l: Layout, key: string) => l.knots.find((k) => k.key === key)!;
+	/** The current itself: one smooth line threaded through every knot. */
+	const currentPath = (l: Layout) => {
+		const k = l.knots;
+		let d = `M ${k[0].x} ${k[0].y - 14}`;
+		for (let i = 0; i < k.length - 1; i++) {
+			const a = k[i];
+			const b = k[i + 1];
+			const my = (a.y + b.y) / 2;
+			d += ` C ${a.x} ${my} ${b.x} ${my} ${b.x} ${b.y}`;
+		}
+		return d;
+	};
+	/** A mooring rope from a craft's cleat to a year knot, bowed outward so
+	 *  it clears the knots it sails past. */
+	const rope = (l: Layout, c: Craft, key: string) => {
+		const k = knotOf(l, key);
+		const ax = c.x + c.ax * c.s;
+		const ay = c.y - 2;
+		const bow = Math.sign(c.ax) * 20; // toward the craft's own bank
+		const mx = (ax + k.x) / 2 + bow;
+		const my = (ay + k.y) / 2 + 12;
+		return `M ${ax} ${ay} Q ${mx} ${my} ${k.x} ${k.y}`;
+	};
 
 	const byId = new Map(vessels.map((v) => [v.slug, v]));
 	const vOf = (slug: VesselT['slug']) => byId.get(slug)!;
@@ -71,9 +151,8 @@
 			.join(', ')}`;
 
 	/* ---- the play: one hungry free koi, the surfacing namazu, and the
-	 * Flaschenpost. Positions are per-layout; only the visible svg receives
-	 * pointer events, and all listeners attach post-mount (reduced motion
-	 * keeps the harbor still and skips the games). ---- */
+	 * Flaschenpost — positions per layout, listeners post-mount, none of it
+	 * under reduced motion. ---- */
 	interface PlaySpots {
 		waterY: number;
 		fkHome: { x: number; y: number };
@@ -83,15 +162,15 @@
 	const PLAY: Record<'pano' | 'quay', PlaySpots> = {
 		pano: {
 			waterY: 120,
-			fkHome: { x: 505, y: 452 },
-			namazu: { x: 1085, y: 464, s: 1 },
-			bottle: { x: 700, y: 468 }
+			fkHome: { x: 500, y: 818 },
+			namazu: { x: 165, y: 800, s: 1 },
+			bottle: { x: 830, y: 792 }
 		},
 		quay: {
-			waterY: 110,
-			fkHome: { x: 310, y: 640 },
-			namazu: { x: 66, y: 336, s: 0.82 },
-			bottle: { x: 330, y: 592 }
+			waterY: 120,
+			fkHome: { x: 205, y: 806 },
+			namazu: { x: 75, y: 812, s: 0.74 },
+			bottle: { x: 322, y: 798 }
 		}
 	};
 
@@ -149,8 +228,7 @@
 			if (now - lastFeed < 1500) return;
 			const p = svgPoint(e.clientX, e.clientY);
 			if (!p) return;
-			const spots = PLAY[mode];
-			if (p.y < spots.waterY + 18) return;
+			if (p.y < PLAY[mode].waterY + 18) return;
 			lastFeed = now;
 			const id = ++pelletN;
 			pellets = [...pellets, { id, x: p.x, y: p.y }];
@@ -220,34 +298,49 @@
 	</g>
 {/snippet}
 
+<!-- the "heute" bollard opening the line -->
 {#snippet bollard()}
-	<rect class="bl-post" x="-6.5" y="-36" width="13" height="38" rx="2.5" />
-	<ellipse class="bl-top" cx="0" cy="-36" rx="6.5" ry="2.6" />
-	<path class="bl-rope" d="M -7 -26 Q 0 -22 7 -26 M -7 -20 Q 0 -16 7 -20" />
+	<rect class="bl-post" x="-7" y="-38" width="14" height="40" rx="2.5" />
+	<ellipse class="bl-top" cx="0" cy="-38" rx="7" ry="2.8" />
+	<path class="bl-rope" d="M -7.5 -27 Q 0 -23 7.5 -27 M -7.5 -20 Q 0 -16 7.5 -20" />
 	<g class="vx-reflect2">
 		<path d="M -8 8 L 7 8" style="stroke-width:3" />
 		<path d="M -5 13 L 4 13" style="stroke-width:2.2" />
 	</g>
-	<g transform="translate(15 -30) rotate(4)">
-		<path class="uk-tie" d="M -8 6 Q -12 2 -15 4" />
-		<rect class="uk-tag" x="-6" y="-8" width="46" height="17" rx="2.5" />
-		<text class="uk-text" x="17" y="4">{m.cv_today()}</text>
+	<g transform="translate(17 -32) rotate(4)">
+		<path class="uk-tie" d="M -8 6 Q -13 2 -16 4" />
+		<rect class="uk-tag" x="-6" y="-9" width={m.cv_today().length * 7 + 14} height="20" rx="3" />
+		<text class="uk-text uk-text--big" x={(m.cv_today().length * 7 + 2) / 2} y="5.5"
+			>{m.cv_today()}</text
+		>
 	</g>
 {/snippet}
 
-<!-- an uki float with its washi span-tag -->
-{#snippet uki(span: string)}
-	<ellipse class="uk-float" cx="0" cy="0" rx="7" ry="3" />
-	<path class="uk-tie" d="M 0 -2 L 0 -8" />
+<!-- a washi year chip threaded on the current -->
+{#snippet yearChip(text: string)}
 	<rect
 		class="uk-tag"
-		x={-(span.length * 5.4 + 10) / 2}
-		y="-24"
-		width={span.length * 5.4 + 10}
-		height="16"
-		rx="2.5"
+		x={-(text.length * 6.6 + 12) / 2}
+		y="-10"
+		width={text.length * 6.6 + 12}
+		height="20"
+		rx="3"
 	/>
-	<text class="uk-text" x="0" y="-12.5">{span}</text>
+	<text class="uk-text uk-text--big" x="0" y="4.5">{text}</text>
+{/snippet}
+
+<!-- the two bank boards: Ausbildung grows left, Erfahrung floats right -->
+{#snippet bankSign(text: string)}
+	<path class="bs-post" d="M 0 30 L 0 9" />
+	<rect
+		class="bs-board"
+		x={-(text.length * 7.4 + 22) / 2}
+		y="-12"
+		width={text.length * 7.4 + 22}
+		height="25"
+		rx="3.5"
+	/>
+	<text class="bs-text" x="0" y="5.5">{text}</text>
 {/snippet}
 
 {#snippet seal()}
@@ -257,8 +350,7 @@
 	</g>
 {/snippet}
 
-<!-- the namazu, surfaced: dome, googly eyes, whiskers lying on the water.
-     In myth he shakes the earth; petted here, he keeps the sea calm. -->
+<!-- the namazu, surfaced: dome, googly eyes, whiskers on the water -->
 {#snippet namazuShape()}
 	<ellipse class="nz-ripple" cx="0" cy="0" rx="36" ry="6.5" />
 	<ellipse class="nz-under" cx="0" cy="6" rx="27" ry="5" />
@@ -283,7 +375,7 @@
 	<circle class="nz-nostril" cx="4" cy="-9" r="0.9" />
 {/snippet}
 
-<!-- die Flaschenpost, adrift: half-lowered glass, the CV rolled inside -->
+<!-- die Flaschenpost, adrift -->
 {#snippet bottleShape(tagText: string)}
 	<ellipse class="nz-ripple" cx="0" cy="2" rx="34" ry="5.5" />
 	<g transform="rotate(-10)">
@@ -296,17 +388,17 @@
 		<path class="bt-cork" d="M 31 -1.8 L 38 -1.8 L 38 -9.5 L 31 -9.5 Z" />
 		<path class="bt-shine" d="M -24 -9 Q -4 -12 16 -10" />
 	</g>
-	<g transform="translate(8 18) rotate(-2)">
-		<path class="uk-tie" d="M 12 -14 Q 4 -10 -2 -8" />
+	<g transform="translate(8 20) rotate(-2)">
+		<path class="uk-tie" d="M 12 -16 Q 4 -12 -2 -9" />
 		<rect
 			class="uk-tag"
-			x={-(tagText.length * 5.4 + 10) / 2}
+			x={-(tagText.length * 5.6 + 10) / 2}
 			y="-8"
-			width={tagText.length * 5.4 + 10}
-			height="16"
+			width={tagText.length * 5.6 + 10}
+			height="17"
 			rx="2.5"
 		/>
-		<text class="uk-text" x="0" y="3.5">{tagText}</text>
+		<text class="uk-text" x="0" y="4">{tagText}</text>
 	</g>
 {/snippet}
 
@@ -319,7 +411,7 @@
 				class="fk-pose"
 				style="transform: rotate({fk.a}deg) scale(1, {Math.abs(fk.a) > 90 ? -1 : 1})"
 			>
-				<Koi robe="asagi" scale={0.42} motion="tail" shadow={false} wag={2} />
+				<Koi robe="asagi" scale={0.46} motion="tail" shadow={false} wag={2} />
 			</g>
 		</g>
 		{#each pellets as pl (pl.id)}
@@ -364,9 +456,54 @@
 	</g>
 {/snippet}
 
+<!-- the shared harbor body: banks, current, ropes, fleet, years, gate -->
+{#snippet harbor(l: Layout)}
+	<g transform="translate({l.signL.x} {l.signL.y})">{@render bankSign(m.cv_education())}</g>
+	<g transform="translate({l.signR.x} {l.signR.y})">{@render bankSign(m.cv_positions())}</g>
+
+	<path class="current" d={currentPath(l)} />
+
+	{#each l.crafts as c (c.slug)}
+		<path class="moor-rope" d={rope(l, c, c.from)} />
+		<path class="moor-rope" d={rope(l, c, c.to)} />
+	{/each}
+
+	{#each l.crafts as c, i (c.slug)}
+		{@const v = vOf(c.slug)}
+		<a class="craft" style="--i:{i}" href={localizeHref(`/cv/${c.slug}`)} aria-label={label(v)}>
+			<g transform="translate({c.x} {c.y}) scale({c.s})">
+				<ellipse class="craft-ring" cx="0" cy="4" rx="118" ry="22" />
+				<g class="bob" style="--bd:{6.4 + i * 0.9}s; --bdel:{-i * 2.1}s">
+					<Vessel slug={c.slug} name={HULL_NAME[c.slug]} />
+				</g>
+			</g>
+		</a>
+	{/each}
+
+	{#each l.knots as k (k.key)}
+		{#if k.key === 'heute'}
+			<g transform="translate({k.x} {k.y})">{@render bollard()}</g>
+		{:else}
+			<g transform="translate({k.x} {k.y})">{@render yearChip(k.key)}</g>
+		{/if}
+	{/each}
+
+	<g transform="translate({l.gate.x} {l.gate.y}) scale({l.gate.s})">
+		<Torii pid="pd-torii-{l.w}" />
+	</g>
+	<text class="origin-cap" x={l.gate.x + 70 * l.gate.s} y={l.gate.y + 118 * l.gate.s + 36}
+		>{m.cv_origin()}</text
+	>
+{/snippet}
+
 <div class="pond" role="group" aria-label={m.cv_moor_hint()}>
 	<!-- ============ THE PANORAMA (≥700px) ============ -->
-	<svg bind:this={panoSvg} class="pano" viewBox="0 0 1200 528" preserveAspectRatio="xMidYMid meet">
+	<svg
+		bind:this={panoSvg}
+		class="pano"
+		viewBox="0 0 {PANO.w} {PANO.h}"
+		preserveAspectRatio="xMidYMid meet"
+	>
 		<defs>
 			<linearGradient id="pd-sky" x1="0" y1="0" x2="0" y2="1">
 				<stop offset="0" stop-color="#f4efe2" />
@@ -375,7 +512,7 @@
 			</linearGradient>
 			<linearGradient id="pd-water" x1="0" y1="0" x2="0" y2="1">
 				<stop offset="0" stop-color="#cfeaf0" />
-				<stop offset="0.35" stop-color="#abdbe6" />
+				<stop offset="0.3" stop-color="#abdbe6" />
 				<stop offset="1" stop-color="#7cc2d6" />
 			</linearGradient>
 			<linearGradient id="pd-out" x1="0" y1="0" x2="0" y2="1">
@@ -390,127 +527,82 @@
 			<Seigaiha pid="pd-sg" />
 		</defs>
 
-		<!-- sky: bokashi wash, sun over the gate, kumo bars, a skein of birds -->
-		<rect width="1200" height="120" fill="url(#pd-sky)" />
-		<circle cx="1004" cy="60" r="46" fill="url(#pd-sun)" />
-		<circle class="sun-core" cx="1004" cy="60" r="19" />
-		<g transform="translate(120 52)">{@render kumo(150)}</g>
-		<g transform="translate(430 28)">{@render kumo(110)}</g>
-		<g transform="translate(505 66)">{@render birds()}</g>
+		<rect width={PANO.w} height={PANO.waterY} fill="url(#pd-sky)" />
+		<circle cx="880" cy="58" r="46" fill="url(#pd-sun)" />
+		<circle class="sun-core" cx="880" cy="58" r="19" />
+		<g transform="translate(110 50)">{@render kumo(150)}</g>
+		<g transform="translate(610 32)">{@render kumo(104)}</g>
+		<g transform="translate(700 74)">{@render birds()}</g>
 		<path
 			class="ridge r1"
-			d="M0 120 C 130 108 280 115 430 108 C 580 102 720 113 880 107 C 1000 103 1110 111 1200 106 L 1200 120 Z"
+			d="M0 120 C 130 108 280 115 430 108 C 580 102 720 113 880 107 C 960 104 1000 110 1000 108 L 1000 120 Z"
 		/>
 		<path
 			class="ridge r2"
-			d="M0 120 C 180 113 360 117 540 113 C 720 109 900 116 1080 112 L 1200 114 L 1200 120 Z"
+			d="M0 120 C 180 113 360 117 540 113 C 720 109 900 116 1000 112 L 1000 120 Z"
 		/>
 
-		<!-- the water -->
-		<rect y="120" width="1200" height="408" fill="url(#pd-water)" />
-		<path class="horizon" d="M0 120 L 1200 120" />
-		<rect class="sg-patch" x="40" y="121" width="300" height="34" rx="10" fill="url(#pd-sg)" />
-		<rect class="sg-patch p2" x="600" y="121" width="240" height="26" rx="9" fill="url(#pd-sg)" />
-		<rect class="sg-patch p3" x="1010" y="121" width="190" height="30" rx="9" fill="url(#pd-sg)" />
-		<rect class="sg-patch p4" x="180" y="394" width="300" height="30" rx="10" fill="url(#pd-sg)" />
+		<rect y={PANO.waterY} width={PANO.w} height={PANO.h - PANO.waterY} fill="url(#pd-water)" />
+		<path class="horizon" d="M0 120 L 1000 120" />
+		<rect class="sg-patch" x="30" y="121" width="260" height="32" rx="10" fill="url(#pd-sg)" />
+		<rect class="sg-patch p2" x="430" y="121" width="150" height="24" rx="9" fill="url(#pd-sg)" />
+		<rect class="sg-patch p3" x="720" y="121" width="250" height="30" rx="9" fill="url(#pd-sg)" />
+		<rect class="sg-patch p4" x="360" y="772" width="280" height="30" rx="10" fill="url(#pd-sg)" />
 
-		<!-- the far gate, where the current begins -->
-		<g transform="translate(1042 55) scale(0.55)">
-			<Torii pid="pd-torii" />
-		</g>
-		<text class="origin-cap" x="1080" y="156">{m.cv_origin()}</text>
-
-		<!-- kasumi mist crossing the far water -->
-		<g class="drift-a" transform="translate(400 144)">{@render kasumi(430)}</g>
-
-		<!-- the mooring current: one line from the gate to today -->
-		<path
-			class="current"
-			d="M 1080 132 C 1050 150 1020 164 985 180 C 950 196 922 200 890 212 C 850 226 800 238 755 256 C 700 276 640 290 575 310 C 500 336 420 354 330 382 C 262 402 202 426 158 446"
-		/>
+		<g class="drift-a" transform="translate(300 205)">{@render kasumi(430)}</g>
 
 		<!-- koi passing beneath the surface -->
 		<g class="under">
 			<Koi
 				robe="kohaku"
-				scale={0.72}
+				scale={0.66}
 				motion="tail"
 				shadow={false}
 				wag={2.4}
-				swim={{ path: loop(330, 424, 175, 24), dur: 84, rest: '30%' }}
+				swim={{ path: loop(160, 505, 85, 15), dur: 74, rest: '30%' }}
 			/>
 		</g>
 		<g class="under u2">
 			<Koi
-				robe="asagi"
-				scale={0.5}
-				motion="tail"
-				shadow={false}
-				wag={2}
-				swim={{ path: loop(660, 360, 150, 20), dur: 66, rest: '62%', delay: -21 }}
-			/>
-		</g>
-		<g class="under u3">
-			<Koi
 				robe="hi"
-				scale={0.34}
+				scale={0.4}
 				motion="tail"
 				shadow={false}
-				wag={1.8}
-				swim={{ path: loop(880, 238, 72, 11), dur: 48, rest: '12%', delay: -9 }}
+				wag={1.9}
+				swim={{ path: loop(895, 318, 62, 12), dur: 52, rest: '64%', delay: -17 }}
 			/>
 		</g>
 
-		<!-- the fleet, moored along it (each craft is a real doorway) -->
-		{#each PANO as sp, i (sp.slug)}
-			{@const v = vOf(sp.slug)}
-			<circle class="moor-knot" cx={sp.x} cy={sp.y} r="2" />
-			<a
-				class="craft"
-				class:haze={sp.haze}
-				style="--i:{i}"
-				href={localizeHref(`/cv/${sp.slug}`)}
-				aria-label={label(v)}
-			>
-				<g transform="translate({sp.x} {sp.y}) scale({sp.s})">
-					<ellipse class="craft-ring" cx="0" cy="4" rx="105" ry="17" />
-					<g class="bob" style="--bd:{6.4 + i * 0.9}s; --bdel:{-i * 2.1}s">
-						<Vessel slug={sp.slug} name={HULL_NAME[sp.slug]} />
-					</g>
-				</g>
-			</a>
-			<g
-				class="uki"
-				transform="translate({sp.x + sp.tx} {sp.y + sp.ty}) scale({Math.max(0.72, sp.s * 0.8)})"
-			>
-				{@render uki(resolveSpan(v.span, locale))}
-			</g>
-		{/each}
+		{@render harbor(PANO)}
 
-		<!-- the "heute" bollard the current ends on -->
-		<g transform="translate(152 448)">{@render bollard()}</g>
-
-		<!-- quiet rings; near mist floating over the middle distance -->
-		<g transform="translate(520 208)">
-			<ellipse class="ring" rx="30" ry="7" style="--rd:0s" />
-			<ellipse class="ring" rx="30" ry="7" style="--rd:4s" />
+		<g transform="translate(830 540)">
+			<ellipse class="ring" rx="28" ry="7" style="--rd:0s" />
+			<ellipse class="ring" rx="28" ry="7" style="--rd:4.4s" />
 		</g>
-		<g class="drift-b" transform="translate(690 230)">{@render kasumi(360)}</g>
+		<g class="drift-b" transform="translate(80 748)">{@render kasumi(250)}</g>
 
 		{@render play('pano')}
 
-		<rect y="498" width="1200" height="30" fill="url(#pd-out)" />
-
-		<!-- the print is signed -->
-		<g transform="translate(1152 494)">{@render seal()}</g>
+		<rect y={PANO.h - 30} width={PANO.w} height="30" fill="url(#pd-out)" />
+		<g transform="translate(938 845)">{@render seal()}</g>
 	</svg>
 
-	<!-- ============ THE QUAY (<700px): the same harbor, walked down ============ -->
-	<svg bind:this={quaySvg} class="quay" viewBox="0 0 420 940" preserveAspectRatio="xMidYMid meet">
+	<!-- ============ THE QUAY (<700px): the same harbor, narrow ============ -->
+	<svg
+		bind:this={quaySvg}
+		class="quay"
+		viewBox="0 0 {QUAY.w} {QUAY.h}"
+		preserveAspectRatio="xMidYMid meet"
+	>
 		<defs>
 			<linearGradient id="pq-sky" x1="0" y1="0" x2="0" y2="1">
 				<stop offset="0" stop-color="#f4efe2" />
 				<stop offset="1" stop-color="#dcebe9" />
+			</linearGradient>
+			<linearGradient id="pq-water" x1="0" y1="0" x2="0" y2="1">
+				<stop offset="0" stop-color="#cfeaf0" />
+				<stop offset="0.3" stop-color="#abdbe6" />
+				<stop offset="1" stop-color="#7cc2d6" />
 			</linearGradient>
 			<linearGradient id="pq-out" x1="0" y1="0" x2="0" y2="1">
 				<stop offset="0" stop-color="#e8f4f8" stop-opacity="0" />
@@ -521,88 +613,46 @@
 				<stop offset="0.45" stop-color="#f6e6bb" stop-opacity="0.5" />
 				<stop offset="1" stop-color="#f6e6bb" stop-opacity="0" />
 			</radialGradient>
-			<linearGradient id="pq-water" x1="0" y1="0" x2="0" y2="1">
-				<stop offset="0" stop-color="#cfeaf0" />
-				<stop offset="0.3" stop-color="#abdbe6" />
-				<stop offset="1" stop-color="#7cc2d6" />
-			</linearGradient>
 			<Seigaiha pid="pq-sg" />
 		</defs>
 
-		<rect width="420" height="110" fill="url(#pq-sky)" />
-		<circle cx="352" cy="48" r="34" fill="url(#pq-sun)" />
-		<circle class="sun-core" cx="352" cy="48" r="15" />
-		<g transform="translate(36 42)">{@render kumo(96)}</g>
-		<g transform="translate(180 64) scale(0.85)">{@render birds()}</g>
+		<rect width={QUAY.w} height={QUAY.waterY} fill="url(#pq-sky)" />
+		<circle cx="352" cy="52" r="34" fill="url(#pq-sun)" />
+		<circle class="sun-core" cx="352" cy="52" r="15" />
+		<g transform="translate(36 44)">{@render kumo(96)}</g>
+		<g transform="translate(180 70) scale(0.85)">{@render birds()}</g>
 		<path
 			class="ridge r1"
-			d="M0 110 C 70 102 160 106 250 101 C 330 98 380 104 420 101 L 420 110 Z"
+			d="M0 120 C 70 112 160 116 250 111 C 330 108 380 114 420 111 L 420 120 Z"
 		/>
-		<rect y="110" width="420" height="830" fill="url(#pq-water)" />
-		<path class="horizon" d="M0 110 L 420 110" />
-		<rect class="sg-patch" x="16" y="111" width="170" height="26" rx="8" fill="url(#pq-sg)" />
-		<rect class="sg-patch p2" x="290" y="111" width="120" height="22" rx="8" fill="url(#pq-sg)" />
-
-		<!-- the current walks the quay: today up top, the gate at the bottom -->
-		<path
-			class="current"
-			d="M 74 164 C 130 180 180 196 215 226 C 250 258 230 320 200 398 C 176 462 196 500 225 552 C 250 596 232 640 205 692 C 182 736 168 772 175 812 C 182 852 226 878 268 896"
-		/>
-		<g transform="translate(70 168)">{@render bollard()}</g>
+		<rect y={QUAY.waterY} width={QUAY.w} height={QUAY.h - QUAY.waterY} fill="url(#pq-water)" />
+		<path class="horizon" d="M0 120 L 420 120" />
+		<rect class="sg-patch" x="16" y="121" width="150" height="24" rx="8" fill="url(#pq-sg)" />
+		<rect class="sg-patch p2" x="300" y="121" width="110" height="20" rx="8" fill="url(#pq-sg)" />
 
 		<g class="under">
 			<Koi
 				robe="kohaku"
-				scale={0.44}
+				scale={0.4}
 				motion="tail"
 				shadow={false}
 				wag={2.2}
-				swim={{ path: loop(300, 314, 72, 13), dur: 58, rest: '30%' }}
-			/>
-		</g>
-		<g class="under u2">
-			<Koi
-				robe="hi"
-				scale={0.32}
-				motion="tail"
-				shadow={false}
-				wag={1.9}
-				swim={{ path: loop(120, 624, 62, 11), dur: 46, rest: '64%', delay: -13 }}
+				swim={{ path: loop(95, 505, 48, 10), dur: 52, rest: '30%' }}
 			/>
 		</g>
 
-		{#each QUAY as sp, i (sp.slug)}
-			{@const v = vOf(sp.slug)}
-			<circle class="moor-knot" cx={sp.x} cy={sp.y} r="2" />
-			<a class="craft" style="--i:{i}" href={localizeHref(`/cv/${sp.slug}`)} aria-label={label(v)}>
-				<g transform="translate({sp.x} {sp.y}) scale({sp.s})">
-					<ellipse class="craft-ring" cx="0" cy="4" rx="112" ry="20" />
-					<g class="bob" style="--bd:{6.6 + i * 0.8}s; --bdel:{-i * 1.9}s">
-						<Vessel slug={sp.slug} name={HULL_NAME[sp.slug]} />
-					</g>
-				</g>
-			</a>
-			<g class="uki" transform="translate({sp.x + sp.tx} {sp.y + sp.ty}) scale(0.86)">
-				{@render uki(resolveSpan(v.span, locale))}
-			</g>
-		{/each}
+		{@render harbor(QUAY)}
 
-		<g class="drift-a" transform="translate(60 476)">{@render kasumi(300)}</g>
-		<g transform="translate(330 470)">
-			<ellipse class="ring" rx="24" ry="6" style="--rd:0s" />
-			<ellipse class="ring" rx="24" ry="6" style="--rd:4.5s" />
+		<g class="drift-a" transform="translate(140 458)">{@render kasumi(220)}</g>
+		<g transform="translate(330 300)">
+			<ellipse class="ring" rx="22" ry="6" style="--rd:0s" />
+			<ellipse class="ring" rx="22" ry="6" style="--rd:4.5s" />
 		</g>
-
-		<!-- the far gate closes the walk -->
-		<g transform="translate(266 838) scale(0.52)">
-			<Torii pid="pq-torii" />
-		</g>
-		<text class="origin-cap" x="252" y="928">{m.cv_origin()}</text>
 
 		{@render play('quay')}
 
-		<rect y="908" width="420" height="32" fill="url(#pq-out)" />
-		<g transform="translate(382 916)">{@render seal()}</g>
+		<rect y={QUAY.h - 32} width={QUAY.w} height="32" fill="url(#pq-out)" />
+		<g transform="translate(382 950)">{@render seal()}</g>
 	</svg>
 </div>
 
@@ -668,7 +718,7 @@
 		opacity: 0.34;
 	}
 	.sg-patch.p4 {
-		opacity: 0.22;
+		opacity: 0.2;
 	}
 	.kasumi {
 		fill: #fbf7ec;
@@ -679,23 +729,48 @@
 	}
 	.origin-cap {
 		font:
-			italic 12.5px var(--font-display, Georgia),
+			italic 15px var(--font-display, Georgia),
 			serif;
 		fill: #14424f;
 		text-anchor: middle;
 		opacity: 0.85;
 	}
+
+	/* ---- the timeline current + mooring ropes ---- */
 	.current {
 		fill: none;
 		stroke: #eef8f8;
-		stroke-width: 2.2;
+		stroke-width: 2.4;
 		stroke-linecap: round;
 		stroke-dasharray: 2 9;
 		opacity: 0.85;
 	}
-	.moor-knot {
-		fill: #eef8f8;
-		opacity: 0.9;
+	.moor-rope {
+		fill: none;
+		stroke: #c9a86a;
+		stroke-width: 1.7;
+		stroke-linecap: round;
+		opacity: 0.85;
+	}
+
+	/* ---- bank boards ---- */
+	.bs-post {
+		stroke: #6d5334;
+		stroke-width: 3;
+		stroke-linecap: round;
+	}
+	.bs-board {
+		fill: #efe5cc;
+		stroke: #6d5334;
+		stroke-width: 1.2;
+	}
+	.bs-text {
+		fill: #2c241b;
+		font:
+			600 12.5px var(--font-display, Georgia),
+			serif;
+		letter-spacing: 0.06em;
+		text-anchor: middle;
 	}
 
 	/* ---- craft links ---- */
@@ -709,9 +784,6 @@
 		stroke-width: 1.6;
 		opacity: 0;
 	}
-	.craft.haze {
-		opacity: 0.82;
-	}
 	.craft:hover .craft-ring,
 	.craft:focus-visible .craft-ring {
 		opacity: 0.75;
@@ -719,14 +791,8 @@
 	.craft:focus-visible .craft-ring {
 		stroke-dasharray: 6 6;
 	}
-	.uki {
-		pointer-events: none;
-	}
-	.uk-float {
-		fill: #c9a86a;
-		stroke: #8a6a42;
-		stroke-width: 0.9;
-	}
+
+	/* ---- washi tags & year chips ---- */
 	.uk-tie {
 		fill: none;
 		stroke: #8a6a42;
@@ -743,6 +809,9 @@
 		font: 11px var(--font-body, sans-serif);
 		font-variant-numeric: tabular-nums;
 		text-anchor: middle;
+	}
+	.uk-text--big {
+		font-size: 13px;
 	}
 
 	/* ---- the bollard ---- */
@@ -901,8 +970,8 @@
 		text-anchor: middle;
 	}
 
-	/* ---- motion: an unhurried harbor. Everything here is slow, tiny and
-	   optional; reduced motion holds a finished print. ---- */
+	/* ---- motion: an unhurried harbor; reduced motion holds a finished
+	   print. ---- */
 	@media (prefers-reduced-motion: no-preference) {
 		.craft {
 			animation: pd-arrive 800ms ease backwards;
@@ -948,43 +1017,6 @@
 			animation: pd-calm-text 1.7s ease-out 120ms forwards;
 		}
 	}
-	@keyframes pd-pellet {
-		from {
-			translate: 0 0;
-			opacity: 1;
-		}
-		to {
-			translate: 0 34px;
-			opacity: 0;
-		}
-	}
-	@keyframes pd-calm-b {
-		from {
-			opacity: 0.85;
-			transform: translateY(0);
-		}
-		to {
-			opacity: 0;
-			transform: translateY(-24px);
-		}
-	}
-	@keyframes pd-calm-text {
-		0% {
-			opacity: 0;
-			transform: translateY(6px);
-		}
-		18% {
-			opacity: 1;
-			transform: translateY(-2px);
-		}
-		70% {
-			opacity: 1;
-		}
-		100% {
-			opacity: 0;
-			transform: translateY(-22px);
-		}
-	}
 	@keyframes pd-arrive {
 		from {
 			opacity: 0;
@@ -1021,6 +1053,43 @@
 		100% {
 			transform: scale(1.3);
 			opacity: 0;
+		}
+	}
+	@keyframes pd-pellet {
+		from {
+			translate: 0 0;
+			opacity: 1;
+		}
+		to {
+			translate: 0 34px;
+			opacity: 0;
+		}
+	}
+	@keyframes pd-calm-b {
+		from {
+			opacity: 0.85;
+			transform: translateY(0);
+		}
+		to {
+			opacity: 0;
+			transform: translateY(-24px);
+		}
+	}
+	@keyframes pd-calm-text {
+		0% {
+			opacity: 0;
+			transform: translateY(6px);
+		}
+		18% {
+			opacity: 1;
+			transform: translateY(-2px);
+		}
+		70% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0;
+			transform: translateY(-22px);
 		}
 	}
 </style>

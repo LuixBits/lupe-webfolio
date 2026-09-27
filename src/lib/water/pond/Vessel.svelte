@@ -23,7 +23,7 @@
 		name,
 		reflect = true
 	}: {
-		slug: 'siga' | 'hslu' | 'neptun' | 'armee' | 'emvs';
+		slug: 'siga' | 'hslu' | 'neptun' | 'armee' | 'emvs' | 'schule';
 		/** Hull lettering (the boat's painted name). */
 		name?: string;
 		reflect?: boolean;
@@ -35,7 +35,8 @@
 		hslu: 60,
 		neptun: 48,
 		armee: 40,
-		emvs: 55
+		emvs: 44,
+		schule: 46
 	};
 	const rw = $derived(REFLECT[slug] ?? 50);
 </script>
@@ -163,16 +164,20 @@
 		<path class="vx-pole" d="M -44 -16 L 30 -4" />
 		<path class="vx-oar" d="M -44 -16 C -52 -18 -56 -16 -58 -12 C -54 -10 -49 -11 -44 -16 Z" />
 		{#if name}<text class="vx-name vx-name--small" x="0" y="5">{name}</text>{/if}
-		<!-- the two school pads in tow, young blossoms aboard -->
-		<path class="vx-cord" d="M 52 -4 Q 62 4 72 1" />
-		<g transform="translate(82 3)">
-			{@render pad(17, 40)}
-			<g transform="translate(0 -1)">{@render lotus(0.4)}</g>
+	{:else if slug === 'schule'}
+		<!-- the school years: two young pads under their own stake sign -->
+		<path class="vx-stake" d="M -48 6 L -46 -30" />
+		<rect class="vx-sign" x="-70" y="-44" width="48" height="15" rx="2" />
+		{#if name}<text class="vx-name vx-name--sign" x="-46" y="-33">{name}</text>{/if}
+		<g transform="translate(-8 0)">
+			{@render pad(30, 32)}
+			<g transform="translate(-2 -1)">{@render lotus(0.62)}</g>
 		</g>
-		<g transform="translate(106 6)">
-			{@render pad(13, 200)}
-			<g transform="translate(0 -1)">{@render lotus(0.32)}</g>
+		<g transform="translate(40 4)">
+			{@render pad(22, 170)}
+			<g transform="translate(1 -1)">{@render lotus(0.46)}</g>
 		</g>
+		<path class="vx-cord" d="M 14 2 Q 22 6 30 3" />
 	{/if}
 
 	{#if reflect}
@@ -277,7 +282,7 @@
 	.vx-name {
 		fill: #f3e8d2;
 		font:
-			600 11px var(--font-display, Georgia),
+			600 12.5px var(--font-display, Georgia),
 			serif;
 		letter-spacing: 0.08em;
 		text-anchor: middle;
@@ -286,13 +291,13 @@
 		stroke-width: 2;
 	}
 	.vx-name--small {
-		font-size: 9px;
+		font-size: 10.5px;
 	}
 	.vx-name--sign {
 		fill: #2c241b;
 		stroke: none;
-		font-size: 9px;
-		letter-spacing: 0.1em;
+		font-size: 10px;
+		letter-spacing: 0.08em;
 	}
 	.vx-stake {
 		fill: none;

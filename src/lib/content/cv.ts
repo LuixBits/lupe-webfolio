@@ -185,7 +185,16 @@ export const vessels: Vessel[] = defineVessels([
 		slug: 'emvs',
 		org: 'EMVs',
 		kind: 'boat',
-		stationIds: ['emvs-lehre', 'efz', 'bm'],
+		stationIds: ['emvs-lehre'],
+		span: '2013 – 2017'
+	},
+	{
+		// the apprenticeship's SCHOOL side — strictly education, so it grows
+		// as lily pads on the education bank (the EMVs boat keeps the job)
+		slug: 'schule',
+		org: 'EFZ & Berufsmaturität',
+		kind: 'pads',
+		stationIds: ['efz', 'bm'],
 		span: '2013 – 2017'
 	}
 ]);
@@ -202,7 +211,8 @@ export const HULL_NAME: Record<Vessel['slug'], string> = {
 	hslu: 'HSLU',
 	neptun: 'Neptun',
 	armee: 'Armee',
-	emvs: 'EMVs'
+	emvs: 'EMVs',
+	schule: 'EFZ · BM'
 };
 
 export function getVessel(slug: string): Vessel | undefined {

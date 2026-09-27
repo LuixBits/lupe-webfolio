@@ -34,6 +34,7 @@
 			>{s.track === 'education' ? m.cv_education() : m.cv_positions()}</span
 		>
 		<h3 class="role">{resolveLocalized(s.role, locale)}</h3>
+		{#if s.org !== vessel.org}<p class="slip-org">{s.org}</p>{/if}
 		<p class="span-line">
 			<span>{resolveSpan(s.span, locale)}</span>
 			{#if s.duration}<span class="dur">· {resolveLocalized(s.duration, locale)}</span>{/if}
@@ -239,6 +240,13 @@
 		font-size: var(--fs-h3);
 		line-height: 1.25;
 		color: var(--ink);
+	}
+	.slip-org {
+		margin: -0.2rem 0 0.45rem;
+		font-family: var(--font-display);
+		font-style: italic;
+		font-size: 0.92rem;
+		color: var(--ink-muted);
 	}
 	.span-line {
 		margin: 0 0 0.55rem;

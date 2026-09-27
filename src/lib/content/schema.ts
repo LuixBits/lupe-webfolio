@@ -235,7 +235,7 @@ export function defineStations(input: unknown[]): Station[] {
  *  stations lived at that org and owns one detail page (/cv/<slug>). */
 export const vesselSchema = z.object({
 	/** Closed set — each slug has bespoke craft art in pond/Vessel.svelte. */
-	slug: z.enum(['siga', 'hslu', 'neptun', 'armee', 'emvs']),
+	slug: z.enum(['siga', 'hslu', 'neptun', 'armee', 'emvs', 'schule']),
 	org: z.string(),
 	kind: z.enum(['boat', 'pads']),
 	/** Station ids aboard, newest first (checked against stations at load). */
