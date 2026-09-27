@@ -4,7 +4,8 @@
 	 *  every station is a written entry on its own page — role as heading,
 	 *  the span in the margin row, a few first-person lines, skills as
 	 *  tied-on paper tags, and a round harbor stamp. Two stations fill a
-	 *  spread exactly (EFZ left, BM right). Entirely static print — the
+	 *  spread exactly (EFZ left, BM right). The book lies straight on the
+	 *  craft's surface (DeckAboard). Entirely static print — the
 	 *  reduced-motion story is the story. */
 	import { resolveLocalized, resolveSpan, type Station, type Vessel } from '$lib/content/schema';
 	import { getLocale } from '$lib/paraglide/runtime';
@@ -73,28 +74,17 @@
 		box-shadow: inset 0 -6px 10px -8px rgba(0, 0, 0, 0.7);
 	}
 
-	/* the dock the book lies on */
+	/* the book lies straight on the craft's surface */
 	.log-desk {
-		padding: clamp(0.9rem, 3.5vw, 2rem);
-		border-radius: 12px 5px 12px 5px;
-		background: repeating-linear-gradient(
-			0deg,
-			#533e2a 0 44px,
-			#2a1d12 44px 46px,
-			#4a3725 46px 90px,
-			#2a1d12 90px 92px,
-			#423122 92px 136px,
-			#2a1d12 136px 138px
-		);
-		box-shadow:
-			inset 0 2px 14px rgba(0, 0, 0, 0.45),
-			0 22px 40px -28px rgba(4, 40, 52, 0.7);
+		padding: 0;
 	}
 	.log-cover {
 		padding: clamp(6px, 1.6vw, 10px);
 		border-radius: 10px;
 		background: linear-gradient(105deg, #5c4527, #4a3524 60%, #543e24);
-		box-shadow: 0 14px 28px -16px rgba(0, 0, 0, 0.75);
+		box-shadow:
+			0 26px 44px -20px rgba(10, 24, 16, 0.6),
+			0 4px 10px rgba(10, 24, 16, 0.25);
 	}
 	.log-book {
 		position: relative;

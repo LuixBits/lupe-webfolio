@@ -1,21 +1,21 @@
 <script lang="ts">
 	/** Aboard a vessel — the detail page behind each craft on the CV pond.
-	 *  A small water band up top carries the SAME art as the pond (you
-	 *  really boarded that boat), then the station content. THREE demo
-	 *  presentations are live side by side for the owner to compare
+	 *  THE ZOOM: `DeckAboard` turns the whole viewport into the craft you
+	 *  clicked (its deck planking, or the lily pad's surface), the hull
+	 *  name painted faintly underfoot; the station content lies on it as
+	 *  papers. THREE presentations run side by side for the owner
 	 *  (2026-09-27): schule = the open Logbuch spread, emvs = the cargo
-	 *  manifest (berth grown into the hero, so no separate berth band),
-	 *  neptun = the rigging line; the rest keep the original washi slips
-	 *  as the baseline. Once the owner picks one, it becomes the single
-	 *  presentation for all vessels. */
+	 *  manifest hung from the spar, neptun = the rigging line; the rest
+	 *  keep the washi slips as the baseline. Rule of thumb once content
+	 *  lands: detail-rich chapters → Logbuch, lighter ones → manifest or
+	 *  rigging. */
 	import { HULL_NAME, vesselStations } from '$lib/content/cv';
 	import { resolveLocalized, resolveSpan, type Station, type Vessel } from '$lib/content/schema';
 	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
 	import * as m from '$lib/paraglide/messages';
-	import Koi from '$lib/water/Koi.svelte';
-	import Vessel_ from '$lib/water/pond/Vessel.svelte';
 	import Crane from '$lib/water/pond/Crane.svelte';
 	import Hanko from './Hanko.svelte';
+	import DeckAboard from './DeckAboard.svelte';
 	import DeckLog from './DeckLog.svelte';
 	import DeckCargo from './DeckCargo.svelte';
 	import DeckRig from './DeckRig.svelte';
@@ -88,44 +88,8 @@
 <article class="page deck">
 	<a class="back" href={localizeHref('/cv')}>← {m.paper_back()}</a>
 
-	<!-- the mooring band: the very craft you boarded, riding its water
-	     (the cargo variant grows this into its own hero instead) -->
-	{#if variant !== 'cargo'}
-		<div class="berth" aria-hidden="true">
-			<svg viewBox="0 0 640 190" preserveAspectRatio="xMidYMid meet">
-				<defs>
-					<linearGradient id="deck-sky" x1="0" y1="0" x2="0" y2="1">
-						<stop offset="0" stop-color="#f4efe2" />
-						<stop offset="1" stop-color="#dceef2" />
-					</linearGradient>
-					<linearGradient id="deck-water" x1="0" y1="0" x2="0" y2="1">
-						<stop offset="0" stop-color="#cfeaf0" />
-						<stop offset="1" stop-color="#8ecbdb" />
-					</linearGradient>
-				</defs>
-				<rect width="640" height="112" fill="url(#deck-sky)" />
-				<rect y="112" width="640" height="78" fill="url(#deck-water)" />
-				<path class="berth-line" d="M 0 112 L 640 112" />
-				<g class="berth-ring">
-					<ellipse cx="320" cy="118" rx="120" ry="9" />
-					<ellipse cx="320" cy="118" rx="78" ry="6" />
-				</g>
-				<g transform="translate(320 112)">
-					<g class="berth-bob"><Vessel_ slug={vessel.slug} name={HULL_NAME[vessel.slug]} /></g>
-				</g>
-				<g transform="translate(120 152)" opacity="0.75">
-					<g class="berth-koi">
-						<Koi robe="asagi" scale={0.34} motion="tail" shadow={false} wag={2.1} />
-					</g>
-				</g>
-				<g class="wv">
-					<path d="M 48 138 Q 56 133.5 64 138 Q 72 133.5 80 138" />
-					<path d="M 528 158 Q 536 153.5 544 158 Q 552 153.5 560 158" />
-				</g>
-				<text class="berth-tag" x="576" y="128">{resolveSpan(vessel.span, locale)}</text>
-			</svg>
-		</div>
-	{/if}
+	<!-- the zoom: the craft itself fills the viewport underfoot -->
+	<DeckAboard slug={vessel.slug} name={HULL_NAME[vessel.slug]} />
 
 	<header class="deck-head">
 		<p class="eyebrow">{m.cv_aboard()}</p>
@@ -162,6 +126,7 @@
 
 <style>
 	.deck {
+		position: relative;
 		--paper: #f5efdf;
 		--ink: #2c241b;
 		--ink-muted: #6b5f4d;
@@ -171,65 +136,39 @@
 	.back {
 		display: inline-block;
 		margin-bottom: 1rem;
-		color: var(--fg-muted);
+		color: #f2e8d0;
+		text-shadow: 0 1px 2px rgba(20, 10, 5, 0.45);
 		text-decoration: none;
 	}
 	.back:hover {
-		color: var(--accent);
+		color: #ffffff;
 	}
 
-	/* ---- the berth band ---- */
-	.berth {
-		border-radius: 14px 5px 14px 5px;
-		overflow: hidden;
-		border: 1px solid color-mix(in srgb, var(--water-deep) 30%, transparent);
-		box-shadow: 0 22px 40px -28px rgba(4, 40, 52, 0.7);
-	}
-	.berth svg {
-		display: block;
-		width: 100%;
-		height: auto;
-	}
-	.berth-line {
-		stroke: rgba(255, 255, 255, 0.75);
-		stroke-width: 1.6;
-	}
-	.berth-ring ellipse {
-		fill: none;
-		stroke: rgba(255, 255, 255, 0.5);
-		stroke-width: 1.2;
-	}
-	.wv path {
-		fill: none;
-		stroke: #eefafd;
-		stroke-width: 1.6;
-		stroke-linecap: round;
-		opacity: 0.55;
-	}
-	.berth-tag {
-		font:
-			italic 14px var(--font-display, Georgia),
-			serif;
-		fill: #14424f;
-		text-anchor: end;
-		opacity: 0.85;
-	}
-
+	/* the page chrome is PAINT on the deck now — light strokes on wood/pad */
 	.deck-head {
-		margin: 1.4rem 0 0.4rem;
+		margin: 0.6rem 0 0.4rem;
 	}
 	.deck-head h1 {
 		margin: 0 0 0.2rem;
+		color: #f6efdd;
+		text-shadow: 0 1px 2px rgba(20, 10, 5, 0.45);
+	}
+	.deck-head .eyebrow {
+		color: #efe3c8;
+		text-shadow: 0 1px 2px rgba(20, 10, 5, 0.4);
 	}
 	.deck-head .note {
 		margin: 0;
-		color: var(--fg-muted);
+		color: #ecdfc4;
+		text-shadow: 0 1px 2px rgba(20, 10, 5, 0.4);
 		font-variant-numeric: tabular-nums;
 	}
 	.logbook-h {
 		font-size: var(--fs-h2);
 		margin: 1.6rem 0 1rem;
-		border-bottom: 1px solid color-mix(in srgb, var(--slice-bg) 45%, transparent);
+		color: #f6efdd;
+		text-shadow: 0 1px 2px rgba(20, 10, 5, 0.45);
+		border-bottom: 1px solid rgba(246, 239, 221, 0.4);
 		padding-bottom: 0.35rem;
 	}
 
@@ -350,31 +289,7 @@
 	}
 	.org-stamp {
 		margin-top: 1.4rem;
-	}
-
-	/* the berth breathes; reduced motion holds still water */
-	@media (prefers-reduced-motion: no-preference) {
-		.berth-bob {
-			animation: deck-bob 7s ease-in-out infinite alternate;
-		}
-		.berth-koi {
-			animation: deck-koi 11s ease-in-out infinite alternate;
-		}
-	}
-	@keyframes deck-bob {
-		from {
-			transform: translateY(-1.6px);
-		}
-		to {
-			transform: translateY(1.8px);
-		}
-	}
-	@keyframes deck-koi {
-		from {
-			transform: translateX(0);
-		}
-		to {
-			transform: translateX(46px);
-		}
+		/* the hanko's printed label must read on wood and pad */
+		--ink-muted: #f0e6d2;
 	}
 </style>

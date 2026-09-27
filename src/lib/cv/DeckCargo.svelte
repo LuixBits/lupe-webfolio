@@ -1,16 +1,12 @@
 <script lang="ts">
-	/** Deck variant B — the CARGO MANIFEST: the berth grows into the whole
-	 *  page. The craft rides its water large, and the information hangs
-	 *  off the boat itself — strings run from the oar, the hull patch, the
-	 *  stern and the mooring post down to knots at the water's edge, and
-	 *  the manifest tags hang from those knots. On narrow screens the tags
+	/** Deck variant B — the CARGO MANIFEST: you stand on the deck
+	 *  (DeckAboard is the boat itself), and the chapter's papers hang
+	 *  from the cargo spar overhead — role, story, skills, carried-
+	 *  forward, each tied by its own string. On narrow screens the tags
 	 *  rack up in column but keep their string stubs. */
-	import { HULL_NAME } from '$lib/content/cv';
 	import { resolveLocalized, resolveSpan, type Station, type Vessel } from '$lib/content/schema';
 	import { getLocale } from '$lib/paraglide/runtime';
 	import * as m from '$lib/paraglide/messages';
-	import Koi from '$lib/water/Koi.svelte';
-	import Vessel_ from '$lib/water/pond/Vessel.svelte';
 
 	let { vessel, stations }: { vessel: Vessel; stations: Station[] } = $props();
 	const locale = getLocale();
@@ -20,62 +16,22 @@
 <section class="cargo">
 	<h2 class="cargo-h">{m.cv_manifest()}</h2>
 
-	<!-- the berth, grown into the hero: your boat, moored to its post -->
-	<div class="cargo-scene" aria-hidden="true">
-		<svg viewBox="0 0 640 250" preserveAspectRatio="xMidYMid meet">
-			<defs>
-				<linearGradient id="cg-sky" x1="0" y1="0" x2="0" y2="1">
-					<stop offset="0" stop-color="#f4efe2" />
-					<stop offset="1" stop-color="#dceef2" />
-				</linearGradient>
-				<linearGradient id="cg-water" x1="0" y1="0" x2="0" y2="1">
-					<stop offset="0" stop-color="#cfeaf0" />
-					<stop offset="0.5" stop-color="#a5d8e4" />
-					<stop offset="1" stop-color="#8ecbdb" />
-				</linearGradient>
-			</defs>
-			<rect width="640" height="96" fill="url(#cg-sky)" />
-			<rect y="96" width="640" height="154" fill="url(#cg-water)" />
-			<path class="cg-horizon" d="M 0 96 L 640 96" />
-
-			<!-- the mooring post, holding her -->
-			<g transform="translate(560 96)">
-				<rect class="cg-post" x="-7" y="-30" width="14" height="34" rx="2.5" />
-				<ellipse class="cg-post-top" cx="0" cy="-30" rx="7" ry="2.6" />
-				<path class="cg-wrap" d="M -7.5 -21 Q 0 -17 7.5 -21 M -7.5 -14 Q 0 -10 7.5 -14" />
-				<path class="cg-reflect" d="M -8 8 L 7 8 M -5 13 L 4 13" />
-			</g>
-			<path class="cg-rope" d="M 402 100 C 460 116 510 112 553 88" />
-
-			<!-- the craft herself, big -->
-			<g transform="translate(300 118) scale(1.9)">
-				<g class="cg-bob"><Vessel_ slug={vessel.slug} name={HULL_NAME[vessel.slug]} /></g>
-			</g>
-
-			<!-- life around her -->
-			<g transform="translate(96 168)" opacity="0.75">
-				<g class="cg-koi"
-					><Koi robe="asagi" scale={0.34} motion="tail" shadow={false} wag={2.1} /></g
-				>
-			</g>
-			<g class="wv">
-				<path d="M 52 128 Q 60 123.5 68 128 Q 76 123.5 84 128" />
-				<path d="M 480 150 Q 488 145.5 496 150 Q 504 145.5 512 150" />
-				<path d="M 590 200 Q 598 195.5 606 200 Q 614 195.5 622 200" />
-			</g>
-
-			<!-- the tag strings, paid out to the water's edge -->
+	<!-- the cargo spar overhead, lines paid down to the papers -->
+	<div class="cargo-spar" aria-hidden="true">
+		<svg viewBox="0 0 640 84" preserveAspectRatio="xMidYMid meet">
+			<path class="sp-bar" d="M 8 16 L 632 12" />
+			<path class="sp-wrap" d="M 30 8 L 36 22 M 604 6 L 610 20" />
 			<g class="cg-string">
-				<path d="M 201 92 C 172 150 100 208 76 246" />
-				<path d="M 256 126 C 258 170 259 212 258 246" />
-				<path d="M 399 92 C 408 150 420 205 424 246" />
-				<path d="M 560 112 C 564 160 568 210 570 246" />
+				<path d="M 76 15.6 C 76 40 76 62 76 84" />
+				<path d="M 258 14.4 C 258 40 258 62 258 84" />
+				<path d="M 424 13.4 C 424 40 424 62 424 84" />
+				<path d="M 570 12.5 C 570 40 570 62 570 84" />
 			</g>
-			<g class="cg-knot">
-				<circle cx="76" cy="246" r="3" />
-				<circle cx="258" cy="246" r="3" />
-				<circle cx="424" cy="246" r="3" />
-				<circle cx="570" cy="246" r="3" />
+			<g class="sp-knot">
+				<path d="M 70 13 Q 76 21 82 13" />
+				<path d="M 252 12 Q 258 20 264 12" />
+				<path d="M 418 11 Q 424 19 430 11" />
+				<path d="M 564 10 Q 570 18 576 10" />
 			</g>
 		</svg>
 	</div>
@@ -139,70 +95,40 @@
 	.cargo-h {
 		font-size: var(--fs-h2);
 		margin: 0 0 0.9rem;
-		border-bottom: 1px solid color-mix(in srgb, var(--slice-bg) 45%, transparent);
+		color: #f6efdd;
+		text-shadow: 0 1px 2px rgba(20, 10, 5, 0.45);
+		border-bottom: 1px solid rgba(246, 239, 221, 0.4);
 		padding-bottom: 0.35rem;
 	}
 
-	.cargo-scene {
-		border-radius: 14px 5px 0 0;
-		overflow: hidden;
-		border: 1px solid color-mix(in srgb, var(--water-deep) 30%, transparent);
-		border-bottom: none;
-		box-shadow: 0 22px 40px -28px rgba(4, 40, 52, 0.5);
-	}
-	.cargo-scene svg {
+	.cargo-spar svg {
 		display: block;
 		width: 100%;
 		height: auto;
 	}
-	.cg-horizon {
-		stroke: rgba(255, 255, 255, 0.75);
-		stroke-width: 1.6;
+	.sp-bar {
+		fill: none;
+		stroke: #4a3524;
+		stroke-width: 7;
+		stroke-linecap: round;
 	}
-	.cg-post {
-		fill: #6a4c37;
-		stroke: #382718;
-		stroke-width: 1;
-	}
-	.cg-post-top {
-		fill: #8a6a4d;
-		stroke: #382718;
-		stroke-width: 0.9;
-	}
-	.cg-wrap {
+	.sp-wrap {
 		fill: none;
 		stroke: #c9a86a;
-		stroke-width: 2.4;
-		stroke-linecap: round;
-	}
-	.cg-rope {
-		fill: none;
-		stroke: #c9a86a;
-		stroke-width: 2.2;
-		stroke-linecap: round;
-		opacity: 0.95;
-	}
-	.cg-reflect {
-		fill: none;
-		stroke: rgba(24, 60, 74, 0.3);
-		stroke-linecap: round;
 		stroke-width: 2.6;
-	}
-	.wv path {
-		fill: none;
-		stroke: #eefafd;
-		stroke-width: 1.6;
 		stroke-linecap: round;
-		opacity: 0.55;
 	}
 	.cg-string path {
 		fill: none;
 		stroke: #8a6a42;
-		stroke-width: 1.6;
-		opacity: 0.85;
+		stroke-width: 1.8;
+		opacity: 0.9;
 	}
-	.cg-knot circle {
-		fill: #6d5334;
+	.sp-knot path {
+		fill: none;
+		stroke: #6d5334;
+		stroke-width: 2.2;
+		stroke-linecap: round;
 	}
 
 	/* the tags racked under their knots */
@@ -244,7 +170,7 @@
 		height: 0.5rem;
 		border: 2px solid #8a6a42;
 		border-radius: 50%;
-		background: var(--bg);
+		background: rgba(26, 17, 9, 0.4);
 	}
 	.ctag-sway {
 		padding-top: 0.55rem;
@@ -310,33 +236,11 @@
 		}
 	}
 
-	/* she bobs, the koi passes, the tags stir — reduced motion: all still */
+	/* the papers stir on their lines — reduced motion: all still */
 	@media (prefers-reduced-motion: no-preference) {
-		.cg-bob {
-			animation: cg-bob 7s ease-in-out infinite alternate;
-		}
-		.cg-koi {
-			animation: cg-koi 12s ease-in-out infinite alternate;
-		}
 		.ctag-sway {
 			animation: cg-sway 6.4s ease-in-out var(--d, 0s) infinite alternate;
 			transform-origin: 50% -1.2rem;
-		}
-	}
-	@keyframes cg-bob {
-		from {
-			transform: translateY(-1.4px);
-		}
-		to {
-			transform: translateY(1.6px);
-		}
-	}
-	@keyframes cg-koi {
-		from {
-			transform: translateX(0);
-		}
-		to {
-			transform: translateX(52px);
 		}
 	}
 	@keyframes cg-sway {

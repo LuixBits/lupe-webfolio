@@ -120,7 +120,9 @@
 	.rig-h {
 		font-size: var(--fs-h2);
 		margin: 0 0 0.6rem;
-		border-bottom: 1px solid color-mix(in srgb, var(--slice-bg) 45%, transparent);
+		color: #f6efdd;
+		text-shadow: 0 1px 2px rgba(20, 10, 5, 0.45);
+		border-bottom: 1px solid rgba(246, 239, 221, 0.4);
 		padding-bottom: 0.35rem;
 	}
 	.rig-scene svg {
@@ -218,7 +220,7 @@
 		height: 0.5rem;
 		border: 2px solid #8a6a42;
 		border-radius: 50%;
-		background: var(--bg);
+		background: rgba(26, 17, 9, 0.4);
 	}
 	.rtag-sway {
 		padding-top: 0.55rem;
