@@ -6,8 +6,11 @@ the owner's request during implementation for a larger, more expressive room.
 
 **Owner follow-up:** this delivery was still too simple and compact. The owner
 requested an inhabited room using the whole space, with About as a reference.
-The [next plan](../plans/projects-inhabited-workshop.md) replaces the visual
-direction. The checks recorded below apply to this baseline, not that proposal.
+The [inhabited workshop plan](../plans/projects-inhabited-workshop.md) has since
+been implemented. See its [review](projects-inhabited-workshop-2026-09-27.md) and
+use <http://localhost:5173/projects>. Preview addresses and build paths below
+are historical records; port 5191 now serves the new room. The checks below
+apply to the compact baseline.
 
 ## Implemented
 

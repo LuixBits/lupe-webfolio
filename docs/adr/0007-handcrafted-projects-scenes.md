@@ -111,3 +111,23 @@ were reviewed in Chromium. See the
 for scoped commits, exact checks, the production preview and the limits of the
 mocked player tests. Final owner review is still pending; the original accepted
 workbench and this ADR's historical context are preserved above.
+
+## 2026-09-27: inhabited overview implementation
+
+The owner requested a larger room after reviewing the compact workshop, then
+asked to restore its connection to the vaporwave hub. The implementation now
+uses full-width architecture, distinct project objects, a sunset window and a
+complete floor. Violet walls, magenta neon and cyan reflections accompany the
+wood and paper. It is integrated into `/projects`, including normal detail
+returns; the standalone study redirects there.
+
+A per-layout state object preserves the lamp, pause, cat and sketch drawer
+across project visits. Intersection observers gate the three ambient zones;
+visibility, route motion and reduced-motion preferences stop them. Route
+snapshots freeze their current SVG frames. Decorative geometry updates on
+resize, while native content remains in document flow. These changes retain the
+HTML/SVG/CSS decision above and add no renderer.
+
+See the [implementation review](../reviews/projects-inhabited-workshop-2026-09-27.md)
+for browser checks, build provenance and test limits. This records the completed
+implementation; final approval of its appearance remains with the owner.

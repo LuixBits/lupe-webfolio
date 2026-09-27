@@ -1,13 +1,17 @@
 # Projects: an inhabited workshop
 
-Date: 2026-09-27. Status: proposed redesign, with a browser-reviewed composition
-study. This replaces the spatial direction of the
+Date: 2026-09-27. Status: implemented in `/projects`; final owner review pending.
+This replaces the spatial direction of the
 [first workshop plan](projects-after-hours-workshop.md). That implementation is
 a working baseline, but the owner rejected its scale and simplicity and asked
 for a whole-room experience comparable to About.
 
-This document plans the next implementation. The production Svelte page has
-not been changed by this planning pass.
+The Svelte implementation now follows this plan, including the owner’s later
+request to restore magenta, cyan and violet from the vaporwave hub. Use
+<http://localhost:5173/projects>. The former standalone study redirects to that
+route; project links and return navigation stay in the app. See the
+[implementation review](../reviews/projects-inhabited-workshop-2026-09-27.md) for
+validation and remaining review limits.
 
 **Build a room someone appears to have just stepped out of.** Rafters cross the
 top of the browser. Rain falls beyond a large window. A studio glows through an
@@ -18,28 +22,26 @@ connect its parts.
 
 ## Read and look first
 
-- [Interactive composition study](studies/projects-inhabited-workshop.html).
-  While this session's server is running:
-  <http://127.0.0.1:5192/studies/projects-inhabited-workshop.html>.
+- [Integrated Projects room](http://localhost:5173/projects). The former
+  [composition study](studies/projects-inhabited-workshop.html) redirects here;
+  its original drawing is preserved in commit `5e96a49`.
 - [HANDOFF](../../HANDOFF.md), [ADR-0007](../adr/0007-handcrafted-projects-scenes.md)
   and the [scene-building guide](../handcrafted-scenes.md).
 - [About page](../../src/routes/about/+page.svelte),
   [TreeLayer](../../src/lib/garden/tree/TreeLayer.svelte) and
   [LivingLine](../../src/lib/garden/LivingLine.svelte).
 - [CV](../../src/routes/cv/+page.svelte) and
-  [DiveLayer](../../src/lib/water/dive/DiveLayer.svelte), which are under active
+  [PondScene](../../src/lib/water/pond/PondScene.svelte), which are under active
   development in the shared checkout. Study their composition without editing
   their work.
 - [LuixBits player](../../src/lib/projects/ChannelPlayer.svelte),
   [desk lamp](../../src/lib/projects/workbench/DeskLamp.svelte) and
   [Hobbies](../../src/routes/hobbies/+page.svelte).
 
-The study is an original HTML/SVG drawing. It demonstrates space, silhouettes,
-weather, a warm-light switch, a motion switch and the cat. It reflows on phones;
-its four links lead to the existing local project preview. It deliberately
-leaves the final material work, project navigation, localization and shared
-type scale to the actual implementation. Its review controls and explanatory
-notes are not proposed page copy.
+The original study established the HTML/SVG composition. Its objects now live
+in Svelte components with the actual project content, localized navigation and
+shared type scale. Review controls and explanatory study notes are absent from
+the application.
 
 ## 1. What the comparison shows
 
@@ -49,7 +51,7 @@ reaches grass, animals, soil, roots and an ant colony. The footer ends that
 descent. Several discoveries reward attention without being necessary to read
 the biography.
 
-The current Projects page is about 1081px tall at 1440 × 1000. Its illustrated
+The compact baseline was about 1081px tall at 1440 × 1000. Its illustrated
 wrapper is 1152px wide, starts at x=236 and ends at x=1388. Almost everything
 belongs to a two-column rectangle. The wheel has clearance, but the room does
 little with the space around it. A thin floor strip finishes the composition
@@ -486,7 +488,7 @@ integration. Update the handoff with the actual reviewed preview and results.
 Record the final direction in ADR-0007 after implementation and owner review;
 do not call this proposal accepted just because its technical checks pass.
 
-The planning pass produced this document and the interactive study. The study
+The initial planning pass produced this document and the interactive study. The study
 was viewed at 1440, 768, 390 and 320px; text/control bounds and its three toggle
 behaviors were checked. Its light changes the receiving surfaces, the cat works
 from the keyboard, and reduced motion leaves zero active animations. No browser

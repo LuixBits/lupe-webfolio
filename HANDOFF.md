@@ -41,35 +41,33 @@ on dev/build; if `$lib/paraglide/*` is missing run
 
 ## Projects workshop — 2026-09-27
 
-**Next direction:** after reviewing this delivery, the owner asked for a much
-larger, inhabited room comparable to About. Follow
-[the inhabited workshop plan](docs/plans/projects-inhabited-workshop.md), which
-supersedes the compact composition below. Its
-[interactive composition study](docs/plans/studies/projects-inhabited-workshop.html)
-is served at <http://127.0.0.1:5192/studies/projects-inhabited-workshop.html> during
-this session. This new direction is planned, not yet implemented in the app.
+The [inhabited workshop plan](docs/plans/projects-inhabited-workshop.md) is now
+integrated into the real `/projects` route. The owner rejected the earlier
+compact overview and later asked to restore its relationship to the vaporwave
+hub tile. The room now fills the page: studio doorway, sunset window, portfolio
+model, workbench apparatus and planning cards, then drawers, stool, rug, plant
+and cat. Violet walls, magenta neon, cyan reflections and a perspective floor
+grid retain the Projects palette alongside the wooden furniture.
 
-The [after-hours workshop plan](docs/plans/projects-after-hours-workshop.md) is
-implemented. Projects now has a studio doorway, illustrated software cases in
-a shared display cabinet, a mounted sign and a tiled threshold. The owner asked
-for a larger, more expressive room during implementation; the final covers and
-cabinet reflect that request. The four existing project links and category
-anchors remain intact.
+**Use <http://localhost:5173/projects>**, or `/de/projects`, for the current
+shared development preview. The old standalone study redirects here. The local
+production preview on port 5191 also contains this integrated room; see the
+[implementation review](docs/reviews/projects-inhabited-workshop-2026-09-27.md)
+for the build, browser checks and temporary artifact paths. The published site
+has not been changed. Final visual approval remains with the owner.
 
-Stable production review: **http://127.0.0.1:5191/projects**, including `/de/projects`.
-It runs commit `40390dd` from `/tmp/lupe-workshop-validation-2AaOVw` with
-`HOST=127.0.0.1 PORT=5191 node build/index.js`. Shared dev remains on port 5190.
-See the [implementation review](docs/reviews/projects-after-hours-workshop-2026-09-27.md)
-for milestones, the browser matrix and artifact paths. Checks and production
-build passed; YouTube lifecycle tests used a mocked provider response. The live
-service has not been restarted.
+All four projects still come from `content/projects.ts`, with localized native
+links and the same category and `tape-{slug}` anchors. The Projects layout owns
+lamp, pause, cat and drawer state across detail round trips. Return navigation
+restores the selected object and scroll, including the lower workbench. Route
+snapshots carry the complete room and freeze its ambient SVG frames.
 
-The overview wheel uses a normal-flow ledge up to 960px and on short landscape
-screens. Other routes retain their positioning. Project navigation measures the
-doorway/case, preserves themed SVG snapshots and restores the source link and
-scroll. CRT and channel light wait for motion completion. Reduced motion and
-no-JavaScript views retain the complete content. Locale changes and category
-jumps do not replay the overview entrance.
+Only visible ambient zones animate; hidden tabs, pause, route motion and reduced
+motion stop them. The floor-plan drawer and cat are optional native buttons.
+Without JavaScript, the entire static room and project links remain available.
+The desktop wheel clears the content; phones and short landscape screens use
+its existing normal-flow ledge. The channel player retains explicit Play,
+selection, eject, power, lamp, watch and remote behavior.
 
 ## Interaction model
 
