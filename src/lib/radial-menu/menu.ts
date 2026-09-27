@@ -25,8 +25,10 @@ export const menu: MenuItem[] = [
 		label: m.nav_cv,
 		href: '/cv',
 		children: [
-			{ id: 'cv-experience', label: m.nav_cv_experience, href: '/cv#experience' },
-			{ id: 'cv-education', label: m.nav_cv_education, href: '/cv#education' }
+			// the three main vessels on the pond — org names need no locale
+			{ id: 'cv-siga', label: () => 'SIGA', href: '/cv/siga' },
+			{ id: 'cv-hslu', label: () => 'HSLU', href: '/cv/hslu' },
+			{ id: 'cv-neptun', label: () => 'Neptun', href: '/cv/neptun' }
 		]
 	},
 	{

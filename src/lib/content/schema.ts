@@ -225,10 +225,32 @@ export const stationSchema = z.object({
 });
 export type Station = z.infer<typeof stationSchema>;
 
-/** Parse + validate the dive stations (authored in any order; the page sorts
- *  by depth). */
+/** Parse + validate the CV stations. */
 export function defineStations(input: unknown[]): Station[] {
 	return z.array(stationSchema).parse(input);
+}
+
+/** One vessel on the CV pond — an organisation as a craft on the water.
+ *  Work floats (boats), education grows (lily pads); a vessel bundles the
+ *  stations lived at that org and owns one detail page (/cv/<slug>). */
+export const vesselSchema = z.object({
+	/** Closed set — each slug has bespoke craft art in pond/Vessel.svelte. */
+	slug: z.enum(['siga', 'hslu', 'neptun', 'armee', 'emvs']),
+	org: z.string(),
+	kind: z.enum(['boat', 'pads']),
+	/** Station ids aboard, newest first (checked against stations at load). */
+	stationIds: z.array(z.string()).min(1),
+	/** The float-tag span on the pond, e.g. "2021 – heute". */
+	span: yearSpan,
+	/** Panel note, e.g. SIGA's "5 Jahre 2 Monate". */
+	note: localizedString.optional(),
+	url: z.url().optional()
+});
+export type Vessel = z.infer<typeof vesselSchema>;
+
+/** Parse + validate the fleet. */
+export function defineVessels(input: unknown[]): Vessel[] {
+	return z.array(vesselSchema).parse(input);
 }
 
 /** A single item in a hobby gallery — a photo or an embedded/hosted video. */

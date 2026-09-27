@@ -1,13 +1,16 @@
 <script lang="ts">
 	import ProjectDetail from '$lib/content/ProjectDetail.svelte';
 	import PaperScroll from '$lib/cv/PaperScroll.svelte';
+	import VesselDeck from '$lib/cv/VesselDeck.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import type { PageData } from './$types';
 	let { data }: { data: PageData } = $props();
 </script>
 
-{#if data.project.paper}
+{#if data.vessel}
+	<VesselDeck vessel={data.vessel} />
+{:else if data.project?.paper}
 	<PaperScroll project={data.project} backHref="/cv" />
-{:else}
+{:else if data.project}
 	<ProjectDetail project={data.project} backHref="/cv" backLabel={m.nav_cv()} />
 {/if}

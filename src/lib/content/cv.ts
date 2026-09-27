@@ -1,4 +1,11 @@
-import { defineProjects, defineStations, type Project, type Station } from './schema';
+import {
+	defineProjects,
+	defineStations,
+	defineVessels,
+	type Project,
+	type Station,
+	type Vessel
+} from './schema';
 
 /** The dive stations — the real CV (LinkedIn export, 2026-09). Depth = time:
  *  `start`/`end` order the stations; the visible strings are literal.
@@ -136,6 +143,76 @@ export const stations: Station[] = defineStations([
  *  owner drops the real file (expected: static/media/cv/luiz-perren-cv.pdf);
  *  the bottle renders a "PDF folgt — placeholder" tag meanwhile. */
 export const cvPdf: string | undefined = undefined;
+
+/** THE FLEET — the pond groups the stations by organisation: work floats
+ *  (boats), education grows (lily pads). Each vessel is one craft on the
+ *  CV pond and one detail page at /cv/<slug>. Order = mooring order along
+ *  the current, newest (foreground) first. */
+export const vessels: Vessel[] = defineVessels([
+	{
+		slug: 'siga',
+		org: 'SIGA',
+		kind: 'boat',
+		stationIds: ['siga-dev', 'siga-trainee'],
+		span: { en: '2021 – today', de: '2021 – heute' },
+		note: { en: '5 yrs 2 mos', de: '5 Jahre 2 Monate' },
+		url: 'https://www.siga.swiss'
+	},
+	{
+		slug: 'hslu',
+		org: 'Hochschule Luzern',
+		kind: 'pads',
+		stationIds: ['hslu-ma', 'hslu-bsc'],
+		span: '2018 – 2024',
+		url: 'https://www.hslu.ch'
+	},
+	{
+		slug: 'neptun',
+		org: 'Projekt Neptun',
+		kind: 'boat',
+		stationIds: ['neptun'],
+		span: '2019 – 2021',
+		url: 'https://www.projektneptun.ch'
+	},
+	{
+		slug: 'armee',
+		org: 'Schweizer Armee',
+		kind: 'boat',
+		stationIds: ['armee'],
+		span: '2017 – 2018'
+	},
+	{
+		slug: 'emvs',
+		org: 'EMVs',
+		kind: 'boat',
+		stationIds: ['emvs-lehre', 'efz', 'bm'],
+		span: '2013 – 2017'
+	}
+]);
+
+// Every vessel's stationIds must resolve — a typo fails the build, not a page.
+for (const v of vessels)
+	for (const id of v.stationIds)
+		if (!stations.some((s) => s.id === id))
+			throw new Error(`vessel ${v.slug} references unknown station ${id}`);
+
+/** The short name painted on each hull (org names can be too long). */
+export const HULL_NAME: Record<Vessel['slug'], string> = {
+	siga: 'SIGA',
+	hslu: 'HSLU',
+	neptun: 'Neptun',
+	armee: 'Armee',
+	emvs: 'EMVs'
+};
+
+export function getVessel(slug: string): Vessel | undefined {
+	return vessels.find((v) => v.slug === slug);
+}
+
+/** The stations aboard a vessel, in its declared (newest-first) order. */
+export function vesselStations(v: Vessel): Station[] {
+	return v.stationIds.map((id) => stations.find((s) => s.id === id)!);
+}
 
 /** Scroll pages under /cv/[slug]. The sample paper below is the PaperScroll
  *  DESIGN FIXTURE only — it appears in no visible list and exists so the
