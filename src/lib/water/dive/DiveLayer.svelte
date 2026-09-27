@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { hashSeed, rng } from '$lib/garden/lsystem';
 	import { prefersReducedMotion } from '$lib/garden/reveal';
-	import { smoothOpen, taperedBranch, type Pt } from '$lib/garden/tree/generate';
+	import { blobPath, smoothOpen, taperedBranch, type Pt } from '$lib/garden/tree/generate';
 	import Garden from '$lib/garden/Garden.svelte';
 	import Koi from '../Koi.svelte';
 	import type { KoiRobe } from '../koi';
@@ -128,6 +128,22 @@
 			sdel: number;
 		}[]
 	>([]);
+	let seabed = $state<{
+		sand1: string;
+		sand2: string;
+		sand3: string;
+		crests: string[];
+		stones: { x: number; y: number; d: string; rim: string }[];
+		toriiX: number;
+		toriiY: number;
+		toriiS: number;
+		moss: { x: number; y: number; d: string }[];
+		barnacles: { x: number; y: number }[];
+		eggsX: number;
+		eggsY: number;
+		eggs: { x: number; y: number; r: number }[];
+		tendrils: string[];
+	} | null>(null);
 	let atmoStops = $state<{ o: number; c: string }[]>([]);
 	let ropeD = $state('');
 	let ropeHiD = $state('');
@@ -682,6 +698,88 @@
 			}
 			kelpBeds = beds;
 		}
+
+		// ---------- the seabed: sand, stones, the sunken gate, the eggs ----------
+		{
+			const mkDune = (yBase: number, amp: number, n: number) => {
+				const pts: Pt[] = [];
+				for (let i = 0; i <= n; i++)
+					pts.push({ x: (W * i) / n, y: yBase + (rand() * 2 - 1) * amp });
+				return `M -20 ${f(yBase + amp)} L${smoothOpen(pts)} L ${W + 20} ${f(yBase + amp)} L ${W + 20} ${H + 60} L -20 ${H + 60} Z`;
+			};
+			const leadX = lineXAt(bedY);
+			// the clutch rests where the plumb lead lands — the line ends where
+			// it all began — which is also where the footer's glow waits below.
+			// The sunken gate stands beside it.
+			const toriiS = central ? 0.92 : 0.7;
+			// the lead rests just BESIDE the clutch — never on top of it
+			const eggsX = central ? leadX + 34 : Math.max(W * 0.5, leadX + 60);
+			const eggsY = bedY + 4;
+			const tx = central ? Math.max(28, eggsX - 330) : Math.min(W - 145 * toriiS, eggsX + 96);
+			const toriiY = bedY + 24 - 118 * toriiS;
+			const eggs: { x: number; y: number; r: number }[] = [];
+			for (let i = 0; i < 9; i++) {
+				const ang = (i / 9) * Math.PI * 2 + rand() * 0.6;
+				const rr = 4 + rand() * 14;
+				eggs.push({
+					x: f(Math.cos(ang) * rr * 1.9),
+					y: f(Math.sin(ang) * rr * 0.55 - 3),
+					r: +(4.4 + rand() * 2.6).toFixed(1)
+				});
+			}
+			// the egg-light's filaments: short irregular wisps seeping down into
+			// the abyss, converging on the footer's waiting glow
+			const tendrils: string[] = [];
+			for (let i = 0; i < 5; i++) {
+				const sx = eggsX + (i - 2) * 21 + (rand() * 2 - 1) * 9;
+				const len = 22 + rand() * Math.min(110, H - bedY - 30);
+				const s1 = (rand() * 2 - 1) * 15;
+				tendrils.push(
+					`M ${f(sx)} ${f(bedY + 6)} C ${f(sx + s1)} ${f(bedY + len * 0.45)} ${f(sx - s1 * 0.5)} ${f(bedY + len * 0.8)} ${f(sx + s1 * 0.25)} ${f(bedY + len)}`
+				);
+			}
+			const stones: { x: number; y: number; d: string; rim: string }[] = [];
+			const nSt = central ? 7 : 5;
+			for (let i = 0; i < nSt; i++) {
+				const sx = W * ((i + 0.3 + rand() * 0.5) / nSt);
+				if (Math.abs(sx - eggsX) < 60) continue;
+				const size = 9 + rand() * 16;
+				stones.push({
+					x: f(sx),
+					y: f(bedY + 8 + rand() * 10),
+					d: blobPath(rand, size, size * (0.5 + rand() * 0.2), 8),
+					rim: `M ${f(-size * 0.7)} ${f(-size * 0.28)} Q 0 ${f(-size * 0.72)} ${f(size * 0.66)} ${f(-size * 0.3)}`
+				});
+			}
+			const moss = [
+				{ x: f(tx + 24 * toriiS), y: f(toriiY + 16 * toriiS), d: blobPath(rand, 9, 4.5, 7) },
+				{ x: f(tx + 112 * toriiS), y: f(toriiY + 52 * toriiS), d: blobPath(rand, 7, 3.6, 7) },
+				{ x: f(tx + 62 * toriiS), y: f(toriiY + 8 * toriiS), d: blobPath(rand, 6, 3, 6) }
+			];
+			const barnacles = Array.from({ length: 5 }, () => ({
+				x: f(tx + (14 + rand() * 112) * toriiS),
+				y: f(toriiY + (30 + rand() * 80) * toriiS)
+			}));
+			seabed = {
+				sand1: mkDune(bedY - 4, 7, 9),
+				sand2: mkDune(bedY + 10, 6, 8),
+				sand3: mkDune(bedY + 24, 5, 7),
+				crests: [
+					`M ${f(W * 0.12)} ${f(bedY + 8)} q 40 -8 84 -2`,
+					`M ${f(W * 0.62)} ${f(bedY + 20)} q 46 -9 92 -2`
+				],
+				stones,
+				toriiX: f(tx),
+				toriiY: f(toriiY),
+				toriiS,
+				moss,
+				barnacles,
+				eggsX: f(eggsX),
+				eggsY: f(eggsY),
+				eggs,
+				tendrils
+			};
+		}
 	}
 
 	const isOn = (key: string) => instant || (key === 'surface' ? arrive : !!grown[key]);
@@ -887,6 +985,11 @@
 						<stop offset="0" stop-color="#ffd98c" stop-opacity="0.5" />
 						<stop offset="1" stop-color="#ffd98c" stop-opacity="0" />
 					</radialGradient>
+					<radialGradient id="{uid}-eglow">
+						<stop offset="0" stop-color="#ffce6a" stop-opacity="0.5" />
+						<stop offset="0.5" stop-color="#f2a94e" stop-opacity="0.18" />
+						<stop offset="1" stop-color="#f2a94e" stop-opacity="0" />
+					</radialGradient>
 					<linearGradient id="{uid}-ray" x1="0" y1="0" x2="0" y2="1">
 						<stop offset="0" stop-color="#ffffff" stop-opacity="0.5" />
 						<stop offset="0.75" stop-color="#ffffff" stop-opacity="0" />
@@ -1076,6 +1179,72 @@
 								{/each}
 							</g>
 						</g>
+					</g>
+				{/if}
+
+				{#if seabed}
+					<!-- the seabed: dune bands, the moss-dark sunken gate, and the
+					     clutch of koi eggs glowing where the current begins -->
+					<path class="sand s1" d={seabed.sand1} />
+					<g transform="translate({seabed.toriiX} {seabed.toriiY}) scale({seabed.toriiS})">
+						<path class="st-main" d="M25.6 24L34.4 24L29.2 118L19.4 118Z" />
+						<path class="st-main" d="M105.6 24L114.4 24L120.6 118L110.8 118Z" />
+						<path class="st-main" d="M66.4 24.5H73.6V47H66.4Z" />
+						<path class="st-main" d="M7.5 47H132.5V55.5H7.5Z" />
+						<path class="st-dark" d="M10.5 15.5H129.5V24.5H10.5Z" />
+						<path class="st-dark" d="M1 2C36 9 104 9 139 2L136.5 14.5C104 20 36 20 3.5 14.5Z" />
+					</g>
+					{#each seabed.moss as ms, i (i)}
+						<g transform="translate({ms.x} {ms.y})"><path class="st-moss" d={ms.d} /></g>
+					{/each}
+					{#each seabed.barnacles as bn, i (i)}
+						<circle class="st-barnacle" cx={bn.x} cy={bn.y} r="1.4" />
+					{/each}
+					<path class="sand s2" d={seabed.sand2} />
+					{#each seabed.stones as sn, i (i)}
+						<g transform="translate({sn.x} {sn.y})">
+							<path class="bed-stone" d={sn.d} />
+							<path class="bed-stone-rim" d={sn.rim} />
+						</g>
+					{/each}
+
+					<!-- the origin: koi eggs under the gate — the Seed's mirror -->
+					<g class="zone" class:on={isOn('origin')}>
+						<g transform="translate({seabed.eggsX} {seabed.eggsY})">
+							<g class="grow" style="--gd:150ms">
+								<ellipse class="egg-glow" rx="110" ry="48" fill="url(#{uid}-eglow)" />
+								<ellipse class="egg-hollow" rx="42" ry="13" cy="5" />
+								<circle class="egg-ring er1" r="17" />
+								<circle class="egg-ring er2" r="17" />
+								{#each seabed.eggs as e, i (i)}
+									<g transform="translate({e.x} {e.y})">
+										<circle class="egg" r={e.r} />
+										<circle class="egg-embryo" cx={-e.r * 0.24} cy={-e.r * 0.18} r={e.r * 0.34} />
+									</g>
+								{/each}
+								<circle class="egg-spark" cx="-6" cy="-7" r="1.4" />
+								<circle class="egg-spark sp2" cx="9" cy="-3" r="1.1" />
+								<circle class="egg-mote em1" cx="-16" cy="-14" r="1.4" />
+								<circle class="egg-mote em2" cx="14" cy="-18" r="1.1" />
+								<!-- the one hatchling, first of the current -->
+								<g transform="translate(30 -14) rotate(-14)">
+									<ellipse class="fry-b" rx="3.4" ry="1.6" />
+									<path class="fry-b" d="M-3.2 0L-5.8 -1.7C-5.2 -0.6 -5.2 0.6 -5.8 1.7Z" />
+								</g>
+							</g>
+						</g>
+					</g>
+					<path class="sand s3" d={seabed.sand3} />
+					{#each seabed.crests as cr2, i (i)}
+						<path class="sand-crest" d={cr2} />
+					{/each}
+
+					<!-- the egg-light's tendrils reach on below the bed, revealed by
+					     your deepest descent (the under-clip) -->
+					<g clip-path="url(#{uid}-uclip)">
+						{#each seabed.tendrils as td, i (i)}
+							<path class="egg-tendril" d={td} />
+						{/each}
 					</g>
 				{/if}
 
@@ -1569,6 +1738,85 @@
 		opacity: 0.38;
 	}
 
+	/* ---- the seabed ---- */
+	.sand.s1 {
+		fill: #143646;
+	}
+	.sand.s2 {
+		fill: #0e2a39;
+	}
+	.sand.s3 {
+		fill: #091f2c;
+	}
+	.sand-crest {
+		fill: none;
+		stroke: #2e5f70;
+		stroke-width: 1.3;
+		stroke-linecap: round;
+		opacity: 0.35;
+	}
+	.bed-stone {
+		fill: #14323f;
+	}
+	.bed-stone-rim {
+		fill: none;
+		stroke: #3a6a7d;
+		stroke-width: 1.2;
+		stroke-linecap: round;
+		opacity: 0.55;
+	}
+	/* the sunken gate: vermilion long drowned to moss-dark wood */
+	.st-main {
+		fill: #5a4a44;
+	}
+	.st-dark {
+		fill: #47393a;
+	}
+	.st-moss {
+		fill: #2e4d3c;
+		opacity: 0.9;
+	}
+	.st-barnacle {
+		fill: #9db3ba;
+		opacity: 0.5;
+	}
+	/* the eggs — amber light in the dark, the Seed's mirror */
+	.egg-hollow {
+		fill: #02090e;
+		opacity: 0.55;
+	}
+	.egg {
+		fill: #f2a94e;
+		stroke: #b06e1e;
+		stroke-width: 0.8;
+	}
+	.egg-embryo {
+		fill: #8a5312;
+		opacity: 0.85;
+	}
+	.egg-spark {
+		fill: #fff3d0;
+	}
+	.egg-ring {
+		fill: none;
+		stroke: #ffce6a;
+		stroke-width: 1;
+		opacity: 0.14;
+		transform-box: fill-box;
+		transform-origin: center;
+	}
+	.egg-mote {
+		fill: #ffe1a0;
+		opacity: 0.3;
+	}
+	.egg-tendril {
+		fill: none;
+		stroke: #d8b268;
+		stroke-width: 0.9;
+		stroke-linecap: round;
+		opacity: 0.26;
+	}
+
 	/* ---- kelp beds (HTML layer over the svg, still behind the cards) ---- */
 	.kelp-bed {
 		position: absolute;
@@ -1671,6 +1919,76 @@
 		}
 		.kelp-sway {
 			animation: dv-kelp var(--sd, 8s) ease-in-out var(--sdel, 0s) infinite alternate;
+		}
+		.egg-glow {
+			animation: dv-egg-breathe 5.4s ease-in-out infinite;
+		}
+		.egg-spark {
+			animation: dv-egg-spark 5.4s ease-in-out infinite;
+		}
+		.egg-spark.sp2 {
+			animation-delay: 2.7s;
+		}
+		.egg-ring.er1 {
+			animation: dv-egg-ring 7.5s ease-out infinite;
+		}
+		.egg-ring.er2 {
+			animation: dv-egg-ring 7.5s ease-out 3.75s infinite;
+		}
+		.egg-mote {
+			animation: dv-egg-mote 12s ease-in-out infinite;
+		}
+		.egg-mote.em2 {
+			animation-duration: 10s;
+			animation-delay: -5s;
+		}
+	}
+	@keyframes dv-egg-breathe {
+		0%,
+		100% {
+			opacity: 0.6;
+		}
+		50% {
+			opacity: 1;
+		}
+	}
+	@keyframes dv-egg-spark {
+		0%,
+		100% {
+			opacity: 0.7;
+		}
+		50% {
+			opacity: 1;
+		}
+	}
+	@keyframes dv-egg-ring {
+		0% {
+			transform: scale(0.7);
+			opacity: 0;
+		}
+		16% {
+			opacity: 0.3;
+		}
+		100% {
+			transform: scale(2.2);
+			opacity: 0;
+		}
+	}
+	@keyframes dv-egg-mote {
+		0%,
+		100% {
+			transform: translateY(0);
+			opacity: 0;
+		}
+		18% {
+			opacity: 0.55;
+		}
+		60% {
+			opacity: 0.35;
+		}
+		90% {
+			transform: translateY(-22px);
+			opacity: 0;
 		}
 	}
 	@keyframes dv-swim {
