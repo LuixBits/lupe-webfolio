@@ -66,7 +66,13 @@ One panoramic pond, roughly a viewport. **Work floats, education grows:**
 
 ## Phases
 
-**IMPLEMENTED the same day** — P1 content+routes+wheel → P2 panorama +
+**IMPLEMENTED the same day**, then **v2 after the owner's review** (elements
+too small, date tags colliding, banks mixed): the scene grew to a tall
+print, split strictly by track (education pads left / work boats right,
+EFZ+BM as their own 'schule' pad cluster), the uki span-tags were replaced
+by year chips threaded on the central current plus two mooring ropes per
+craft (spans as rigging), and the nonsensical wave footer became
+FooterJetty — the dock underfoot. Baseline phases: — P1 content+routes+wheel → P2 panorama +
 compact `/cv` + dive removal → P3 quay + life + play → P4 hardening (the dive's assertion matrix, minus
 scrub/dive-specific checks, plus scene link hit-targets) + HANDOFF.
 

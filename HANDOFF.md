@@ -181,16 +181,21 @@ class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
   a signed woodblock print (plan + judgment calls:
   `docs/plans/cv-mooring.md`; it supersedes the one-night dive build of
   `cv-koi-dive.md`, whose asset library it reuses). **Work floats,
-  education grows:** five bespoke crafts in `lib/water/pond/Vessel.svelte`
+  education grows — split by bank:** Ausbildung as lily pads on the LEFT,
+  Erfahrung as boats on the RIGHT of one central timeline current, under
+  two bank boards. Six bespoke crafts in `lib/water/pond/Vessel.svelte`
   — the SIGA flagship (two lashed cargo crates = the two roles, mizuhiki
   cord, koinobori, lit chōchin), the HSLU lotus raft (MA + BSc pads in
   bloom, stake sign, tombo dragonfly), the Neptun skiff (trident
   boat-hook), the Armee punt (origami crane — deliberately NOT a red
-  cross), the weathered EMVs rowboat towing two school pads. **Time is
-  distance:** newest big in the foreground, the far moss-vermilion torii
-  marks 2013 ("Hier beginnt die Strömung."), and one dashed mooring
-  current ties every craft to the "heute" bollard; uki floats carry the
-  spans. Print devices: kumo cloud bars, kasumi mist, seigaiha patches,
+  cross), the weathered EMVs rowboat (Lehre only), and the young
+  EFZ · BM pad cluster (slug 'schule' — the apprenticeship's school side,
+  strictly education; its deck slips name their own orgs). **Time is the
+  line itself:** washi YEAR CHIPS (heute at the bollard → 2013 framed by
+  the gate's pillars, "Hier beginnt die Strömung.") are threaded on the
+  dashed current, and every craft hangs on two mooring ROPES tied to the
+  years its chapter began and ended — spans read as rigging, concurrency
+  mirrors across the line, no date tags to collide. Print devices: kumo cloud bars, kasumi mist, seigaiha patches,
   dash-stylized reflections (no masks), bokashi sky, the artist's LP seal.
   `lib/water/pond/PondScene.svelte` holds TWO fixed compositions — the
   wide PANORAMA and, under 700px, the vertical QUAY (same fleet walked
@@ -207,6 +212,11 @@ class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
   the **Logbuch** of washi station slips (PaperScroll palette); the
   future thesis scroll hangs off the HSLU MA slip via `stations.detail`.
   Wheel CV children: SIGA / HSLU / Neptun (routes, no hash anchors).
+  `/cv` ends on **FooterJetty** — the dock you stand on: stretch-safe
+  plank rows, water lapping the edge, and a fixed center vignette (the
+  mooring rope onto its cleat, the coil, a breathing chōchin, geta) —
+  while the /cv/* deck and scroll pages out on the water keep the
+  Hokusai `FooterWave` (route-scoped in `Footer.svelte`).
   Reduced motion = a finished still print (koi parked at `--rest`
   offsets, zero pond animations, games disabled); no-JS gets the full
   working harbor and decks. Shared vocabulary: sky · horizon ·
