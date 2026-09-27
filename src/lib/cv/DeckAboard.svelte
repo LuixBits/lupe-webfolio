@@ -24,7 +24,17 @@
 	const world: 'boat' | 'pad' = $derived(pal ? 'boat' : 'pad');
 	// ten planks between the gunwales
 	const PLANKS = Array.from({ length: 10 }, (_, i) => 176 + i * 84.8);
-	const nameSize = $derived(name.length <= 4 ? 230 : name.length <= 6 ? 170 : 120);
+	const nameSize = $derived(
+		name.length <= 4
+			? 230
+			: name.length <= 6
+				? 170
+				: name.length <= 10
+					? 130
+					: name.length <= 13
+						? 104
+						: 88
+	);
 </script>
 
 {#snippet coil(s: number)}
@@ -74,12 +84,13 @@
 {/snippet}
 
 {#snippet stakeSign(label: string, tilt: number)}
+	{@const w = label.length * 10.6 + 26}
 	<g transform="rotate({tilt})">
 		<path class="ab-stake" d="M 0 46 L 2 -18" />
-		<rect class="ab-sign" x="-52" y="-46" width="104" height="30" rx="4" />
+		<rect class="ab-sign" x={-w / 2} y="-46" width={w} height="30" rx="4" />
 		<text class="ab-sign-text" y="-25">{label}</text>
-		<circle class="ab-nail" cx="-44" cy="-31" r="1.8" />
-		<circle class="ab-nail" cx="44" cy="-31" r="1.8" />
+		<circle class="ab-nail" cx={-w / 2 + 8} cy="-31" r="1.8" />
+		<circle class="ab-nail" cx={w / 2 - 8} cy="-31" r="1.8" />
 	</g>
 {/snippet}
 
@@ -249,7 +260,7 @@
 						<path class="ab-tombo-body" d="M -3 0 L 25 4" />
 						<circle class="ab-tombo-eye" cx="-6" cy="-1" r="3.4" />
 					</g>
-					<g transform="translate(112 560)">{@render stakeSign('HSLU', -7)}</g>
+					<g transform="translate(146 560)">{@render stakeSign(name, -7)}</g>
 					<g transform="translate(760 620)">{@render dew(1.2)}</g>
 					<g transform="translate(420 660)">{@render dew(0.9)}</g>
 					<g transform="translate(736 170)">{@render dew(0.8)}</g>
@@ -269,7 +280,7 @@
 					</g>
 					<g transform="translate(902 296)">{@render lotusTop(1.35)}</g>
 					<g transform="translate(268 664)">{@render lotusTop(0.95)}</g>
-					<g transform="translate(1010 540)">{@render stakeSign('EFZ · BM', 6)}</g>
+					<g transform="translate(996 540)">{@render stakeSign(name, 6)}</g>
 					<g transform="translate(760 180)">{@render dew(0.85)}</g>
 					<g transform="translate(700 640)">{@render dew(1.05)}</g>
 				{/if}

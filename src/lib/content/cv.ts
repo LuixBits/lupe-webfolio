@@ -280,13 +280,13 @@ for (const v of vessels)
 			throw new Error(`vessel ${v.slug} references unknown station ${id}`);
 
 /** The short name painted on each hull (org names can be too long). */
-export const HULL_NAME: Record<Vessel['slug'], string> = {
-	siga: 'SIGA',
-	hslu: 'HSLU',
-	neptun: 'Neptun',
-	armee: 'Armee',
-	emvs: 'EMVs',
-	schule: 'EFZ · BM'
+export const HULL_NAME: Record<Vessel['slug'], { en: string; de: string }> = {
+	siga: { en: 'Developer', de: 'Entwickler' },
+	hslu: { en: 'Bachelor · Master', de: 'Bachelor · Master' },
+	neptun: { en: 'IT Support', de: 'IT-Support' },
+	armee: { en: 'Army', de: 'Armee' },
+	emvs: { en: 'Apprenticeship', de: 'Lehre' },
+	schule: { en: 'Berufsmatura', de: 'Berufsmatura' }
 };
 
 export function getVessel(slug: string): Vessel | undefined {

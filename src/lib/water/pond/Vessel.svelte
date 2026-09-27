@@ -116,9 +116,9 @@
 		<!-- the stake sign -->
 		<path class="vx-stake" d="M -58 6 L -56 -34" />
 		<path class="vx-stake" style="stroke-width:1.7" d="M -58 -8 L -70 -30" />
-		<rect class="vx-sign" x="-78" y="-48.8" width="44" height="16.5" rx="2" />
-		<circle class="vx-nail" cx="-74" cy="-40.5" r="0.9" />
-		<circle class="vx-nail" cx="-38" cy="-40.5" r="0.9" />
+		<rect class="vx-sign" x="-128" y="-49.8" width="140" height="18" rx="2" />
+		<circle class="vx-nail" cx="-121" cy="-40.8" r="0.9" />
+		<circle class="vx-nail" cx="5" cy="-40.8" r="0.9" />
 		{#if name}<text class="vx-name vx-name--sign" x="-56" y="-37">{name}</text>{/if}
 		<!-- two pads in bloom: MA (big) + BSc -->
 		<g transform="translate(-14 0)">
@@ -173,9 +173,9 @@
 		<!-- the school years: two young pads under their own stake sign -->
 		<path class="vx-stake" d="M -48 6 L -46 -30" />
 		<path class="vx-stake" style="stroke-width:1.7" d="M -48 -6 L -60 -26" />
-		<rect class="vx-sign" x="-75" y="-44.8" width="58" height="16.5" rx="2" />
-		<circle class="vx-nail" cx="-71" cy="-36.5" r="0.9" />
-		<circle class="vx-nail" cx="-21" cy="-36.5" r="0.9" />
+		<rect class="vx-sign" x="-103" y="-45.8" width="114" height="18" rx="2" />
+		<circle class="vx-nail" cx="-97" cy="-37" r="0.9" />
+		<circle class="vx-nail" cx="5" cy="-37" r="0.9" />
 		{#if name}<text class="vx-name vx-name--sign" x="-46" y="-33">{name}</text>{/if}
 		<g transform="translate(-8 0)">
 			{@render pad(30, 32)}
@@ -290,7 +290,7 @@
 	.vx-name {
 		fill: #f3e8d2;
 		font:
-			600 14px var(--font-display, Georgia),
+			600 15.5px var(--font-display, Georgia),
 			serif;
 		letter-spacing: 0.08em;
 		text-anchor: middle;
@@ -299,12 +299,13 @@
 		stroke-width: 2;
 	}
 	.vx-name--small {
-		font-size: 12px;
+		font-size: 13px;
+		letter-spacing: 0.05em;
 	}
 	.vx-name--sign {
 		fill: #2c241b;
 		stroke: none;
-		font-size: 11.2px;
+		font-size: 12px;
 		letter-spacing: 0.08em;
 	}
 	.vx-stake {

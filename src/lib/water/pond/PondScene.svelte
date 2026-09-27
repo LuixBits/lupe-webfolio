@@ -80,12 +80,12 @@
 			{ key: '2013', x: 496, y: 784 }
 		],
 		crafts: [
-			{ slug: 'siga', x: 742, y: 240, s: 1.35, ax: -96, from: 'heute', to: '2021' },
-			{ slug: 'neptun', x: 740, y: 440, s: 1.32, ax: -56, from: '2021', to: '2019' },
-			{ slug: 'armee', x: 748, y: 604, s: 1.26, ax: -48, from: '2018', to: '2017' },
-			{ slug: 'emvs', x: 742, y: 716, s: 1.3, ax: -60, from: '2017', to: '2013' },
-			{ slug: 'hslu', x: 250, y: 408, s: 1.28, ax: 74, from: '2024', to: '2018' },
-			{ slug: 'schule', x: 258, y: 716, s: 1.24, ax: 44, from: '2017', to: '2013' }
+			{ slug: 'siga', x: 742, y: 240, s: 1.5, ax: -96, from: 'heute', to: '2021' },
+			{ slug: 'neptun', x: 740, y: 440, s: 1.45, ax: -56, from: '2021', to: '2019' },
+			{ slug: 'armee', x: 748, y: 604, s: 1.38, ax: -48, from: '2018', to: '2017' },
+			{ slug: 'emvs', x: 742, y: 716, s: 1.43, ax: -60, from: '2017', to: '2013' },
+			{ slug: 'hslu', x: 250, y: 408, s: 1.4, ax: 74, from: '2024', to: '2018' },
+			{ slug: 'schule', x: 258, y: 716, s: 1.36, ax: 44, from: '2017', to: '2013' }
 		],
 		gate: { x: 437, y: 684, s: 0.85 },
 		signL: { x: 84, y: 36 },
@@ -106,12 +106,12 @@
 			{ key: '2013', x: 202, y: 738 }
 		],
 		crafts: [
-			{ slug: 'siga', x: 300, y: 232, s: 0.88, ax: -80, from: 'heute', to: '2021' },
-			{ slug: 'neptun', x: 306, y: 410, s: 0.86, ax: -48, from: '2021', to: '2019' },
-			{ slug: 'armee', x: 308, y: 572, s: 0.84, ax: -42, from: '2018', to: '2017' },
-			{ slug: 'emvs', x: 306, y: 672, s: 0.86, ax: -52, from: '2017', to: '2013' },
-			{ slug: 'hslu', x: 104, y: 402, s: 0.84, ax: 52, from: '2024', to: '2018' },
-			{ slug: 'schule', x: 108, y: 672, s: 0.84, ax: 34, from: '2017', to: '2013' }
+			{ slug: 'siga', x: 300, y: 232, s: 0.92, ax: -80, from: 'heute', to: '2021' },
+			{ slug: 'neptun', x: 306, y: 410, s: 0.9, ax: -48, from: '2021', to: '2019' },
+			{ slug: 'armee', x: 308, y: 572, s: 0.88, ax: -42, from: '2018', to: '2017' },
+			{ slug: 'emvs', x: 306, y: 672, s: 0.9, ax: -52, from: '2017', to: '2013' },
+			{ slug: 'hslu', x: 118, y: 402, s: 0.88, ax: 52, from: '2024', to: '2018' },
+			{ slug: 'schule', x: 108, y: 672, s: 0.88, ax: 34, from: '2017', to: '2013' }
 		],
 		gate: { x: 160, y: 667, s: 0.6 },
 		signL: { x: 26, y: 52 },
@@ -523,7 +523,7 @@
 			<g transform="translate({c.x} {c.y}) scale({c.s})">
 				<ellipse class="craft-ring" cx="0" cy="4" rx="118" ry="22" />
 				<g class="bob" style="--bd:{6.4 + i * 0.9}s; --bdel:{-i * 2.1}s">
-					<Vessel slug={c.slug} name={HULL_NAME[c.slug]} />
+					<Vessel slug={c.slug} name={resolveLocalized(HULL_NAME[c.slug], locale)} />
 				</g>
 			</g>
 		</a>

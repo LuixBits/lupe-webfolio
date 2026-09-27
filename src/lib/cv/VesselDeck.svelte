@@ -89,7 +89,7 @@
 	<a class="back" href={localizeHref('/cv')}>← {m.paper_back()}</a>
 
 	<!-- the zoom: the craft itself fills the viewport underfoot -->
-	<DeckAboard slug={vessel.slug} name={HULL_NAME[vessel.slug]} />
+	<DeckAboard slug={vessel.slug} name={resolveLocalized(HULL_NAME[vessel.slug], locale)} />
 
 	<header class="deck-head">
 		<p class="eyebrow">{m.cv_aboard()}</p>
