@@ -27,7 +27,21 @@
 	position: relative;
 }
 .workshop-overview .shelf-heading {
+	position: relative;
+	isolation: isolate;
 	margin-bottom: 10px;
+}
+.workshop-overview .shelf-heading::before {
+	content: '';
+	position: absolute;
+	inset: -48px -20px -30px;
+	z-index: -1;
+	background: radial-gradient(
+		ellipse at 100px 45px,
+		color-mix(in srgb, var(--station-neon) 17%, transparent),
+		transparent 68%
+	);
+	pointer-events: none;
 }
 .workshop-overview .shelf-heading h2 {
 	display: table;
@@ -41,7 +55,8 @@
 	background: #21182fe6;
 	box-shadow:
 		4px 5px 0 #19132388,
-		inset 0 0 0 3px #352744;
+		inset 0 0 0 3px #352744,
+		0 0 22px color-mix(in srgb, var(--station-neon) 18%, transparent);
 }
 .workshop-overview .shelf-heading p {
 	margin: 0;
@@ -61,14 +76,27 @@
 	display: block;
 }
 .workshop-overview .shelf-timber {
+	position: relative;
 	height: 30px;
 	flex: none;
 	margin: -10px -12px 0;
 	border-top: 2px solid #c9a284;
 	background:
-		linear-gradient(100deg, #95dfdb22, transparent 45%, #ff81d629),
+		linear-gradient(100deg, #95dfdb40, transparent 45%, #ff81d637),
 		linear-gradient(#ae865f, #896048 80%, #583d35);
 	box-shadow: 0 5px 0 #382738;
+}
+.workshop-overview .shelf-timber::before {
+	content: '';
+	position: absolute;
+	inset: 0 0 auto;
+	height: 5px;
+	background: linear-gradient(
+		90deg,
+		color-mix(in srgb, var(--station-neon) 58%, transparent),
+		transparent 75%
+	);
+	pointer-events: none;
 }
 .workshop-overview .project-files {
 	container: project-files / inline-size;
@@ -135,6 +163,10 @@
 	text-decoration: underline;
 	text-underline-offset: 0.22em;
 }
+.workshop-overview .project-file.previewing .file-emblem {
+	border-color: var(--station-neon);
+	box-shadow: 0 0 12px color-mix(in srgb, var(--station-neon) 28%, transparent);
+}
 /* Give enlarged text the full label width before the icon makes a narrow column. */
 @container project-files (max-width: 18rem) {
 	.workshop-overview .project-files .project-file {
@@ -153,12 +185,14 @@
 	isolation: isolate;
 	padding: 22px 25px 24px;
 	border: 8px solid;
-	border-color: #9b879f #40354e #34293f #806e88;
+	border-color: #ad90aa #58475f #34293f #9980a0;
 	border-radius: 7px 7px 4px 4px;
 	background:
 		linear-gradient(120deg, #d48ad319, transparent 32%, #78b8d70c 72%),
 		linear-gradient(#231e33, #302b3e);
 	box-shadow:
+		inset 2px 0 0 #eea0d659,
+		inset -2px 0 0 #8dcbd636,
 		7px 9px 0 #211b30,
 		12px 17px 22px #17112770,
 		inset 0 0 0 2px #151323,

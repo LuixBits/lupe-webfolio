@@ -3,6 +3,7 @@
 	import { localizeHref } from '$lib/paraglide/runtime';
 	import * as m from '$lib/paraglide/messages';
 	import StudioGlimpse from './StudioGlimpse.svelte';
+	import StudioRecess from './StudioRecess.svelte';
 	let { project, locale }: { project: Project; locale: string } = $props();
 </script>
 
@@ -13,6 +14,7 @@
 	data-project-kind="studio"
 	href={localizeHref(`/projects/${project.slug}`)}
 >
+	<StudioRecess />
 	<svg class="door-panel" viewBox="0 0 48 640" preserveAspectRatio="none" aria-hidden="true">
 		<g data-door-panel
 			><path d="M0 0 43 40V599L0 640Z" fill="#726151" stroke="#b29c80" />

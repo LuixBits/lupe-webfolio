@@ -8,6 +8,7 @@
 	import { colorForSection } from '$lib/themes';
 	import { lighten, darken } from '$lib/color';
 	import type { MenuItem, DockPosition } from './types';
+	import WorkshopNavigationMount from './WorkshopNavigationMount.svelte';
 
 	let {
 		items,
@@ -460,6 +461,10 @@
 			<path id="back-arc" d={backArc} />
 			<clipPath id="clip-sun"><circle cx={art.sun.x} cy={art.sun.y} r={art.sun.r} /></clipPath>
 		</defs>
+
+		{#if projectsLedge && mode === 'docked'}
+			<WorkshopNavigationMount {size} />
+		{/if}
 
 		<!-- Main wedges. Each is a group: coloured wedge + clipped theme art +
 		     curved label + (when expanded) its sub-wedges, so hover/glow/scale
@@ -1057,6 +1062,10 @@
 	/* The visible quarter sits on a normal-flow ledge. Its open fan may
 	   extend below the ledge; the resting wheel scrolls away with it. */
 	@media (max-width: 60rem), (max-height: 560px) {
+		/* The compact ledge is already a physical support; a plate would be clipped here. */
+		.menu-root :global(.workshop-navigation-mount) {
+			display: none;
+		}
 		.menu-root.projects-ledge[data-mode='docked'] {
 			position: absolute;
 			top: 0;

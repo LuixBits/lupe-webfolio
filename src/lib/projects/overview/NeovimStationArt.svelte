@@ -1,4 +1,5 @@
 <script lang="ts">
+	let { project = 'roomplan-nvim' }: { project?: string } = $props();
 	const id = $props.id();
 	// Shape reference: https://dygma.com/products/dygma-defy-purple-white
 	// Keep the sculpted outline, full thumb fans and deep palm pads legible at room scale.
@@ -121,16 +122,37 @@
 			opacity=".8"
 		/>
 	{/each}
-	<path
-		d="M174 94h128v111H174Zm0 67h58m0-67v39m0 24v48m70-53h-36"
-		stroke="#94d7b2"
-		stroke-width="2.5"
-	/>
-	<path
-		d="M232 133q24 0 24 24h-24m-47-52h31v43h-31Zm59 60h46v24h-46Z"
-		stroke="#d8dc9b"
-		stroke-width="1.5"
-	/>
+	<g data-screen-content={project}>
+		{#if project === 'neorg-flashcards'}
+			<!-- A review card replaces the plan inside the same editor split. -->
+			<rect x="180" y="96" width="113" height="91" rx="3" fill="#355f51" stroke="#84bc99" />
+			<rect x="186" y="102" width="113" height="91" rx="3" fill="#5c896d" stroke="#a5d3a6" />
+			<rect x="192" y="108" width="113" height="91" rx="3" fill="#bdd6ab" stroke="#d9ecc2" />
+			<path d="M203 121h35m-35 7h16" stroke="#60826b" stroke-width="2" />
+			<path
+				d="M238 144q0-10 11-10t11 9q0 6-10 11v7"
+				stroke="#305c4c"
+				stroke-width="4"
+				stroke-linecap="round"
+			/>
+			<circle cx="250" cy="172" r="2.5" fill="#305c4c" />
+			<path d="M203 186h35m6 0h21m6 0h21" stroke="#749277" stroke-width="2" />
+			{#each [226, 239, 252, 265, 278] as x, index}
+				<circle cx={x} cy="208" r="2.5" fill={index === 1 ? '#e5cc90' : '#527c65'} />
+			{/each}
+		{:else}
+			<path
+				d="M174 94h128v111H174Zm0 67h58m0-67v39m0 24v48m70-53h-36"
+				stroke="#94d7b2"
+				stroke-width="2.5"
+			/>
+			<path
+				d="M232 133q24 0 24 24h-24m-47-52h31v43h-31Zm59 60h46v24h-46Z"
+				stroke="#d8dc9b"
+				stroke-width="1.5"
+			/>
+		{/if}
+	</g>
 	<path d="M89 219h217" stroke="#315e52" stroke-width="10" /><path
 		d="M92 219h30m8 0h23m112 0h36"
 		stroke="#acd9b4"

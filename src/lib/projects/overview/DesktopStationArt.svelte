@@ -1,4 +1,5 @@
 <script lang="ts">
+	let { project = 'noctalia-plugins' }: { project?: string } = $props();
 	const id = $props.id();
 </script>
 
@@ -126,33 +127,77 @@
 				r="3"
 				fill="#75c8bd"
 			/>
-			<rect
-				x="33"
-				y="57"
-				width="108"
-				height="107"
-				rx="8"
-				fill="#182235"
-				fill-opacity=".9"
-				stroke="#8594b0"
-				stroke-opacity=".6"
-			/>
-			<rect x="42" y="67" width="90" height="32" rx="4" fill="#434059" />
-			<path d="M51 77h47m-47 10h62" stroke="#c4d3d4" stroke-width="2" />
-			{#each [48, 76, 104] as x}<rect
-					{x}
-					y="110"
-					width="20"
-					height="19"
-					rx="4"
-					fill="#65627e"
-				/><circle cx={x + 10} cy="119" r="4" stroke="#b7c9cc" />{/each}
-			<path d="M46 145h77" stroke="#3c4d61" stroke-width="5" stroke-linecap="round" /><path
-				d="M46 145h44"
-				stroke="#80ccc6"
-				stroke-width="5"
-				stroke-linecap="round"
-			/>
+			<g data-screen-content={project}>
+				{#if project === 'magic-mouse'}
+					<!-- An illustrated device study; the upcoming app has no released UI yet. -->
+					<rect
+						x="73"
+						y="51"
+						width="281"
+						height="149"
+						rx="10"
+						fill="#19253a"
+						fill-opacity=".95"
+						stroke="#a49ac4"
+						stroke-width="1.5"
+					/>
+					<path d="M88 68h78m131 0h12m9 0h12M88 78h251" stroke="#7984a4" stroke-width="2" />
+					<ellipse cx="170" cy="178" rx="48" ry="9" fill="#0d1528" opacity=".65" />
+					<path
+						d="M143 108q3-18 24-18 23 0 28 18l12 48q4 23-28 26-31 1-34-19Z"
+						fill={`url(#${id}-glass)`}
+						stroke="#e6d8ef"
+						stroke-width="1.5"
+					/>
+					<path
+						d="M148 112q10-21 32-13m-23 12 3 17"
+						stroke="#fff5ee"
+						stroke-width="2"
+						stroke-linecap="round"
+					/>
+					<path
+						d="M222 101h47m-47 9h72m-72 39h56m-56 10h83"
+						stroke="#8494b0"
+						stroke-width="3"
+						stroke-linecap="round"
+					/>
+					<path
+						d="m218 128 8 5 14-15m-17 61h47m9 0h22"
+						stroke="#b79acd"
+						stroke-width="3"
+						stroke-linecap="round"
+					/>
+					<circle cx="312" cy="105" r="8" stroke="#87b8c8" stroke-dasharray="3 4" />
+				{:else}
+					<rect
+						x="33"
+						y="57"
+						width="108"
+						height="107"
+						rx="8"
+						fill="#182235"
+						fill-opacity=".9"
+						stroke="#8594b0"
+						stroke-opacity=".6"
+					/>
+					<rect x="42" y="67" width="90" height="32" rx="4" fill="#434059" />
+					<path d="M51 77h47m-47 10h62" stroke="#c4d3d4" stroke-width="2" />
+					{#each [48, 76, 104] as x}<rect
+							{x}
+							y="110"
+							width="20"
+							height="19"
+							rx="4"
+							fill="#65627e"
+						/><circle cx={x + 10} cy="119" r="4" stroke="#b7c9cc" />{/each}
+					<path d="M46 145h77" stroke="#3c4d61" stroke-width="5" stroke-linecap="round" /><path
+						d="M46 145h44"
+						stroke="#80ccc6"
+						stroke-width="5"
+						stroke-linecap="round"
+					/>
+				{/if}
+			</g>
 			<rect x="179" y="216" width="108" height="13" rx="6" fill="#1a2638" />
 			{#each [191, 208, 225, 242, 259, 276] as x}<rect
 					{x}

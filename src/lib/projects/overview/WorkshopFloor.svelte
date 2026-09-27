@@ -8,6 +8,7 @@
 	import WorkshopRug from './WorkshopRug.svelte';
 	import { roomActivity, useWorkshopState } from './workshop-state.svelte';
 	let { ready }: { ready: boolean } = $props();
+	const id = $props.id();
 	const roomState = useWorkshopState();
 	let gaze = $state(0);
 	let catBounds: DOMRect | undefined;
@@ -55,8 +56,15 @@
 		fill="none"
 		aria-hidden="true"
 	>
+		<defs>
+			<linearGradient id={`${id}-floor-neon`}>
+				<stop stop-color="#9bddd9" /><stop offset=".36" stop-color="#b19ccc" />
+				<stop offset="1" stop-color="#ed79cf" />
+			</linearGradient>
+		</defs>
 		<path
 			d="M0 14h1440M0 42h1440M0 83h1440M0 141h1440M0 224h1440M0 342h1440M600 0 0 350M640 0 240 350M680 0 480 350M720 0v350M760 0 960 350M800 0 1200 350M840 0l600 350"
+			stroke={`url(#${id}-floor-neon)`}
 		/>
 	</svg>
 	<WorkshopRug />

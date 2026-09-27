@@ -23,8 +23,11 @@
 		locale: string;
 		color?: 'pink' | 'cyan' | 'violet';
 		housing?: 'shelf' | 'network-cabinet';
-		children: Snippet;
+		children: Snippet<[string]>;
 	} = $props();
+	let hoveredProject = $state<string | null>(null);
+	let focusedProject = $state<string | null>(null);
+	const preview = $derived(hoveredProject ?? focusedProject ?? projects[0]?.slug ?? '');
 </script>
 
 <section
@@ -32,6 +35,7 @@
 	class:network-cabinet={housing === 'network-cabinet'}
 	{id}
 	aria-labelledby={`${id}-title`}
+	style={`--station-neon:${color === 'pink' ? '#e997d5' : color === 'violet' ? '#b4a5f0' : '#9bdfdf'}`}
 >
 	{#if housing === 'network-cabinet'}
 		<div class="cabinet-fittings" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
@@ -42,7 +46,9 @@
 		</h2>
 		<p>{intro}</p>
 	</header>
-	<div class="shelf-scene" aria-hidden="true">{@render children()}</div>
+	<div class="shelf-scene" data-project-preview={preview} aria-hidden="true">
+		{@render children(preview)}
+	</div>
 	{#if housing === 'network-cabinet'}
 		<div class="network-panel" aria-hidden="true"><NetworkPatchPanel /></div>
 	{/if}
@@ -52,10 +58,22 @@
 			<li>
 				<a
 					class="project-file"
+					class:previewing={preview === project.slug && !!(hoveredProject || focusedProject)}
 					id={`tape-${project.slug}`}
 					data-project-tape={project.slug}
 					data-project-kind="case"
 					href={localizeHref(`/projects/${project.slug}`)}
+					onpointerenter={(event) => {
+						if (event.pointerType !== 'touch') hoveredProject = project.slug;
+					}}
+					onpointerleave={() => (hoveredProject = null)}
+					onpointercancel={() => (hoveredProject = null)}
+					onfocus={() => {
+						focusedProject = project.slug;
+						// Keyboard movement takes over even if the pointer still rests on another file.
+						hoveredProject = null;
+					}}
+					onblur={() => (focusedProject = null)}
 				>
 					<span class="file-emblem" data-project-object><TapeArtwork {project} /></span>
 					<div class="file-copy">

@@ -10,7 +10,7 @@
 	import ProjectShelf from '$lib/projects/overview/ProjectShelf.svelte';
 	import NeonSign from '$lib/projects/overview/NeonSign.svelte';
 	import NightWindow from '$lib/projects/overview/NightWindow.svelte';
-	import WebfolioModel from '$lib/projects/overview/WebfolioModel.svelte';
+	import WebStationArt from '$lib/projects/overview/WebStationArt.svelte';
 	import NeovimStationArt from '$lib/projects/overview/NeovimStationArt.svelte';
 	import DesktopStationArt from '$lib/projects/overview/DesktopStationArt.svelte';
 	import OrbitApparatus from '$lib/projects/overview/OrbitApparatus.svelte';
@@ -58,7 +58,7 @@
 				color="pink"
 				housing="network-cabinet"
 			>
-				<WebfolioModel />
+				{#snippet children(preview)}<WebStationArt project={preview} />{/snippet}
 			</ProjectShelf>
 		</div>
 	</div>
@@ -84,7 +84,7 @@
 				projects={projectsByCategory('neovim')}
 				{locale}
 			>
-				<NeovimStationArt />
+				{#snippet children(preview)}<NeovimStationArt project={preview} />{/snippet}
 			</ProjectShelf>
 			<ProjectShelf
 				id="desktop"
@@ -94,7 +94,7 @@
 				{locale}
 				color="violet"
 			>
-				<DesktopStationArt />
+				{#snippet children(preview)}<DesktopStationArt project={preview} />{/snippet}
 			</ProjectShelf>
 		</div>
 		<aside
