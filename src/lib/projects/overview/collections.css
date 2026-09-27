@@ -71,6 +71,7 @@
 	box-shadow: 0 5px 0 #382738;
 }
 .workshop-overview .project-files {
+	container: project-files / inline-size;
 	list-style: none;
 	margin: 0 -12px;
 	padding: 15px 14px 19px;
@@ -133,6 +134,145 @@
 .workshop-overview .project-file:is(:hover, :focus-visible) h3 {
 	text-decoration: underline;
 	text-underline-offset: 0.22em;
+}
+/* Give enlarged text the full label width before the icon makes a narrow column. */
+@container project-files (max-width: 18rem) {
+	.workshop-overview .project-files .project-file {
+		display: block;
+	}
+	.workshop-overview .project-files .file-emblem {
+		width: 2.1rem;
+		margin-bottom: 12px;
+	}
+	.workshop-overview .project-files .file-arrow {
+		display: none;
+	}
+}
+/* Web lives in an open wall cabinet. Its rails carry the model, network and files. */
+.workshop-overview .network-cabinet {
+	isolation: isolate;
+	padding: 22px 25px 24px;
+	border: 8px solid;
+	border-color: #9b879f #40354e #34293f #806e88;
+	border-radius: 7px 7px 4px 4px;
+	background:
+		linear-gradient(120deg, #d48ad319, transparent 32%, #78b8d70c 72%),
+		linear-gradient(#231e33, #302b3e);
+	box-shadow:
+		7px 9px 0 #211b30,
+		12px 17px 22px #17112770,
+		inset 0 0 0 2px #151323,
+		inset 0 7px 14px #100f2460;
+}
+.workshop-overview .network-cabinet::before,
+.workshop-overview .network-cabinet::after {
+	content: '';
+	position: absolute;
+	z-index: -1;
+	top: 13px;
+	bottom: 13px;
+	width: 10px;
+	border: 1px solid #77697f;
+	background:
+		repeating-linear-gradient(0deg, transparent 0 10px, #1b1828 10px 16px, transparent 16px 23px)
+			center / 4px 100% no-repeat,
+		linear-gradient(90deg, #50485e, #6b6073, #393449);
+	pointer-events: none;
+}
+.workshop-overview .network-cabinet::before {
+	left: 6px;
+}
+.workshop-overview .network-cabinet::after {
+	right: 6px;
+}
+.workshop-overview .cabinet-fittings {
+	position: absolute;
+	inset: -5px;
+	pointer-events: none;
+}
+.workshop-overview .cabinet-fittings i {
+	position: absolute;
+	width: 5px;
+	height: 5px;
+	border: 1px solid #bfafc3;
+	border-radius: 50%;
+	background: linear-gradient(135deg, #403348 40%, #b4a3b9 40% 56%, #403348 56%);
+}
+.workshop-overview .cabinet-fittings i:nth-child(1) {
+	top: 0;
+	left: 0;
+}
+.workshop-overview .cabinet-fittings i:nth-child(2) {
+	top: 0;
+	right: 0;
+}
+.workshop-overview .cabinet-fittings i:nth-child(3) {
+	bottom: 0;
+	left: 0;
+}
+.workshop-overview .cabinet-fittings i:nth-child(4) {
+	bottom: 0;
+	right: 0;
+}
+.workshop-overview .cabinet-fittings::before,
+.workshop-overview .cabinet-fittings::after {
+	content: '';
+	position: absolute;
+	right: -7px;
+	width: 9px;
+	height: 32px;
+	border: 1px solid #a698b1;
+	border-radius: 3px;
+	background: linear-gradient(90deg, #343248, #827e92, #40374e);
+}
+.workshop-overview .cabinet-fittings::before {
+	top: 16%;
+}
+.workshop-overview .cabinet-fittings::after {
+	bottom: 16%;
+}
+.workshop-overview .network-cabinet .shelf-heading {
+	margin-bottom: 12px;
+}
+.workshop-overview .network-cabinet .shelf-scene {
+	margin-top: 0;
+	padding: 0 3px 5px;
+	border-bottom: 5px solid #6c627c;
+	box-shadow: 0 3px 0 #151421;
+	background: radial-gradient(ellipse at 50% 82%, #b873b522, transparent 65%);
+}
+.workshop-overview .network-panel {
+	margin: 12px -14px 0;
+	pointer-events: none;
+}
+.workshop-overview .network-panel svg {
+	display: block;
+	width: 100%;
+	height: auto;
+}
+.workshop-overview .network-cabinet .shelf-timber {
+	height: 12px;
+	margin: 0 -14px;
+	border-top-color: #a69ab0;
+	background: linear-gradient(#797287, #4b465d 72%, #30283e);
+	box-shadow: 0 4px 6px #141121;
+}
+.workshop-overview .network-cabinet .project-files {
+	margin: 0;
+	padding: 17px 0 0;
+	border-bottom: 0;
+	background: none;
+	box-shadow: none;
+}
+.workshop-overview .network-cabinet .project-file {
+	background: linear-gradient(110deg, #e9dde0, #d4c8d6);
+	border-color: #b1a7bf;
+	box-shadow:
+		0 3px 0 #72697e,
+		3px 6px 8px #13102188;
+}
+.workshop-overview .network-cabinet .project-file:is(:hover, :focus-visible) {
+	background: #f5e9ef;
 }
 .workshop-overview .collection-bench {
 	padding-top: 60px;
@@ -424,6 +564,24 @@
 	}
 }
 @media (max-width: 580px) {
+	.workshop-overview .network-cabinet {
+		padding: 18px 16px 20px;
+		border-width: 6px;
+	}
+	.workshop-overview .network-cabinet::before {
+		left: 3px;
+	}
+	.workshop-overview .network-cabinet::after {
+		right: 3px;
+	}
+	.workshop-overview .network-cabinet::before,
+	.workshop-overview .network-cabinet::after {
+		width: 7px;
+	}
+	.workshop-overview .network-cabinet .shelf-timber,
+	.workshop-overview .network-panel {
+		margin-inline: -7px;
+	}
 	.workshop-overview .collection-bench {
 		padding-top: 40px;
 	}

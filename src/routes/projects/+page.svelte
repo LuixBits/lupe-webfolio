@@ -56,6 +56,7 @@
 				projects={projectsByCategory('web')}
 				{locale}
 				color="pink"
+				housing="network-cabinet"
 			>
 				<WebfolioModel />
 			</ProjectShelf>

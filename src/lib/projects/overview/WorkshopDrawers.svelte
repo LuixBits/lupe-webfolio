@@ -2,14 +2,20 @@
 	import { tick } from 'svelte';
 	import * as m from '$lib/paraglide/messages';
 	import FloorPlan from '$lib/projects/workbench/FloorPlan.svelte';
-	import { useWorkshopState } from './workshop-state.svelte';
+	import { useWorkshopState, type WorkshopDrawer } from './workshop-state.svelte';
 	let { ready }: { ready: boolean } = $props();
 	const roomState = useWorkshopState();
+	const id = $props.id();
+	const group = `workshop-drawers-${id}`;
+	function setDrawer(drawer: WorkshopDrawer, open: boolean) {
+		if (open) roomState.openDrawer = drawer;
+		else if (roomState.openDrawer === drawer) roomState.openDrawer = null;
+	}
 	let playing = $state(false);
 	let playButton = $state<HTMLButtonElement>();
 	let stopButton = $state<HTMLButtonElement>();
 	$effect(() => {
-		if (!roomState.tabletOpen) playing = false;
+		if (roomState.openDrawer !== 'tablet') playing = false;
 	});
 	async function play() {
 		playing = true;
@@ -29,6 +35,7 @@
 				: null;
 		if (!drawer?.open) return;
 		event.preventDefault();
+		roomState.openDrawer = null;
 		drawer.open = false;
 		drawer.querySelector('summary')?.focus({ preventScroll: true });
 	}
@@ -37,12 +44,20 @@
 <svelte:window onkeydown={closeOnEscape} />
 
 <div class="drawers interactive-drawers">
-	<details class="drawer-unit" data-drawer="sketch" bind:open={roomState.drawerOpen}>
+	<details
+		class="drawer-unit"
+		data-drawer="sketch"
+		name={group}
+		bind:open={() => roomState.openDrawer === 'sketch', (open) => setDrawer('sketch', open)}
+	>
 		<summary
 			class="drawer sketch-handle"
-			aria-label={roomState.drawerOpen ? m.workshop_drawer_close() : m.workshop_drawer_open()}
-			title={roomState.drawerOpen ? m.workshop_drawer_close() : m.workshop_drawer_open()}
-			><span aria-hidden="true">I</span></summary
+			aria-label={roomState.openDrawer === 'sketch'
+				? m.workshop_drawer_close()
+				: m.workshop_drawer_open()}
+			title={roomState.openDrawer === 'sketch'
+				? m.workshop_drawer_close()
+				: m.workshop_drawer_open()}><span aria-hidden="true">I</span></summary
 		>
 		<div class="drawer-content sketch-tray" role="region" aria-label={m.workshop_sketch()}>
 			<div class="drawer-sketch">
@@ -50,11 +65,18 @@
 			</div>
 		</div>
 	</details>
-	<details class="drawer-unit" data-drawer="parts" bind:open={roomState.partsOpen}>
+	<details
+		class="drawer-unit"
+		data-drawer="parts"
+		name={group}
+		bind:open={() => roomState.openDrawer === 'parts', (open) => setDrawer('parts', open)}
+	>
 		<summary
 			class="drawer parts-handle"
-			aria-label={roomState.partsOpen ? m.workshop_parts_close() : m.workshop_parts_open()}
-			title={roomState.partsOpen ? m.workshop_parts_close() : m.workshop_parts_open()}
+			aria-label={roomState.openDrawer === 'parts'
+				? m.workshop_parts_close()
+				: m.workshop_parts_open()}
+			title={roomState.openDrawer === 'parts' ? m.workshop_parts_close() : m.workshop_parts_open()}
 			><span aria-hidden="true">II</span></summary
 		>
 		<div class="drawer-content parts-tray" role="region" aria-label={m.workshop_parts()}>
@@ -92,12 +114,20 @@
 			</svg>
 		</div>
 	</details>
-	<details class="drawer-unit" data-drawer="tablet" bind:open={roomState.tabletOpen}>
+	<details
+		class="drawer-unit"
+		data-drawer="tablet"
+		name={group}
+		bind:open={() => roomState.openDrawer === 'tablet', (open) => setDrawer('tablet', open)}
+	>
 		<summary
 			class="drawer tablet-handle"
-			aria-label={roomState.tabletOpen ? m.workshop_tablet_close() : m.workshop_tablet_open()}
-			title={roomState.tabletOpen ? m.workshop_tablet_close() : m.workshop_tablet_open()}
-			><span aria-hidden="true">III</span></summary
+			aria-label={roomState.openDrawer === 'tablet'
+				? m.workshop_tablet_close()
+				: m.workshop_tablet_open()}
+			title={roomState.openDrawer === 'tablet'
+				? m.workshop_tablet_close()
+				: m.workshop_tablet_open()}><span aria-hidden="true">III</span></summary
 		>
 		<div class="drawer-content tablet-tray" role="region" aria-label={m.workshop_tablet()}>
 			<div class="drawer-tablet">
