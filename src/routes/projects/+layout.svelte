@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import { deLocalizeUrl } from '$lib/paraglide/runtime';
 	import PowerOn from '$lib/projects/PowerOn.svelte';
+	import { createWorkshopState, workshopRoom } from '$lib/projects/overview/workshop-state.svelte';
 	import {
 		consumeProjectLocaleChange,
 		projectNavigation,
@@ -34,6 +35,7 @@
 		popstate: boolean;
 	};
 	let journey: Journey | undefined;
+	setContext(workshopRoom, createWorkshopState());
 	setContext(projectNavigation, {
 		get moving() {
 			return moving;
@@ -70,6 +72,15 @@
 		const frame = oldPage.getBoundingClientRect();
 		const computed = getComputedStyle(oldPage);
 		departing = oldPage.cloneNode(true) as HTMLElement;
+		// Ambient effects in the larger room must hold their visible frame in
+		// the departure snapshot instead of restarting when the clone mounts.
+		const originals = oldPage.querySelectorAll<HTMLElement>('[data-workshop-animated]');
+		departing.querySelectorAll<HTMLElement>('[data-workshop-animated]').forEach((clone, index) => {
+			const style = getComputedStyle(originals[index]);
+			clone.style.animation = 'none';
+			clone.style.transform = style.transform;
+			clone.style.opacity = style.opacity;
+		});
 		selectedClone =
 			departing.querySelector<HTMLElement>(`[data-project-tape="${CSS.escape(slug)}"]`) ??
 			undefined;
@@ -152,7 +163,9 @@
 			return;
 		const slug = (returning ? from : to).split('/')[2];
 		const source = tapeFor(slug);
-		const target = source?.querySelector<HTMLElement>('[data-project-aperture]') ?? source;
+		const target =
+			source?.querySelector<HTMLElement>('[data-project-aperture], [data-project-object]') ??
+			source;
 		const compact = matchMedia('(max-width: 700px), (max-height: 560px)').matches;
 		journey = {
 			sequence,
@@ -249,9 +262,11 @@
 								fill: 'both'
 							})
 						);
-					else if (selectedClone)
+					else if (selectedClone) {
+						const object =
+							selectedClone.querySelector<HTMLElement>('[data-project-object]') ?? selectedClone;
 						animations.push(
-							selectedClone.animate(
+							object.animate(
 								[
 									{ transform: 'translateY(0) scale(1)' },
 									{
@@ -261,6 +276,7 @@
 								{ duration: timing.duration, easing, fill: 'both' }
 							)
 						);
+					}
 				}
 				const returnTarget = current.returning
 					? tapeFor(current.slug)?.getBoundingClientRect()

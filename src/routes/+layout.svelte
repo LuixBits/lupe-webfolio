@@ -184,14 +184,13 @@
 	}
 	.app.overview {
 		position: relative;
-		--bg: #2d2030;
-		--footer-bar-bg: #19151e;
-		--fg-muted: #d2bdcd;
+		--bg: #24153c;
+		--footer-bar-bg: #180f29;
+		--fg-muted: #d6bfeb;
 	}
 	.overview main {
 		container-type: inline-size;
-		padding-left: 216px;
-		padding-bottom: 0;
+		padding: 0;
 	}
 	.navigation-placement {
 		z-index: 20;
@@ -205,7 +204,7 @@
 			background: linear-gradient(90deg, #36273666, transparent 60%);
 		}
 		.overview main {
-			padding: 1.5rem clamp(0.9rem, 3.5vw, 2rem) 0;
+			padding: 0;
 		}
 	}
 	.app {
