@@ -142,12 +142,12 @@
 	.log-hand {
 		margin: 0 0 0.75rem;
 		font:
-			italic 1rem/1.62 var(--font-display, Georgia),
+			italic clamp(1rem, 0.88rem + 0.28vw, 1.22rem) / 1.62 var(--font-display, Georgia),
 			serif;
 	}
 	.log-take {
 		margin: 0 0 0.9rem;
-		font-size: 0.86rem;
+		font-size: clamp(0.86rem, 0.78rem + 0.18vw, 1rem);
 		line-height: 1.5;
 		color: var(--ink-muted);
 	}

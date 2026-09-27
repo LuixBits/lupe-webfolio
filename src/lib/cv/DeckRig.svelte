@@ -234,7 +234,7 @@
 	}
 	.rtag-role {
 		margin: 0 0 0.3rem;
-		font-size: 1.02rem;
+		font-size: clamp(1.02rem, 0.92rem + 0.22vw, 1.2rem);
 		line-height: 1.3;
 	}
 	.rtag-line {
@@ -269,12 +269,12 @@
 	.rtag-hand {
 		margin: 0 0 0.7rem;
 		font:
-			italic 0.95rem/1.55 var(--font-display, Georgia),
+			italic clamp(0.95rem, 0.84rem + 0.26vw, 1.16rem) / 1.55 var(--font-display, Georgia),
 			serif;
 	}
 	.rtag-take {
 		margin: 0.6rem 0 0;
-		font-size: 0.82rem;
+		font-size: clamp(0.82rem, 0.75rem + 0.16vw, 0.95rem);
 		line-height: 1.5;
 		color: var(--ink-muted);
 	}

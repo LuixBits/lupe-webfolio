@@ -497,6 +497,7 @@
 	{/if}
 	<g transform="translate({sp.bottle.x} {sp.bottle.y})">
 		<a class="bottle-link" href={localizeHref('/cv/flaschenpost')} aria-label={m.cv_pdf_label()}>
+			<ellipse class="craft-ring" cx="3" cy="10" rx="58" ry="28" />
 			<g class="bob" style="--bd:8.4s">{@render bottleShape(m.cv_bottle_arrow())}</g>
 		</a>
 	</g>
@@ -899,10 +900,13 @@
 		opacity: 0;
 	}
 	.craft:hover .craft-ring,
-	.craft:focus-visible .craft-ring {
+	.craft:focus-visible .craft-ring,
+	.bottle-link:hover .craft-ring,
+	.bottle-link:focus-visible .craft-ring {
 		opacity: 0.75;
 	}
-	.craft:focus-visible .craft-ring {
+	.craft:focus-visible .craft-ring,
+	.bottle-link:focus-visible .craft-ring {
 		stroke-dasharray: 6 6;
 	}
 
@@ -1102,7 +1106,9 @@
 			animation: pd-bob var(--bd, 7s) ease-in-out var(--bdel, 0s) infinite alternate;
 		}
 		.craft:hover .bob,
-		.craft:focus-visible .bob {
+		.craft:focus-visible .bob,
+		.bottle-link:hover .bob,
+		.bottle-link:focus-visible .bob {
 			animation-play-state: paused;
 			translate: 0 -2.5px;
 			transition: translate 300ms ease;

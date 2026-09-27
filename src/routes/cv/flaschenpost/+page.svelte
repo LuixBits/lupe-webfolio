@@ -142,7 +142,7 @@
 
 <style>
 	.fpost {
-		max-width: 62rem;
+		max-width: clamp(62rem, 72vw, 84rem);
 		--paper: #f7f1de;
 		--ink: #2c241b;
 		--ink-muted: #6b5f4d;

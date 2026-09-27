@@ -188,7 +188,7 @@
 	}
 	.ctag-role {
 		margin: 0 0 0.3rem;
-		font-size: 1.05rem;
+		font-size: clamp(1.05rem, 0.94rem + 0.24vw, 1.24rem);
 		line-height: 1.3;
 	}
 	.ctag-line {
@@ -200,12 +200,12 @@
 	.ctag-hand {
 		margin: 0;
 		font:
-			italic 0.95rem/1.55 var(--font-display, Georgia),
+			italic clamp(0.95rem, 0.84rem + 0.26vw, 1.16rem) / 1.55 var(--font-display, Georgia),
 			serif;
 	}
 	.ctag-take {
 		margin: 0;
-		font-size: 0.85rem;
+		font-size: clamp(0.85rem, 0.77rem + 0.18vw, 1rem);
 		line-height: 1.5;
 	}
 	.ctag-skills {

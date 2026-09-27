@@ -131,7 +131,8 @@
 		--ink: #2c241b;
 		--ink-muted: #6b5f4d;
 		--seal: #c43f2a;
-		max-width: 44rem;
+		/* grow with the ship: ~44rem on laptops, up to 72rem on a 34" deck */
+		max-width: clamp(44rem, 62vw, 72rem);
 	}
 	.back {
 		display: inline-block;
