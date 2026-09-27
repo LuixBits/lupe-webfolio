@@ -21,6 +21,8 @@
 .workshop-overview {
 	position: relative;
 	isolation: isolate;
+	/* Keep the same responsive composition when this room becomes a route snapshot. */
+	container-type: inline-size;
 	overflow: clip;
 	--room-side: clamp(22px, 6vw, 100px);
 	background:
@@ -101,12 +103,6 @@
 }
 .workshop-overview .room-head h1::after {
 	margin-left: -26px;
-}
-.workshop-overview .room-head p {
-	margin: 8px auto 0;
-	max-width: 38rem;
-	color: #ddc8e8;
-	font-size: var(--fs-body);
 }
 .workshop-overview .upper-room {
 	position: relative;
@@ -280,14 +276,6 @@
 		transparent 64%
 	);
 	pointer-events: none;
-}
-.workshop-overview .rain {
-	animation: workshop-rain 3.2s linear infinite;
-}
-@keyframes workshop-rain {
-	to {
-		transform: translate(-32px, 90px);
-	}
 }
 .workshop-overview .portfolio-station {
 	position: relative;
@@ -828,9 +816,6 @@
 	.workshop-overview .room-head h1::after {
 		height: 30px;
 	}
-	.workshop-overview .room-head p {
-		font-size: var(--fs-body);
-	}
 	.workshop-overview .upper-room {
 		display: flex;
 		flex-direction: column;
@@ -1021,7 +1006,7 @@
 	}
 }
 
-/* Production layout: the room fills the route, while text clears the wheel.
+/* The room fills its capped route container, while text clears the wheel.
    Scenery stays inside this wrapper so route snapshots carry the whole room. */
 .workshop-overview {
 	--ink: #f3e9db;
@@ -1029,12 +1014,13 @@
 	--paper: #f0e1bf;
 	--warm: 1;
 	--room-side: clamp(22px, 6vw, 100px);
-	--room-left: max(228px, var(--room-side));
+	--room-left: max(var(--room-side), calc(228px - var(--workshop-gutter, 0px)));
 	max-width: none;
 	width: 100%;
 	padding: 0;
 	margin: 0;
 	color: var(--ink);
+	box-shadow: 0 0 90px #120c2c80;
 }
 .workshop-overview.cool {
 	--warm: 0;
@@ -1090,23 +1076,8 @@
 .workshop-overview .mounted-sign::after {
 	right: 25px;
 }
-.workshop-overview .motion-switch {
-	display: block;
-	margin: 14px auto 0;
-	min-height: 44px;
-	max-width: 100%;
-	border: 1px solid #9b84b0;
-	border-radius: 4px;
-	padding: 8px 14px;
-	background: #30233f;
-	color: #decce9;
-	font-size: var(--fs-small);
-}
 .workshop-overview button:disabled {
 	cursor: default;
-}
-.workshop-overview .motion-switch:disabled {
-	opacity: 0.7;
 }
 .workshop-overview .upper-room {
 	padding: 22px var(--room-side) 0 var(--room-left);
@@ -1412,14 +1383,10 @@
 .workshop-overview .extra-station {
 	margin-top: 50px;
 }
-/* Only three small ambient areas can run, and only while visible and enabled. */
-.workshop-overview .rain,
+/* The two remaining ambient areas run only while visible and enabled. */
 .workshop-overview .orbit-core,
 .workshop-overview .cat-body {
 	animation: none;
-}
-.workshop-overview.motion-enabled .ambient-zone[data-visible='true'] .rain {
-	animation: workshop-rain 3.2s linear infinite;
 }
 .workshop-overview.motion-enabled .ambient-zone[data-visible='true'] .orbit-core {
 	animation: workshop-orbit 24s linear infinite;
@@ -1503,9 +1470,6 @@
 		margin: 0;
 		padding: 12px 18px;
 		max-width: 100%;
-	}
-	.workshop-overview .motion-switch {
-		margin-left: 0;
 	}
 	.workshop-overview .upper-room {
 		padding: 20px 26px 0;

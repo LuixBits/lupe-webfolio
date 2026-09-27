@@ -12,8 +12,7 @@
 	let gaze = $state(0);
 	let catBounds: DOMRect | undefined;
 	function look(event: PointerEvent) {
-		if (event.pointerType !== 'mouse' || !roomState.catAwake || roomState.paused || !catBounds)
-			return;
+		if (event.pointerType !== 'mouse' || !roomState.catAwake || !catBounds) return;
 		gaze = Math.max(
 			-4,
 			Math.min(4, ((event.clientX - catBounds.left) / catBounds.width - 0.5) * 8)

@@ -46,7 +46,7 @@
 			{/each}
 		</section>
 		<div class="window-bay">
-			<div class="ambient-zone window-zone" use:roomActivity><NightWindow /></div>
+			<div class="window-zone"><NightWindow /></div>
 			<!-- Keep the old category fragment useful after moving Webfolio into Web. -->
 			<span id="opensource" aria-hidden="true"></span>
 			<ProjectShelf

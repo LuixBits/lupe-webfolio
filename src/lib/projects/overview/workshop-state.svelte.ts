@@ -5,7 +5,6 @@ export type WorkshopDrawer = 'sketch' | 'parts' | 'tablet';
 export function createWorkshopState() {
 	const room = $state({
 		lampOn: true,
-		paused: false,
 		catAwake: false,
 		openDrawer: null as WorkshopDrawer | null
 	});

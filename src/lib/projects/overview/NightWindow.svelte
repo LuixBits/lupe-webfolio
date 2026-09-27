@@ -19,14 +19,6 @@
 				<circle cx="392" cy="86" r="66" fill="white" />
 				<path d="M320 90h145m-145 13h145m-145 17h145m-145 20h145" stroke="black" stroke-width="5" />
 			</mask>
-			<pattern id={`${id}-rain`} width="67" height="90" patternUnits="userSpaceOnUse">
-				<path
-					d="m30 0-7 20m40 26-12 33m-42 9-5 15"
-					stroke="#9fe9f2"
-					stroke-opacity=".3"
-					stroke-width="1.5"
-				/>
-			</pattern>
 		</defs>
 		<path d="M0 0h540v300H0Z" fill={`url(#${id}-dusk)`} />
 		<circle cx="392" cy="86" r="66" fill={`url(#${id}-sun)`} mask={`url(#${id}-sun-stripes)`} />
@@ -61,15 +53,6 @@
 			d="M80 118h10v14H80m20-14h10v14h-10m194-8h9v13h-9m130 0h13v19h-13m-89 36h9v17h-9m-197 35h12v14h-12"
 			fill="#ffb5d4"
 			opacity=".7"
-		/>
-		<rect
-			class="rain"
-			data-workshop-animated
-			x="-70"
-			y="-90"
-			width="680"
-			height="480"
-			fill={`url(#${id}-rain)`}
 		/>
 		<path d="M0 280 500 0h120L70 300Z" fill="#cce3e8" opacity=".05" />
 	</svg>

@@ -34,7 +34,7 @@
 <div
 	class="page workshop-overview"
 	class:cool={!roomState.lampOn}
-	class:motion-enabled={ready && visible && !reduced && !roomState.paused && !navigation.moving}
+	class:motion-enabled={ready && visible && !reduced && !navigation.moving}
 	data-workshop-room
 >
 	<div class="ceiling" aria-hidden="true"></div>
@@ -45,16 +45,6 @@
 				<span class="workshop-sr-only">{m.nav_projects()}</span><NeonSign text={m.nav_projects()} />
 			</h1>
 		</div>
-		<p>{m.projects_intro()}</p>
-		<button
-			class="motion-switch"
-			type="button"
-			disabled={!ready || reduced}
-			aria-pressed={roomState.paused}
-			onclick={() => (roomState.paused = !roomState.paused)}
-		>
-			{roomState.paused ? m.workshop_motion_resume() : m.workshop_motion_pause()}
-		</button>
 	</header>
 	{@render children()}
 	<WorkshopFloor {ready} />

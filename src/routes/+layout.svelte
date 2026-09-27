@@ -187,13 +187,27 @@
 	}
 	.app.overview {
 		position: relative;
+		--workshop-max-width: 1600px;
+		--workshop-gutter: max(0px, calc((100vw - var(--workshop-max-width)) / 2));
 		--bg: #24153c;
 		--footer-bar-bg: #180f29;
 		--fg-muted: #d6bfeb;
 	}
 	.overview main {
-		container-type: inline-size;
 		padding: 0;
+		width: 100%;
+		max-width: var(--workshop-max-width);
+		margin-inline: auto;
+	}
+	.overview :global(footer.overview) {
+		width: 100%;
+		max-width: var(--workshop-max-width);
+		margin-inline: auto;
+	}
+	.overview :global(footer.overview .bar) {
+		padding-left: calc(
+			clamp(1rem, 4vw, 2.5rem) + max(0px, var(--clear-l) - var(--workshop-gutter, 0px))
+		);
 	}
 	.navigation-placement {
 		z-index: 20;
@@ -208,6 +222,9 @@
 		}
 		.overview main {
 			padding: 0;
+		}
+		.overview :global(footer.overview .bar) {
+			padding-inline: clamp(1rem, 4vw, 2.5rem);
 		}
 	}
 	.app {
