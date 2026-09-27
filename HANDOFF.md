@@ -75,6 +75,17 @@ see the [responsive-room review](docs/reviews/projects-responsive-room-2026-09-2
 for the build, browser checks and temporary artifact paths. The published site
 has not been changed. Final visual approval remains with the owner.
 
+The [LuixBits studio refinement](docs/reviews/luixbits-studio-room-2026-09-27.md)
+brings `/projects/my-channel` into the same 2000px room, with perspective side
+walls, ceiling trim, floor, desk legs, stool and plant. Framed Tux and Neovim
+prints, Vim keycaps, a books/hardware shelf and a sunset print decorate the
+walls. The title uses the shared neon tubes. The studio gallery moves from the
+side walls to the upper wall and then into flow above the desk as space narrows.
+The player stacks below an 80rem room width; desktop content reserves space
+for the navigation wheel even at enlarged text sizes. Local artwork credits
+live beside the SVG assets. Both local previews contain this studio; the review
+records the isolated production build and browser checks.
+
 The [collections follow-up](docs/plans/projects-collections-drawers.md) adds
 Team Feed, RoomPlan, Flashcards, Noctalia Plugins and the upcoming Magic Mouse
 app. The wheel and physical workstations now group the nine entries into
@@ -183,11 +194,12 @@ real-provider playback observations.
   every craft a doorway — its own entry below). CV content lives in `lib/content/cv.ts`
   (`stations[]` + `vessels[]` + `cvPdf` + `scrolls[]`).
 - **LuixBits workbench** (`/projects/my-channel`, including localized routes)
-  keeps the Projects palette and CRT but has its own plaster wall, mounted
-  neon title, wooden desk, and cable footer. The root layout selects this
-  room; the overview has its own workshop entrance, and other detail routes
-  keep the rental-wall scenery. Artwork lives in
-  `lib/projects/workbench/`. `ChannelPlayer` binds the TV's `powered` state
+  uses `StudioRoom` for its 2000px shell, perspective walls and furnished floor.
+  `StudioWallDecor` adds Linux/Neovim prints, books and hardware; `ChannelPlayer`
+  retains the CRT, tape rack, desk and paper. The root layout selects this
+  room and its cable footer; other detail routes keep the rental-wall scenery.
+  Artwork lives in `lib/projects/workbench/`, with shared side walls, neon,
+  stool and plant from `overview/`. `ChannelPlayer` binds the TV's `powered` state
   to the blue wall glow; the desk lamp toggles its warm pool of light. The
   Casio is one keyboard-accessible button that loads the `casio-nixos` video,
   scrolls to the TV, and focuses Play. Loading a tape does not start a YouTube
