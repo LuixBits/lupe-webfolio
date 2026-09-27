@@ -1,7 +1,10 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { page } from '$app/state';
+	import { deLocalizeUrl } from '$lib/paraglide/runtime';
 	import type { ThemeName } from '$lib/themes';
 	import FooterWave from './footer/FooterWave.svelte';
+	import FooterJetty from './footer/FooterJetty.svelte';
 	import FooterGarden from './footer/FooterGarden.svelte';
 	import FooterVaporwave from './footer/FooterVaporwave.svelte';
 	import FooterCosmos from './footer/FooterCosmos.svelte';
@@ -43,8 +46,15 @@
 		vaporwave: FooterVaporwave,
 		cosmos: FooterCosmos
 	};
+	// The pond page ends on the jetty you stand on (»Der Anlegesteg«); the
+	// /cv/* deck and scroll pages, out on the water, keep the Hokusai wave.
+	const jetty = $derived(theme === 'water' && deLocalizeUrl(page.url).pathname === '/cv');
 	const Decoration = $derived(
-		variant === 'workbench' ? FooterWorkbench : (decorations[theme] ?? FooterGarden)
+		variant === 'workbench'
+			? FooterWorkbench
+			: jetty
+				? FooterJetty
+				: (decorations[theme] ?? FooterGarden)
 	);
 </script>
 
@@ -52,7 +62,9 @@
 	class="footer"
 	class:workbench={variant === 'workbench'}
 	class:overview={variant === 'overview'}
-	style="--bar-h:{barHeight}px; --wave-h:{waveHeight}px; --clear-l:{clearLeft}; --clear-r:{clearRight};"
+	style="--bar-h:{barHeight}px; --wave-h:{waveHeight}px; --clear-l:{clearLeft}; --clear-r:{clearRight};{jetty
+		? ' --footer-bar-bg:#241a10;'
+		: ''}"
 >
 	<!-- Theme decoration cresting above the bar. Purely decorative. -->
 	{#if variant !== 'overview'}
