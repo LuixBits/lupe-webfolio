@@ -90,11 +90,7 @@ interface TurtleState {
 }
 
 /** Generate plant geometry starting from (originX, originY). */
-export function growPlant(
-	originX: number,
-	originY: number,
-	opts: LSystemOptions
-): Plant {
+export function growPlant(originX: number, originY: number, opts: LSystemOptions): Plant {
 	const { axiom, rules, angle, iterations, step } = opts;
 	const heading = opts.heading ?? 0;
 	const jitter = opts.jitter ?? 0;
@@ -160,6 +156,21 @@ export const BRANCH_PRESET: Omit<LSystemOptions, 'seed'> = {
 	step: 6,
 	heading: 0,
 	jitter: 6
+};
+
+/** A tall, narrow strand with blades alternating up a gently S-curved stipe —
+ *  underwater kelp. Params picked by bbox scan (see docs/plans/cv-koi-dive.md
+ *  Phase 0): h ≈ 265–295, w ≈ 50–62, 10 blades, 25 segments per strand. */
+export const KELP_PRESET: Omit<LSystemOptions, 'seed'> = {
+	axiom: 'X',
+	rules: {
+		X: 'F+F[+L]F-F[-L]FX'
+	},
+	angle: 14,
+	iterations: 5,
+	step: 11,
+	heading: 0,
+	jitter: 4
 };
 
 /** Same grammar aimed downward with a wider fan — roots creeping into a corner. */

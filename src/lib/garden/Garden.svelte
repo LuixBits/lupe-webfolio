@@ -1,5 +1,12 @@
 <script lang="ts">
-	import { growPlant, hashSeed, BRANCH_PRESET, ROOT_PRESET, type Plant } from './lsystem';
+	import {
+		growPlant,
+		hashSeed,
+		BRANCH_PRESET,
+		KELP_PRESET,
+		ROOT_PRESET,
+		type Plant
+	} from './lsystem';
 
 	let {
 		seed = 'lupe',
@@ -23,7 +30,7 @@
 		originX?: number;
 		originY?: number;
 		/** 'branch' grows up with leaves, 'root' creeps down into the corner. */
-		variant?: 'branch' | 'root';
+		variant?: 'branch' | 'root' | 'kelp';
 		/** Initial growth direction in degrees (0 = up, clockwise). Overrides the
 		 *  preset — used to aim growth into the viewport from a docked corner. */
 		heading?: number;
@@ -43,7 +50,9 @@
 		strokeWidth?: number;
 	} = $props();
 
-	const preset = $derived(variant === 'root' ? ROOT_PRESET : BRANCH_PRESET);
+	const preset = $derived(
+		variant === 'root' ? ROOT_PRESET : variant === 'kelp' ? KELP_PRESET : BRANCH_PRESET
+	);
 	const plant = $derived<Plant>(
 		growPlant(originX, originY, {
 			...preset,

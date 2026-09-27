@@ -2,9 +2,12 @@
 	import { onMount } from 'svelte';
 	import { hashSeed, rng } from '$lib/garden/lsystem';
 	import { prefersReducedMotion } from '$lib/garden/reveal';
-	import { smoothOpen, type Pt } from '$lib/garden/tree/generate';
+	import { smoothOpen, taperedBranch, type Pt } from '$lib/garden/tree/generate';
+	import Garden from '$lib/garden/Garden.svelte';
+	import Koi from '../Koi.svelte';
+	import type { KoiRobe } from '../koi';
 	import Seigaiha from '../Seigaiha.svelte';
-	import { ropeGeometry, leadPath, cordPath } from './generate';
+	import { ropeGeometry, leadPath, cordPath, ellipseLoop } from './generate';
 
 	let {
 		seed = 'cv-dive',
@@ -80,10 +83,51 @@
 		pads: { x: number; y: number; s: number; rot: number; edge?: boolean; delay: number }[];
 	}
 
+	interface KoiCast {
+		gate: string;
+		robe: KoiRobe;
+		scale: number;
+		path: string;
+		dur: number;
+		rest: string;
+		delay: number;
+		wag: number;
+	}
+	interface Lantern {
+		x: number;
+		y: number;
+		s: number;
+		gate: string;
+	}
+
 	let root = $state<HTMLDivElement | null>(null);
 	let W = $state(0);
 	let H = $state(0);
 	let surface = $state<Surface | null>(null);
+	let koiCast = $state<KoiCast[]>([]);
+	let school = $state<{ path: string; gate: string } | null>(null);
+	let fry = $state<{ path: string; gate: string } | null>(null);
+	let lanterns = $state<Lantern[]>([]);
+	let glowPools = $state<{ cx: number; cy: number; rx: number; ry: number; gate: string }[]>([]);
+	let crossTies = $state<{ d: string; gate: string }[]>([]);
+	let algae = $state<{ x: number; y: number; d: string }[]>([]);
+	let bubbleCols = $state<{ d: string; dur: number; delay: number }[]>([]);
+	let ringset = $state<{ x: number; y: number } | null>(null);
+	let stems = $state<{ d: string; tx: number; ty: number; tuft: string }[]>([]);
+	let kelpBeds = $state<
+		{
+			x: number;
+			y: number;
+			seed: string;
+			step: number;
+			flip: boolean;
+			stem: string;
+			leaf: string;
+			gate: string;
+			sway: number;
+			sdel: number;
+		}[]
+	>([]);
 	let atmoStops = $state<{ o: number; c: string }[]>([]);
 	let ropeD = $state('');
 	let ropeHiD = $state('');
@@ -346,6 +390,298 @@
 		flush();
 		knots = ks;
 		cords = cs;
+
+		// ---------- life: koi cast, kelp, school, fry, lanterns, ties ----------
+		{
+			const siga = a['st-siga-dev'];
+			const tra = a['st-siga-trainee'];
+			const ma = a['st-hslu-ma'];
+			const bsc = a['st-hslu-bsc'];
+			const nep = a['st-neptun'];
+			const arm = a['st-armee'];
+			const efz = a['st-efz'];
+			const leh = a['st-emvs-lehre'];
+			const bmA = a['st-bm'];
+
+			// koi cast: era by size and robe — the biggest kohaku circles the
+			// newest station, twilight swims asagi, the deep is left to the fry
+			const cast: KoiCast[] = [];
+			const cx0 = (x: number) => Math.min(W - 70, Math.max(70, x));
+			const addKoi = (
+				gate: string,
+				robe: KoiRobe,
+				scale: number,
+				cx: number,
+				cy: number,
+				rx: number,
+				ry: number,
+				dur: number,
+				rest: string,
+				delay = 0
+			) => {
+				const x = cx0(cx);
+				cast.push({
+					gate,
+					robe,
+					scale,
+					path: ellipseLoop(x, cy, Math.max(50, Math.min(rx, x - 40, W - 40 - x)), ry),
+					dur,
+					rest,
+					delay,
+					wag: 1.7 + scale
+				});
+			};
+			if (siga)
+				addKoi(
+					'siga-dev',
+					'kohaku',
+					1.02,
+					central ? siga.x0 - 250 : W * 0.42,
+					siga.y0 + 44,
+					175,
+					54,
+					78,
+					'12%'
+				);
+			if (tra) addKoi('siga-trainee', 'hi', 0.6, tra.cx, tra.y1 + 66, 165, 38, 58, '55%', -21);
+			if (ma) {
+				addKoi(
+					'hslu-ma',
+					'asagi',
+					0.56,
+					central ? ma.x0 - 130 : W * 0.3,
+					ma.cy,
+					110,
+					30,
+					64,
+					'30%',
+					-9
+				);
+				addKoi(
+					'hslu-ma',
+					'asagi',
+					0.48,
+					lineXAt(ma.y0 - 66) + 40,
+					ma.y0 - 64,
+					140,
+					26,
+					70,
+					'72%',
+					-33
+				);
+			}
+			if (arm)
+				addKoi(
+					'armee',
+					'hi',
+					0.42,
+					central ? arm.x0 - 140 : W * 0.34,
+					arm.cy + 8,
+					95,
+					24,
+					52,
+					'40%',
+					-12
+				);
+			koiCast = cast;
+
+			// the fish school: five silhouettes, ONE shared loop
+			school = bsc
+				? {
+						path: ellipseLoop(cx0(lineXAt(bsc.y1 + 70)), bsc.y1 + 66, central ? 230 : 130, 42),
+						gate: 'hslu-bsc'
+					}
+				: null;
+			// the fry cluster, near the bottom of everything
+			fry =
+				efz && bmA
+					? {
+							path: ellipseLoop(
+								cx0(lineXAt((efz.y0 + bmA.y1) / 2)),
+								(efz.y0 + bmA.y1) / 2,
+								central ? 120 : 90,
+								70
+							),
+							gate: 'efz'
+						}
+					: null;
+
+			// tōrō lanterns: one at the twilight band, two lighting the midnight trio
+			const lts: Lantern[] = [];
+			const lx = (x: number) => Math.min(W - 42, Math.max(42, x));
+			if (bsc)
+				lts.push({
+					x: lx(central ? bsc.x0 - 95 : W - 64),
+					y: bsc.y1 + 6,
+					s: 0.92,
+					gate: 'hslu-bsc'
+				});
+			if (efz)
+				lts.push({ x: lx(central ? efz.x0 - 88 : W - 58), y: efz.y1 + 8, s: 1, gate: 'efz' });
+			if (leh)
+				lts.push({
+					x: lx(central ? leh.x1 + 64 : W - 92),
+					y: leh.y1 + 30,
+					s: 0.82,
+					gate: 'emvs-lehre'
+				});
+			lanterns = lts;
+
+			// warm glow pools behind the midnight slips (paper lit by the tōrō)
+			glowPools = (
+				[
+					[efz, 'efz'],
+					[bmA, 'bm'],
+					[leh, 'emvs-lehre']
+				] as [Anchor | undefined, string][]
+			)
+				.filter((g2): g2 is [Anchor, string] => !!g2[0])
+				.map(([s2, gate]) => ({
+					cx: f(s2.cx),
+					cy: f(s2.cy),
+					rx: f((s2.x1 - s2.x0) * 0.74),
+					ry: f((s2.y1 - s2.y0) * 0.95),
+					gate
+				}));
+
+			// cross-currents: a faint bubble-trail arc tying each concurrent pair
+			const tiesL: { d: string; gate: string }[] = [];
+			const tie = (l: Anchor, r: Anchor, gate: string) => {
+				if (!central) return;
+				const y0b = Math.max(l.y0, r.y0) + 24;
+				tiesL.push({
+					d: `M ${f(l.x1 + 8)} ${f(y0b + 14)} Q ${f((l.x1 + r.x0) / 2)} ${f(y0b - 36)} ${f(r.x0 - 8)} ${f(y0b + 6)}`,
+					gate
+				});
+			};
+			if (ma && tra) tie(ma, tra, 'hslu-ma');
+			if (bsc && nep) tie(bsc, nep, 'hslu-bsc');
+			crossTies = tiesL;
+
+			// the rope grows algae wisps below ~58% depth — the line ages
+			const alg: { x: number; y: number; d: string }[] = [];
+			const aTop = waterY + (bedY - waterY) * 0.58;
+			const nAlg = 9;
+			for (let i = 0; i < nAlg; i++) {
+				const y = aTop + ((bedY - 70 - aTop) * i) / (nAlg - 1) + (rand() * 2 - 1) * 18;
+				const side = i % 2 === 0 ? 1 : -1;
+				const g2 = taperedBranch(
+					rand,
+					90 * side + (rand() * 2 - 1) * 30,
+					9 + rand() * 11,
+					3,
+					0.8,
+					5
+				);
+				alg.push({ x: f(lineXAt(y) + side * 1.5), y: f(y), d: g2.d });
+			}
+			algae = alg;
+
+			// two dashed bubble columns rising through the midnight zone —
+			// dozens of bubbles for two paths (dashoffset loop)
+			const cols: { d: string; dur: number; delay: number }[] = [];
+			if (efz && bmA) {
+				for (const [k, off] of [
+					[0, central ? -190 : -60],
+					[1, central ? 205 : 70]
+				] as const) {
+					const bx = cx0(lineXAt(efz.cy) + off);
+					const yB = bmA.y1 + 60;
+					const yT = efz.y0 - 110;
+					const pts: Pt[] = [];
+					for (let i2 = 0; i2 <= 8; i2++) {
+						const t = i2 / 8;
+						pts.push({ x: bx + Math.sin(t * 5 + k * 2) * 9, y: yB + (yT - yB) * t });
+					}
+					cols.push({ d: `M${smoothOpen(pts)}`, dur: 8 + k * 2.6, delay: -k * 3.2 });
+				}
+			}
+			bubbleCols = cols;
+
+			// quiet surface rings near the first pad
+			ringset = surface ? { x: cx0(surface.boatX - 350), y: waterY + 7 } : null;
+
+			// lily stems dangling from the floating pads, root tufts at the tips
+			const stm: { d: string; tx: number; ty: number; tuft: string }[] = [];
+			if (surface) {
+				for (const pd of surface.pads.filter((p2) => !p2.edge)) {
+					for (const dx of [-8, 7]) {
+						const len = 60 + rand() * 55;
+						const sway = (rand() * 2 - 1) * 22;
+						const ex = pd.x + dx + sway;
+						const ey = pd.y + len;
+						stm.push({
+							d: `M ${f(pd.x + dx)} ${f(pd.y + 4)} C ${f(pd.x + dx + sway * 0.3)} ${f(pd.y + len * 0.4)} ${f(ex - sway * 0.4)} ${f(pd.y + len * 0.7)} ${f(ex)} ${f(ey)}`,
+							tx: f(ex),
+							ty: f(ey),
+							tuft: `M -4 0 q 4 ${f(3 + rand() * 3)} 8 0 M -3 2 q 3 ${f(2 + rand() * 2)} 6 0`
+						});
+					}
+				}
+			}
+			stems = stm;
+
+			// kelp beds bracketing the column (flanks on desktop, the free right
+			// edge on narrow layouts), taller and darker with depth
+			const beds: typeof kelpBeds = [];
+			const flankL = central ? wrap.x0 / 2 - 70 : -999;
+			const flankR = central ? (wrap.x1 + W) / 2 - 60 : W - 130;
+			const bed = (
+				x: number,
+				yBottom: number,
+				seed2: string,
+				step: number,
+				flip: boolean,
+				stem: string,
+				leaf: string,
+				gate: string,
+				sdel: number
+			) => {
+				if (x < -140 || x > W - 20) return;
+				beds.push({
+					x: f(x),
+					y: f(yBottom - 310),
+					seed: seed2,
+					step,
+					flip,
+					stem,
+					leaf,
+					gate,
+					sway: 8 + Math.abs(sdel),
+					sdel
+				});
+			};
+			const upStem = '#2f7d72';
+			const upLeaf = 'rgba(70, 152, 132, 0.85)';
+			const dpStem = '#1f5c55';
+			const dpLeaf = 'rgba(48, 118, 104, 0.85)';
+			if (ma) {
+				bed(flankL - 40, ma.y1 + 60, 'dive-kelp-a', 10, false, upStem, upLeaf, 'hslu-ma', 0);
+				if (central)
+					bed(
+						flankR + 20,
+						ma.y1 + 80,
+						'dive-kelp-b',
+						11.5,
+						true,
+						upStem,
+						upLeaf,
+						'siga-trainee',
+						-2.6
+					);
+			}
+			if (bsc) {
+				bed(flankL - 90, bsc.y1 + 90, 'dive-kelp-c', 12, true, dpStem, dpLeaf, 'hslu-bsc', -1.2);
+				if (central) {
+					bed(flankL + 60, bsc.y1 + 60, 'dive-kelp-d', 9, false, dpStem, dpLeaf, 'hslu-bsc', -3.8);
+					bed(flankR - 50, bsc.y1 + 76, 'dive-kelp-e', 11, false, dpStem, dpLeaf, 'neptun', -5);
+					bed(flankR + 70, bsc.y1 + 50, 'dive-kelp-f', 8.5, true, dpStem, dpLeaf, 'neptun', -2);
+				} else {
+					bed(flankR, bsc.y1 + 60, 'dive-kelp-e', 9.5, true, dpStem, dpLeaf, 'neptun', -4);
+				}
+			}
+			kelpBeds = beds;
+		}
 	}
 
 	const isOn = (key: string) => instant || (key === 'surface' ? arrive : !!grown[key]);
@@ -542,6 +878,15 @@
 						{/each}
 					</linearGradient>
 					<Seigaiha pid="{uid}-sg" />
+					<radialGradient id="{uid}-pool">
+						<stop offset="0" stop-color="#ffcf6e" stop-opacity="0.17" />
+						<stop offset="0.6" stop-color="#f2a94e" stop-opacity="0.08" />
+						<stop offset="1" stop-color="#f2a94e" stop-opacity="0" />
+					</radialGradient>
+					<radialGradient id="{uid}-lglow">
+						<stop offset="0" stop-color="#ffd98c" stop-opacity="0.5" />
+						<stop offset="1" stop-color="#ffd98c" stop-opacity="0" />
+					</radialGradient>
 					<linearGradient id="{uid}-ray" x1="0" y1="0" x2="0" y2="1">
 						<stop offset="0" stop-color="#ffffff" stop-opacity="0.5" />
 						<stop offset="0.75" stop-color="#ffffff" stop-opacity="0" />
@@ -634,6 +979,106 @@
 					</g>
 				{/if}
 
+				<!-- warm tōrō light pooling behind the midnight slips -->
+				{#each glowPools as gp, i (i)}
+					<g class="zone" class:on={isOn(gp.gate)}>
+						<ellipse
+							class="glow-pool fade"
+							cx={gp.cx}
+							cy={gp.cy}
+							rx={gp.rx}
+							ry={gp.ry}
+							fill="url(#{uid}-pool)"
+						/>
+					</g>
+				{/each}
+
+				{#if ringset}
+					<!-- quiet rings settling on the surface -->
+					<g class="zone" class:on={isOn('surface')}>
+						<g transform="translate({ringset.x} {ringset.y})">
+							<ellipse class="ring" rx="38" ry="10" style="--rd:0s" />
+							<ellipse class="ring" rx="38" ry="10" style="--rd:3.6s" />
+						</g>
+					</g>
+				{/if}
+
+				<!-- lily stems trailing down from the pads, root tufts at the tips -->
+				<g class="zone" class:on={isOn('surface')}>
+					{#each stems as st2, i (i)}
+						<g class="fade" style="--gd:{500 + i * 120}ms">
+							<path class="stem-line" d={st2.d} />
+							<g transform="translate({st2.tx} {st2.ty})">
+								<path class="stem-tuft" d={st2.tuft} />
+							</g>
+						</g>
+					{/each}
+				</g>
+
+				<!-- cross-currents tying each concurrent pair of stations -->
+				{#each crossTies as t, i (i)}
+					<g class="zone" class:on={isOn(t.gate)}>
+						<path class="cross-tie fade" d={t.d} />
+					</g>
+				{/each}
+
+				<!-- the koi cast: era by size — kohaku at today, asagi in twilight -->
+				{#each koiCast as k, i (i)}
+					<g class="zone" class:on={isOn(k.gate)}>
+						<g class="fade" style="--gd:300ms">
+							<Koi
+								robe={k.robe}
+								scale={k.scale}
+								wag={k.wag}
+								motion="tail"
+								shadow={false}
+								swim={{ path: k.path, dur: k.dur, rest: k.rest, delay: k.delay }}
+							/>
+						</g>
+					</g>
+				{/each}
+
+				<!-- the twilight school: five silhouettes, one shared loop -->
+				{#if school}
+					<g class="zone" class:on={isOn(school.gate)}>
+						<g class="fade" style="--gd:350ms">
+							<g
+								class="shoal-mover"
+								style="offset-path: path('{school.path}'); --swim:96s; --rest:22%"
+							>
+								{#each [[0, 0, 1], [20, -9, 0.9], [38, 5, 0.82], [15, 11, 0.78], [33, -16, 0.7]] as [fx, fy, fs], i2 (i2)}
+									<g transform="translate({fx} {fy}) scale({fs})">
+										<path
+											class="shoal-fish"
+											d="M8 0C8 -2.6 4.4 -4.4 0 -4.4C-3.6 -4.4 -6.6 -2.4 -7.6 0C-6.6 2.4 -3.6 4.4 0 4.4C4.4 4.4 8 2.6 8 0Z"
+										/>
+										<path class="shoal-fish" d="M-7 0L-11.5 -3.5C-10.4 -1.4 -10.4 1.4 -11.5 3.5Z" />
+									</g>
+								{/each}
+							</g>
+						</g>
+					</g>
+				{/if}
+
+				<!-- fry, hatched where everything began -->
+				{#if fry}
+					<g class="zone" class:on={isOn(fry.gate)}>
+						<g class="fade" style="--gd:400ms">
+							<g
+								class="shoal-mover"
+								style="offset-path: path('{fry.path}'); --swim:110s; --rest:64%"
+							>
+								{#each [[0, 0], [11, -5], [21, 3], [8, 7], [17, -10], [27, -3]] as [fx, fy], i2 (i2)}
+									<g transform="translate({fx} {fy})">
+										<ellipse class="fry-b" rx="3.2" ry="1.5" />
+										<path class="fry-b" d="M-3 0L-5.4 -1.6C-4.9 -0.6 -4.9 0.6 -5.4 1.6Z" />
+									</g>
+								{/each}
+							</g>
+						</g>
+					</g>
+				{/if}
+
 				<!-- tie cords: each washi slip hangs off the line -->
 				{#each cords as c, i (i)}
 					<g class="zone" class:on={isOn(c.gate)}>
@@ -660,6 +1105,11 @@
 							{/if}
 						</g>
 					{/each}
+					{#each algae as al, i (i)}
+						<g transform="translate({al.x} {al.y})">
+							<path class="algae" d={al.d} />
+						</g>
+					{/each}
 					{#if leadPos}
 						<g transform="translate({leadPos.x} {leadPos.y - 17})">
 							<path class="lead" d={leadPath(1.15)} />
@@ -667,6 +1117,33 @@
 						</g>
 					{/if}
 				</g>
+
+				<!-- sunken stone lanterns, their fireboxes still warm -->
+				{#each lanterns as lt, i (i)}
+					<g class="zone" class:on={isOn(lt.gate)}>
+						<g transform="translate({lt.x} {lt.y}) scale({lt.s})">
+							<g class="grow" style="--gd:200ms">
+								<circle class="lantern-glow" cy="-33" r="30" fill="url(#{uid}-lglow)" />
+								<path class="toro-stone" d="M -13 0 L 13 0 L 10 -6 L -10 -6 Z" />
+								<path class="toro-stone" d="M -3.5 -6 L 3.5 -6 L 3 -22 L -3 -22 Z" />
+								<path class="toro-stone" d="M -8 -22 L 8 -22 L 6.5 -27 L -6.5 -27 Z" />
+								<path class="toro-box" d="M -7 -27 L 7 -27 L 7 -40 L -7 -40 Z" />
+								<path class="toro-window" d="M -3.6 -29 L 3.6 -29 L 3.6 -38 L -3.6 -38 Z" />
+								<path
+									class="toro-roof"
+									d="M -14 -40 C -8 -48 8 -48 14 -40 C 8 -43.5 -8 -43.5 -14 -40 Z"
+								/>
+								<path class="toro-curl" d="M -14 -40 q -2.5 -1 -3 -3.4 M 14 -40 q 2.5 -1 3 -3.4" />
+								<circle class="toro-hoju" cy="-49.5" r="2.5" />
+							</g>
+						</g>
+					</g>
+				{/each}
+
+				<!-- two dashed bubble columns: dozens of bubbles for two paths -->
+				{#each bubbleCols as bc, i (i)}
+					<path class="bubble-col" d={bc.d} style="--bdur:{bc.dur}s; --bdel:{bc.delay}s" />
+				{/each}
 
 				{#if surface}
 					<!-- the skiff (over the rope's top), the standing gate, the pads -->
@@ -718,6 +1195,30 @@
 		<!-- two soft caustic light patches drifting near the surface -->
 		<div class="caustic ca1" style="left:{surface.boatX - 330}px; top:{waterYS + 30}px"></div>
 		<div class="caustic ca2" style="left:{surface.toriiX - 60}px; top:{waterYS + 120}px"></div>
+		<!-- kelp beds bracketing the column, deterministic L-system strands -->
+		{#each kelpBeds as b (b.seed)}
+			<div
+				class="kelp-bed"
+				class:flip={b.flip}
+				style="left:{b.x}px; top:{b.y}px; --garden-stem:{b.stem}; --garden-leaf:{b.leaf}"
+			>
+				<div class="kelp-sway" style="--sd:{b.sway}s; --sdel:{b.sdel}s">
+					<Garden
+						seed={b.seed}
+						width={130}
+						height={310}
+						originX={65}
+						originY={304}
+						variant="kelp"
+						step={b.step}
+						leafScale={0.85}
+						strokeWidth={3.2}
+						duration={3400}
+						start={instant || !!grown[b.gate]}
+					/>
+				</div>
+			</div>
+		{/each}
 	{/if}
 </div>
 
@@ -970,6 +1471,119 @@
 		stroke: none;
 	}
 
+	/* ---- life ---- */
+	.glow-pool {
+		pointer-events: none;
+	}
+	.ring {
+		fill: none;
+		stroke: #e8f6f9;
+		stroke-width: 1.5;
+		opacity: 0;
+		transform-box: fill-box;
+		transform-origin: center;
+	}
+	.instant .ring {
+		opacity: 0.16;
+		transform: scale(0.7);
+	}
+	.stem-line {
+		fill: none;
+		stroke: #35664f;
+		stroke-width: 1.6;
+		stroke-linecap: round;
+		opacity: 0.7;
+	}
+	.stem-tuft {
+		fill: none;
+		stroke: #2c5642;
+		stroke-width: 1.1;
+		stroke-linecap: round;
+		opacity: 0.8;
+	}
+	.cross-tie {
+		fill: none;
+		stroke: #cdeef6;
+		stroke-width: 2.2;
+		stroke-linecap: round;
+		stroke-dasharray: 0 9;
+		opacity: 0.4;
+	}
+	.shoal-mover {
+		offset-rotate: auto;
+		offset-distance: var(--rest, 0%);
+	}
+	.shoal-fish {
+		fill: #123a49;
+		opacity: 0.55;
+	}
+	.fry-b {
+		fill: #bfe4ef;
+		opacity: 0.6;
+	}
+	.algae {
+		fill: #2f5a4c;
+		opacity: 0.9;
+	}
+	.toro-stone {
+		fill: #45525c;
+		stroke: #29333b;
+		stroke-width: 1;
+		stroke-linejoin: round;
+	}
+	.toro-box {
+		fill: #505f6a;
+		stroke: #29333b;
+		stroke-width: 1;
+	}
+	.toro-window {
+		fill: #ffd98c;
+		opacity: 0.9;
+	}
+	.toro-roof {
+		fill: #3c4650;
+		stroke: #29333b;
+		stroke-width: 1;
+		stroke-linejoin: round;
+	}
+	.toro-curl {
+		fill: none;
+		stroke: #3c4650;
+		stroke-width: 2;
+		stroke-linecap: round;
+	}
+	.toro-hoju {
+		fill: #556270;
+		stroke: #29333b;
+		stroke-width: 0.8;
+	}
+	.lantern-glow {
+		pointer-events: none;
+	}
+	.bubble-col {
+		fill: none;
+		stroke: #cdeef6;
+		stroke-width: 2.6;
+		stroke-linecap: round;
+		stroke-dasharray: 0 27;
+		opacity: 0.38;
+	}
+
+	/* ---- kelp beds (HTML layer over the svg, still behind the cards) ---- */
+	.kelp-bed {
+		position: absolute;
+		width: 130px;
+		height: 310px;
+	}
+	.kelp-bed.flip {
+		transform: scaleX(-1);
+	}
+	.kelp-sway {
+		width: 100%;
+		height: 100%;
+		transform-origin: 50% 100%;
+	}
+
 	/* ---- caustic light, drifting slow ---- */
 	.caustic {
 		position: absolute;
@@ -1045,6 +1659,55 @@
 		}
 		.zone.on .plunge-b {
 			animation: dv-plunge-b 1.25s ease-out var(--pd, 0ms) forwards;
+		}
+		.shoal-mover {
+			animation: dv-swim var(--swim, 90s) linear infinite;
+		}
+		.ring {
+			animation: dv-ringpulse 8s ease-out var(--rd, 0s) infinite;
+		}
+		.bubble-col {
+			animation: dv-bubbleflow var(--bdur, 9s) linear var(--bdel, 0s) infinite;
+		}
+		.kelp-sway {
+			animation: dv-kelp var(--sd, 8s) ease-in-out var(--sdel, 0s) infinite alternate;
+		}
+	}
+	@keyframes dv-swim {
+		from {
+			offset-distance: 0%;
+		}
+		to {
+			offset-distance: 100%;
+		}
+	}
+	@keyframes dv-ringpulse {
+		0% {
+			transform: scale(0.2);
+			opacity: 0;
+		}
+		10% {
+			opacity: 0.45;
+		}
+		70% {
+			opacity: 0.12;
+		}
+		100% {
+			transform: scale(1.2);
+			opacity: 0;
+		}
+	}
+	@keyframes dv-bubbleflow {
+		to {
+			stroke-dashoffset: -162;
+		}
+	}
+	@keyframes dv-kelp {
+		from {
+			transform: rotate(-1.5deg);
+		}
+		to {
+			transform: rotate(1.6deg);
 		}
 	}
 	@keyframes dv-bob {

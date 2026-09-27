@@ -12,7 +12,8 @@
 		scale = 1,
 		wag = 2,
 		swim,
-		shadow = true
+		shadow = true,
+		motion = 'full'
 	}: {
 		robe?: KoiRobe;
 		scale?: number;
@@ -21,6 +22,8 @@
 		/** A closed CSS offset-path loop to swim; dur in seconds. */
 		swim?: { path: string; dur: number; rest: string; delay?: number };
 		shadow?: boolean;
+		/** 'full' wags tail + fins; 'tail' keeps only the tail (cheap crowds). */
+		motion?: 'full' | 'tail';
 	} = $props();
 
 	const uid = $props.id();
@@ -28,7 +31,12 @@
 </script>
 
 {#snippet fig()}
-	<g class="koi" transform="scale({scale})" style="--wag:{wag}s">
+	<g
+		class="koi"
+		class:koi--tail={motion === 'tail'}
+		transform="scale({scale})"
+		style="--wag:{wag}s"
+	>
 		{#if shadow}
 			<radialGradient id="{uid}-ks">
 				<stop offset="0" stop-color="var(--water-deep, #2b9cba)" stop-opacity="0.22" />
@@ -124,6 +132,9 @@
 		}
 		.fin-l {
 			animation-delay: calc(var(--wag, 2s) * -0.8);
+		}
+		.koi--tail .koi-fin {
+			animation: none;
 		}
 	}
 	@keyframes koi-swim {
