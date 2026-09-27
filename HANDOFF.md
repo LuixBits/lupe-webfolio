@@ -46,15 +46,23 @@ on dev/build; if `$lib/paraglide/*` is missing run
 The [inhabited workshop plan](docs/plans/projects-inhabited-workshop.md) is now
 integrated into the real `/projects` route. The owner rejected the earlier
 compact overview and later asked to restore its relationship to the vaporwave
-hub tile. The room now fills the page: studio doorway, sunset window, portfolio
+hub tile. The room contains a studio doorway, sunset window, portfolio
 model, shared project workstations, then drawers, stool, rug, plant
 and cat. Violet walls, magenta neon, cyan reflections and a perspective floor
 grid retain the Projects palette alongside the wooden furniture.
 
+The [ultrawide refinement](docs/reviews/projects-ultrawide-2026-09-27.md) caps
+the room and footer at **1600px**, centred within the full-width wall. The cap
+is `--workshop-max-width` in the root layout; narrower screens remain fluid.
+Wheel clearance decreases as the outside gutters grow, keeping the room balanced.
+Responsive queries belong to the room itself so departure snapshots retain its
+composition. The heading now contains only the neon sign. The subtitle, motion
+button and animated rain were removed at the owner's request.
+
 **Use <http://localhost:5173/projects>**, or `/de/projects`, for the current
 shared development preview. The old standalone study redirects here. The local
 production preview at <http://localhost:5191/projects> also contains this room;
-see the [workstation review](docs/reviews/projects-stations-2026-09-27.md)
+see the [ultrawide review](docs/reviews/projects-ultrawide-2026-09-27.md)
 for the build, browser checks and temporary artifact paths. The published site
 has not been changed. Final visual approval remains with the owner.
 
@@ -81,7 +89,9 @@ Web a recessed network cabinet with metal rails, a patch panel and lavender
 project labels. This is the implemented proposal for the owner's Web-setting
 discussion. Neovim has a deep cream terminal, green screen and purple split
 keyboard; Desktop has a slim widescreen, metal stand, tower, linked watch and
-glass mouse. These are original SVG illustrations. Narrow project labels stack
+glass mouse. The Defy was subsequently redrawn with deeper palm pads, a fuller
+key layout and curved thumb clusters using Dygma's photo as a reference. These
+are original SVG illustrations. Narrow project labels stack
 their emblem above the copy to preserve readable text at enlarged sizes.
 
 The [floor and typography refinement](docs/reviews/projects-floor-and-type-2026-09-27.md)
@@ -91,11 +101,12 @@ now reflows cassette labels, the channel masthead, desk objects and project
 sleeves. All Projects routes use the phone navigation ledge, so detail-page
 content and footer controls clear the wheel as well.
 
-Only visible ambient zones animate; hidden tabs, pause, route motion and reduced
-motion stop them. Static project links and drawer disclosures work without
+Only the visible cat and Orbit Toy animate; hidden tabs, route motion and reduced
+motion stop them. The sunset window is static and has no visibility observer.
+Static project links and drawer disclosures work without
 JavaScript. The desktop wheel clears the content; phones and short landscape
 screens use its normal-flow ledge. The channel player's controls retain their
-behavior. See the [workstation review](docs/reviews/projects-stations-2026-09-27.md)
+behavior. See the [ultrawide review](docs/reviews/projects-ultrawide-2026-09-27.md)
 for the current build and checks, and the
 [collections review](docs/reviews/projects-collections-2026-09-27.md) for earlier
 real-provider playback observations.

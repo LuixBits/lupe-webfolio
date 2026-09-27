@@ -96,4 +96,6 @@ add no flicker or animation loop.
 
 Implementation and validation are recorded in the
 [collections review](../reviews/projects-collections-2026-09-27.md) and the
-[workstation follow-up](../reviews/projects-stations-2026-09-27.md).
+[workstation follow-up](../reviews/projects-stations-2026-09-27.md). The later
+[ultrawide refinement](../reviews/projects-ultrawide-2026-09-27.md) caps the room
+at 1600px, redraws the Defy and removes the subtitle, rain and motion button.
