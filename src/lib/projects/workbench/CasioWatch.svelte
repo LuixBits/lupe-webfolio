@@ -82,6 +82,7 @@
 
 <style>
 	.casio-watch {
+		font: inherit;
 		position: relative;
 		display: block;
 		width: 8rem;

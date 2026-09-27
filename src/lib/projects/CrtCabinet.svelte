@@ -113,7 +113,7 @@
 		x="97"
 		y="441"
 		fill="#b2b5b9"
-		font-family="Arial,sans-serif"
+		font-family="var(--font-body)"
 		font-weight="bold"
 		font-size="11"
 		letter-spacing="2.5">LUPE</text
@@ -122,7 +122,7 @@
 		x="149"
 		y="441"
 		fill="#777d86"
-		font-family="Arial,sans-serif"
+		font-family="var(--font-body)"
 		font-size="5.5"
 		letter-spacing="1.2">STEREO · COLOUR MONITOR</text
 	>
@@ -141,9 +141,9 @@
 		x="431"
 		y="441"
 		fill="#a3a5ae"
-		font-family="Arial"
+		font-family="var(--font-body)"
 		font-size="8">−</text
-	><text x="459" y="441" fill="#a3a5ae" font-family="Arial" font-size="8">+</text>
+	><text x="459" y="441" fill="#a3a5ae" font-family="var(--font-body)" font-size="8">+</text>
 	<rect
 		x="489"
 		y="431"
@@ -154,8 +154,13 @@
 		stroke="#5a5d63"
 		stroke-width=".8"
 	/>
-	<text x="499" y="440" fill="#7e8590" font-family="Arial" font-size="5.5" letter-spacing="1"
-		>INPUT</text
+	<text
+		x="499"
+		y="440"
+		fill="#7e8590"
+		font-family="var(--font-body)"
+		font-size="5.5"
+		letter-spacing="1">INPUT</text
 	>
 	<circle cx="573" cy="437" r="4" fill="#161821" stroke="#444854" />
 	<path d="M63 465H125L122 478H61ZM520 461H582L582 474H523Z" fill="#13151b" stroke="#323640" />

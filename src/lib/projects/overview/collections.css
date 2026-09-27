@@ -17,6 +17,9 @@
 .workshop-overview .room-head h1 {
 	line-height: 1;
 }
+.workshop-overview .door h3 {
+	font-size: var(--fs-h3);
+}
 .workshop-overview .project-shelf {
 	min-width: 0;
 	display: flex;
@@ -266,12 +269,12 @@
 	padding: 6px 20px;
 }
 .workshop-overview .drawer-sketch .floor-plan {
-	max-width: 240px;
-	max-height: 230px;
+	max-width: 300px;
+	max-height: 260px;
 }
 .workshop-overview .sketch-pencil {
 	position: absolute;
-	right: 18%;
+	right: 9%;
 	top: 5%;
 	height: 85%;
 	width: 7px;
@@ -372,7 +375,26 @@
 	border-radius: 4px;
 }
 .workshop-overview .drawer-cabinet .stool {
-	left: 68%;
+	left: 63%;
+	width: 250px;
+	height: auto;
+	bottom: -54px;
+	transform: none;
+}
+.workshop-overview .drawer-cabinet .basket {
+	width: 165px;
+	right: 8%;
+	bottom: 8px;
+}
+.workshop-overview .floor .cat {
+	width: 270px;
+	top: 79px;
+}
+.workshop-overview .floor .plant {
+	right: 12px;
+	width: 240px;
+	height: auto;
+	bottom: 17px;
 }
 
 @container (max-width: 62rem) {
@@ -391,6 +413,14 @@
 	.workshop-overview .drawers.interactive-drawers {
 		margin-left: 9%;
 		width: 52%;
+	}
+	.workshop-overview .drawer-cabinet .stool {
+		width: 190px;
+		left: 64%;
+	}
+	.workshop-overview .drawer-cabinet .basket {
+		width: 130px;
+		right: 4%;
 	}
 }
 @media (max-width: 580px) {
@@ -446,13 +476,23 @@
 		border-width: 4px;
 	}
 	.workshop-overview .drawer-cabinet .stool {
-		left: 58%;
-		bottom: -42px;
-		height: 200px;
-		width: 110px;
+		left: 54%;
+		bottom: -32px;
+		width: 145px;
 	}
 	.workshop-overview .drawer-cabinet .basket {
-		bottom: 14px;
+		width: 108px;
+		bottom: 5px;
+	}
+	.workshop-overview .floor .cat {
+		width: 205px;
+		left: 9%;
+		top: 90px;
+	}
+	.workshop-overview .floor .plant {
+		width: 128px;
+		right: 0;
+		bottom: 44px;
 	}
 }
 @media (prefers-reduced-motion: reduce) {

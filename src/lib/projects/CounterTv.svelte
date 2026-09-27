@@ -523,9 +523,7 @@
 		right: 1.5%;
 		top: -2.5rem;
 		transform: rotate(-8deg);
-		font:
-			italic var(--fs-body) Georgia,
-			serif;
+		font: italic var(--fs-body) / var(--lh-body) var(--font-body);
 		color: #f7d89c;
 		z-index: 5;
 		pointer-events: none;
@@ -551,6 +549,7 @@
 	}
 	.transport {
 		display: flex;
+		flex-wrap: wrap;
 		gap: 0.35rem;
 		align-items: center;
 	}
@@ -566,6 +565,7 @@
 		padding: 5px;
 	}
 	.display {
+		font-family: var(--font-body);
 		margin-left: auto;
 		padding: 0.4rem 0.6rem;
 		color: #a3ebc6;
@@ -575,6 +575,7 @@
 		font-size: var(--fs-small);
 		text-shadow: 0 0 8px #a3ebc633;
 		white-space: nowrap;
+		max-width: 100%;
 	}
 	.hardware {
 		display: inline-flex;

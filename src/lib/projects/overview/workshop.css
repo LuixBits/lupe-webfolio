@@ -590,7 +590,7 @@
 	height: 360px;
 	left: 50%;
 	bottom: -60px;
-	transform: rotate(-7deg);
+	transform: none;
 	z-index: 1;
 }
 .workshop-overview .basket {
@@ -629,22 +629,15 @@
 	top: 60px;
 	height: 190px;
 	transform: skewX(-9deg);
-	background: repeating-linear-gradient(0deg, transparent 0 7px, #241e291a 8px), #785677;
-	border: 12px solid #413550;
-	outline: 3px solid #b587b8;
-	box-shadow: 0 13px 11px #211d2d77;
+	background: repeating-linear-gradient(0deg, transparent 0 3px, #241e291a 4px), #71516d;
+	border: 4px solid #413550;
+	outline: 1px solid #a480a2;
+	box-shadow: 0 6px 5px #17122466;
 }
-.workshop-overview .rug::after {
-	content: '';
-	position: absolute;
-	inset: 13px;
-	border: 3px solid #91d5cf88;
-	background: repeating-linear-gradient(
-		45deg,
-		transparent 0 50px,
-		#e3a0cf33 52px 55px,
-		transparent 58px 105px
-	);
+.workshop-overview .rug svg {
+	display: block;
+	width: 100%;
+	height: 100%;
 }
 .workshop-overview .cat {
 	position: absolute;
@@ -664,12 +657,12 @@
 	filter: drop-shadow(0 9px 5px #1a152255);
 }
 .workshop-overview .cat-body {
-	transform-origin: 120px 72px;
+	transform-origin: 175px 145px;
 	animation: workshop-breathe 5s ease-in-out infinite alternate;
 }
 @keyframes workshop-breathe {
 	to {
-		transform: scaleY(1.025);
+		transform: scaleY(1.016);
 	}
 }
 .workshop-overview .cat .open-eye {
@@ -682,11 +675,11 @@
 	display: none;
 }
 .workshop-overview .cat .tail {
-	transform-origin: 175px 90px;
+	transform-origin: 258px 100px;
 	transition: transform 0.4s;
 }
 .workshop-overview .cat.awake .tail {
-	transform: rotate(-18deg);
+	transform: rotate(-6deg);
 }
 .workshop-overview .plant {
 	position: absolute;
@@ -1397,7 +1390,7 @@
 	transition: transform 0.4s;
 }
 .workshop-overview .cat-head {
-	transform-origin: 72px 82px;
+	transform-origin: 100px 115px;
 }
 .workshop-overview.motion-enabled .cat-head {
 	transform: rotate(var(--cat-gaze, 0deg));

@@ -69,7 +69,7 @@
 	}
 	.t {
 		font-family: var(--font-body);
-		font-size: clamp(0.62rem, 2.4vw, 0.78rem);
+		font-size: var(--fs-body);
 		font-weight: 700;
 		letter-spacing: 0.22em;
 		text-transform: uppercase;
@@ -81,7 +81,7 @@
 	}
 	.l {
 		font-family: var(--font-body);
-		font-size: 0.56rem;
+		font-size: var(--fs-small);
 		letter-spacing: 0.16em;
 		text-transform: uppercase;
 		color: var(--fg-muted);

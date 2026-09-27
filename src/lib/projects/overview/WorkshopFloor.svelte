@@ -5,6 +5,7 @@
 	import WorkshopBasket from './WorkshopBasket.svelte';
 	import WorkshopCatArt from './WorkshopCatArt.svelte';
 	import WorkshopPlant from './WorkshopPlant.svelte';
+	import WorkshopRug from './WorkshopRug.svelte';
 	import { roomActivity, useWorkshopState } from './workshop-state.svelte';
 	let { ready }: { ready: boolean } = $props();
 	const roomState = useWorkshopState();
@@ -59,7 +60,7 @@
 			d="M0 14h1440M0 42h1440M0 83h1440M0 141h1440M0 224h1440M0 342h1440M600 0 0 350M640 0 240 350M680 0 480 350M720 0v350M760 0 960 350M800 0 1200 350M840 0l600 350"
 		/>
 	</svg>
-	<div class="rug" aria-hidden="true"></div>
+	<WorkshopRug />
 	<button
 		class="cat"
 		class:awake={roomState.catAwake}

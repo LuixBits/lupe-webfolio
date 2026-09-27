@@ -138,12 +138,12 @@
 
 	<!-- The one navigation: centered on home (over the squares), glides to the
 	     corner on a section. -->
-	<div class="navigation-placement" class:ledge={overview}>
+	<div class="navigation-placement" class:ledge={section === 'projects'}>
 		<RadialMenu
 			items={menu}
 			label={m.menu_label()}
 			backLabel={m.menu_back()}
-			overviewLedge={overview}
+			projectsLedge={section === 'projects'}
 		/>
 	</div>
 

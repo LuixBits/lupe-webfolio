@@ -14,15 +14,15 @@
 		size = 400,
 		label = 'Menu',
 		backLabel = 'Back',
-		overviewLedge = false,
+		projectsLedge = false,
 		onnavigate
 	}: {
 		items: MenuItem[];
 		size?: number;
 		label?: string;
 		backLabel?: string;
-		/** Projects overview only: reserve a ledge for the compact wheel. */
-		overviewLedge?: boolean;
+		/** Projects routes: reserve a ledge for the compact wheel. */
+		projectsLedge?: boolean;
 		/** Override navigation (defaults to SvelteKit `goto`). */
 		onnavigate?: (href: string) => void;
 	} = $props();
@@ -132,7 +132,7 @@
 	let fanOpen = $state(false);
 	$effect(() => {
 		const mq = window.matchMedia(
-			overviewLedge
+			projectsLedge
 				? '(max-width: 960px), (max-height: 560px)'
 				: '(max-width: 560px), (max-height: 560px)'
 		);
@@ -158,7 +158,7 @@
 	let scrolling = $state(false);
 	let scrollTimer: ReturnType<typeof setTimeout> | undefined;
 	$effect(() => {
-		if (!(isMobile && mode === 'docked') || overviewLedge) {
+		if (!(isMobile && mode === 'docked') || projectsLedge) {
 			scrolling = false;
 			return;
 		}
@@ -420,7 +420,7 @@
 
 <div
 	class="menu-root"
-	class:overview-ledge={overviewLedge}
+	class:projects-ledge={projectsLedge}
 	class:fan-open={fanOpen}
 	class:scrolling
 	bind:this={rootEl}
@@ -1042,7 +1042,7 @@
 	/* The visible quarter sits on a normal-flow ledge. Its open fan may
 	   extend below the ledge; the resting wheel scrolls away with it. */
 	@media (max-width: 60rem), (max-height: 560px) {
-		.menu-root.overview-ledge[data-mode='docked'] {
+		.menu-root.projects-ledge[data-mode='docked'] {
 			position: absolute;
 			top: 0;
 			left: 0;
@@ -1052,12 +1052,12 @@
 			clip-path: inset(0 0 50% 50%);
 			opacity: 1;
 		}
-		.menu-root.overview-ledge[data-mode='docked'].fan-open {
+		.menu-root.projects-ledge[data-mode='docked'].fan-open {
 			width: min(88vw, 400px);
 			height: min(88vw, 400px);
 		}
-		.menu-root.overview-ledge[data-mode='docked']:not(.fan-open) .slice.sub,
-		.menu-root.overview-ledge[data-mode='docked']:not(.fan-open) .label.sub {
+		.menu-root.projects-ledge[data-mode='docked']:not(.fan-open) .slice.sub,
+		.menu-root.projects-ledge[data-mode='docked']:not(.fan-open) .label.sub {
 			display: none;
 		}
 	}

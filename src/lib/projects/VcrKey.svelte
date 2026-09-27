@@ -68,13 +68,13 @@
 			color 90ms ease-out;
 	}
 	.sub {
-		font-size: 0.5rem;
+		font-size: var(--fs-small);
 		font-weight: 700;
 		letter-spacing: 0.2em;
 		color: color-mix(in srgb, var(--sub-bg) 72%, var(--fg-muted));
 	}
 	.cap {
-		font-size: 0.66rem;
+		font-size: var(--fs-small);
 		font-weight: 700;
 		letter-spacing: 0.14em;
 		text-transform: uppercase;

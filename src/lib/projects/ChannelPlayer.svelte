@@ -263,6 +263,7 @@
 		color: var(--fg);
 	}
 	.programme {
+		container: programme / inline-size;
 		min-width: 0;
 		padding: 1rem 0;
 	}
@@ -325,6 +326,7 @@
 	}
 	h1 {
 		margin: 0;
+		overflow-wrap: anywhere;
 		font-size: var(--fs-h1);
 		line-height: var(--lh-tight);
 		text-shadow:
@@ -399,6 +401,7 @@
 		outline-offset: 4px;
 	}
 	.desk-surface {
+		container: desk / inline-size;
 		position: relative;
 		isolation: isolate;
 		margin: 3.5rem -1.5rem 0;
@@ -592,6 +595,7 @@
 		margin: 0;
 		font-size: var(--fs-body);
 		line-height: var(--lh-body);
+		overflow-wrap: anywhere;
 	}
 	.description p + p {
 		margin-top: 1rem;
@@ -608,6 +612,8 @@
 	}
 	.liner-source {
 		display: inline-flex;
+		flex-wrap: wrap;
+		overflow-wrap: anywhere;
 		align-items: center;
 		gap: 0.6rem;
 		min-height: 44px;
@@ -634,7 +640,7 @@
 	.signature {
 		margin-left: auto;
 		padding: 0 0.3rem;
-		font-family: Georgia, serif;
+		font-family: var(--font-body);
 		font-size: var(--fs-h3);
 		font-style: italic;
 		line-height: var(--lh-body);
@@ -707,10 +713,10 @@
 			width: 3.7rem;
 		}
 		.liner {
-			grid-template-columns: 1fr;
+			grid-template-columns: minmax(0, 1fr);
 			gap: 1.5rem;
 			margin: 1.5rem 0.4rem 0;
-			padding: 2rem 1.5rem;
+			padding: min(2rem, 32px) min(1.5rem, 24px);
 		}
 		.liner::after {
 			left: 0.65rem;
@@ -724,7 +730,44 @@
 			padding-inline: 0.3rem;
 		}
 		.tape-list {
-			padding: 0.6rem 0.7rem 0.9rem;
+			padding: 0.6rem min(0.7rem, 16px) 0.9rem;
+		}
+	}
+	@container programme (max-width: 20rem) {
+		.masthead {
+			flex-wrap: wrap;
+			padding: 16px;
+		}
+		.avatar {
+			width: 60px;
+		}
+	}
+	@container desk (max-width: 12rem) {
+		.bench-tools {
+			grid-template-columns: minmax(0, 1fr);
+			justify-items: center;
+			padding-inline: 12px;
+			gap: 1rem;
+		}
+		.lamp-slot {
+			max-width: 160px;
+		}
+		.watch-slot {
+			grid-column: 1;
+			grid-row: 2;
+			justify-self: center;
+			width: 65%;
+			padding: 0;
+		}
+		.keyboard-notes {
+			grid-row: 3;
+		}
+		.plan-sheet {
+			max-width: 60%;
+		}
+		.nix-sticker {
+			padding-inline: 12px;
+			margin-left: 0;
 		}
 	}
 	@media (prefers-reduced-motion: reduce) {

@@ -55,6 +55,9 @@
 		color: var(--on-hub);
 		outline: none;
 	}
+	:global([data-theme='vaporwave']) button {
+		font-size: var(--fs-small);
+	}
 	button.active {
 		background: var(--on-hub);
 		color: var(--hub-bg);

@@ -60,6 +60,7 @@
 
 <footer
 	class="footer"
+	class:projects={theme === 'vaporwave'}
 	class:workbench={variant === 'workbench'}
 	class:overview={variant === 'overview'}
 	style="--bar-h:{barHeight}px; --wave-h:{waveHeight}px; --clear-l:{clearLeft}; --clear-r:{clearRight};{jetty
@@ -105,7 +106,7 @@
 		font-size: var(--fs-small);
 	}
 	@media (max-width: 60rem), (max-height: 560px) {
-		.overview .bar {
+		.projects .bar {
 			padding-inline: clamp(1rem, 4vw, 2.5rem);
 		}
 	}
@@ -171,6 +172,9 @@
 		min-width: 0;
 	}
 	@media (max-width: 34rem) {
+		.projects .copy {
+			white-space: normal;
+		}
 		.workbench .copy,
 		.overview .copy {
 			white-space: normal;

@@ -73,6 +73,7 @@
 
 <style>
 	.programme-tape {
+		container: cassette / inline-size;
 		position: relative;
 		display: block;
 		width: 100%;
@@ -95,7 +96,7 @@
 		flex-direction: column;
 		height: 100%;
 		gap: 0.35rem;
-		padding: 0.85rem 1rem 0.35rem;
+		padding: 0.85rem min(1rem, 16px) 0.35rem;
 		border: 1px solid #655866;
 		border-radius: 6px 6px 4px 4px;
 		background:
@@ -146,7 +147,7 @@
 		gap: 0.6rem;
 		flex: 1;
 		min-height: 2.8rem;
-		padding: 0.35rem 0.7rem;
+		padding: 0.35rem min(0.7rem, 12px);
 		border: 1px solid #c8baa2;
 		border-left: 3px solid #95839f;
 		border-radius: 2px;
@@ -308,10 +309,26 @@
 	}
 	@media (max-width: 40rem) {
 		.cassette-case {
-			padding-inline: 0.85rem;
+			padding-inline: min(0.85rem, 16px);
 		}
 		.cassette-label {
-			padding: 0.35rem 0.5rem;
+			padding: 0.35rem min(0.5rem, 12px);
+		}
+	}
+	@container cassette (max-width: 18rem) {
+		.cassette-label {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		.label-end {
+			flex-direction: row;
+			align-items: center;
+		}
+		.tape-window {
+			width: 48%;
+		}
+		.tape-art {
+			width: 35%;
+			right: 12px;
 		}
 	}
 	@media (prefers-reduced-motion: reduce) {

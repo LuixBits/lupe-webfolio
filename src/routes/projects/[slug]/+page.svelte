@@ -112,10 +112,12 @@
 
 <style>
 	.page.vhs-detail {
+		overflow-wrap: anywhere;
 		max-width: 78rem;
 		padding-bottom: 7.5rem;
 	}
 	.sleeve {
+		container: sleeve / inline-size;
 		margin-top: 2rem;
 		padding: 1.3rem 1.2rem;
 		border-radius: 4px;
@@ -216,6 +218,14 @@
 		}
 		.sleeve {
 			margin-top: 0;
+		}
+	}
+	@container sleeve (max-width: 24rem) {
+		.masthead {
+			flex-direction: column;
+		}
+		.jacket {
+			max-width: 100px;
 		}
 	}
 	@media (max-width: 40rem) {
