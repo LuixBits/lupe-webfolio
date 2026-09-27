@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import * as m from '$lib/paraglide/messages';
 	import { hashSeed, rng } from '$lib/garden/lsystem';
 	import { prefersReducedMotion } from '$lib/garden/reveal';
 	import { blobPath, smoothOpen, taperedBranch, type Pt } from '$lib/garden/tree/generate';
@@ -15,7 +16,8 @@
 		arrive = false,
 		tip = 0.86,
 		overlay = false,
-		tags = {}
+		tags = {},
+		pdf
 	}: {
 		seed?: string;
 		/** Per-zone growth flags from the page: station ids + 'waterline' +
@@ -30,6 +32,8 @@
 		overlay?: boolean;
 		/** Depth-tag text per station id (page-localized), e.g. '7 m · 2021 – 2024'. */
 		tags?: Record<string, string>;
+		/** The Flaschenpost target (the CV as PDF). Undefined → placeholder tag. */
+		pdf?: string;
 	} = $props();
 
 	/* THE DIVE. One procedural water column spanning the whole page: it
@@ -128,6 +132,25 @@
 			sdel: number;
 		}[]
 	>([]);
+	interface OverlayData {
+		compHome: Pt;
+		free: { home: Pt; robe: KoiRobe; scale: number }[];
+		namazu: Pt | null;
+		bottle: Pt | null;
+	}
+	let odata = $state<OverlayData | null>(null);
+	let compY = $state(0);
+	let compUp = $state(false);
+	let fkPos = $state<{ x: number; y: number; a: number }[]>([]);
+	let pellets = $state<{ id: number; x: number; y: number }[]>([]);
+	let nzGaze = $state(0);
+	let nzBlink = $state(false);
+	let calmN = $state(0);
+	let layerPageTop = 0;
+	let layerLeft = 0;
+	let blinkT: ReturnType<typeof setTimeout> | undefined;
+	const homeT: (ReturnType<typeof setTimeout> | undefined)[] = [undefined, undefined];
+
 	let seabed = $state<{
 		sand1: string;
 		sand2: string;
@@ -171,6 +194,7 @@
 	const uid = $derived(`dl-${hashSeed(seed).toString(36)}${overlay ? 'o' : ''}`);
 	const clipHeight = $derived(Math.max(0, lineTopYS + (bedYS + 26 - lineTopYS) * progress));
 	const underClipH = $derived(Math.max(0, (H - bedYS + 60) * underProgress));
+	const compX = $derived(lineParams ? lineXOf(lineParams, compY) + 30 : 0);
 
 	const f = (n: number) => +n.toFixed(1);
 
@@ -193,6 +217,8 @@
 		if (!root || !parent) return null;
 		const lr = root.getBoundingClientRect();
 		if (lr.width < 10 || lr.height < 10) return null;
+		layerPageTop = lr.top + window.scrollY;
+		layerLeft = lr.left;
 		const out: Record<string, Anchor> = {};
 		for (const el of parent.querySelectorAll<HTMLElement>('[data-dive]')) {
 			const r = el.getBoundingClientRect();
@@ -760,6 +786,31 @@
 				x: f(tx + (14 + rand() * 112) * toriiS),
 				y: f(toriiY + (30 + rand() * 80) * toriiS)
 			}));
+			// ---------- the overlay's furniture: companions + creatures ----------
+			{
+				const siga = a['st-siga-dev'];
+				const free: OverlayData['free'] = [
+					{
+						home: { x: Math.max(80, W * 0.3), y: waterY + (bedY - waterY) * 0.2 },
+						robe: 'hi',
+						scale: 0.52
+					},
+					{
+						home: { x: Math.min(W - 90, W * 0.68), y: waterY + (bedY - waterY) * 0.55 },
+						robe: 'kohaku',
+						scale: 0.44
+					}
+				];
+				odata = {
+					compHome: { x: 0, y: siga ? siga.y0 + 80 : waterY + 150 },
+					free,
+					namazu: { x: Math.min(W - 92, eggsX + (central ? 255 : 125)), y: bedY + 14 },
+					bottle: { x: Math.max(56, eggsX - (central ? 470 : 155)), y: bedY + 12 }
+				};
+				if (instant || compY === 0) compY = odata.compHome.y;
+				if (fkPos.length === 0) fkPos = free.map((f2) => ({ x: f2.home.x, y: f2.home.y, a: 0 }));
+			}
+
 			seabed = {
 				sand1: mkDune(bedY - 4, 7, 9),
 				sand2: mkDune(bedY + 10, 6, 8),
@@ -784,6 +835,13 @@
 
 	const isOn = (key: string) => instant || (key === 'surface' ? arrive : !!grown[key]);
 
+	function namazuClick() {
+		calmN += 1;
+		nzBlink = true;
+		clearTimeout(blinkT);
+		blinkT = setTimeout(() => (nzBlink = false), 950);
+	}
+
 	onMount(() => {
 		instant = prefersReducedMotion();
 		let raf = 0;
@@ -792,6 +850,19 @@
 			if (!root) return;
 			const r = root.getBoundingClientRect();
 			if (r.height < 1) return;
+			if (overlay) {
+				// the companion koi rides the line at your viewport — the ONLY
+				// per-frame overlay work is this one transform target
+				if (instant || !lineParams) return;
+				const viewTop = -r.top;
+				let t2 = Math.min(bedYS - 70, Math.max(waterYS + 85, viewTop + window.innerHeight * 0.52));
+				t2 = Math.max(viewTop + 120, Math.min(viewTop + window.innerHeight - 140, t2));
+				if (Math.abs(t2 - compY) > 6) {
+					compUp = t2 < compY;
+					compY = t2;
+				}
+				return;
+			}
 			const span = Math.max(1, bedYS - lineTopYS);
 			const tipY = window.innerHeight * tip - r.top;
 			progress = instant ? 1 : Math.min(1, Math.max(0, (tipY - lineTopYS) / span));
@@ -823,7 +894,7 @@
 		if (root) ro.observe(root);
 		rebuild();
 
-		if (!instant && !overlay) {
+		if (!instant) {
 			window.addEventListener('scroll', schedule, { passive: true });
 			window.addEventListener('resize', schedule, { passive: true });
 		}
@@ -832,12 +903,87 @@
 			underProgress = 1;
 		}
 
+		// ---- feed the koi: a click in open water drops a pellet; the nearest
+		// free koi glides to it (state + CSS transition — no rAF chase) ----
+		let lastFeed = 0;
+		let pelletN = 0;
+		const onClick = (e: MouseEvent) => {
+			const t = e.target as HTMLElement | null;
+			if (!t || typeof t.closest !== 'function') return;
+			if (
+				t.closest(
+					'a,button,[role=button],input,textarea,select,nav,svg,.station,.bank-head,.sky,.origin'
+				)
+			)
+				return;
+			const now = performance.now();
+			if (now - lastFeed < 1500) return;
+			const x = e.clientX - layerLeft;
+			const y = e.clientY + window.scrollY - layerPageTop;
+			if (y < waterYS + 40 || y > bedYS - 16 || x < 20 || x > W - 20) return;
+			lastFeed = now;
+			const id = ++pelletN;
+			pellets = [...pellets, { id, x, y }];
+			setTimeout(() => (pellets = pellets.filter((p2) => p2.id !== id)), 2100);
+			let best = 0;
+			let bd = Infinity;
+			fkPos.forEach((p2, i2) => {
+				const d2 = (p2.x - x) ** 2 + (p2.y - y) ** 2;
+				if (d2 < bd) {
+					bd = d2;
+					best = i2;
+				}
+			});
+			const p3 = fkPos[best];
+			const ty2 = y + 36; // meet the pellet where it settles
+			const ang = (Math.atan2(ty2 - p3.y, x - p3.x) * 180) / Math.PI;
+			const nose = 64 * (odata?.free[best].scale ?? 0.5);
+			fkPos[best] = {
+				x: x - Math.cos((ang * Math.PI) / 180) * nose,
+				y: ty2 - Math.sin((ang * Math.PI) / 180) * nose,
+				a: ang
+			};
+			clearTimeout(homeT[best]);
+			homeT[best] = setTimeout(() => {
+				const h2 = odata?.free[best]?.home;
+				if (h2) fkPos[best] = { x: h2.x, y: h2.y, a: 0 };
+			}, 7000);
+		};
+
+		// ---- the namazu's eye follows the cursor (fine pointers only) ----
+		let moveRaf = 0;
+		let mx = 0;
+		let my = 0;
+		const applyGaze = () => {
+			moveRaf = 0;
+			const nz = odata?.namazu;
+			if (!nz) return;
+			const px = mx - layerLeft;
+			const py = my + window.scrollY - layerPageTop;
+			nzGaze = (Math.atan2(py - (nz.y - 14), px - (nz.x - 26)) * 180) / Math.PI;
+		};
+		const onMove = (e: PointerEvent) => {
+			mx = e.clientX;
+			my = e.clientY;
+			if (!moveRaf) moveRaf = requestAnimationFrame(applyGaze);
+		};
+		const finePointer = window.matchMedia('(pointer: fine)').matches;
+		if (overlay && !instant) {
+			window.addEventListener('click', onClick);
+			if (finePointer) window.addEventListener('pointermove', onMove, { passive: true });
+		}
+
 		return () => {
 			ro.disconnect();
 			window.removeEventListener('scroll', schedule);
 			window.removeEventListener('resize', schedule);
+			window.removeEventListener('click', onClick);
+			window.removeEventListener('pointermove', onMove);
 			if (raf) cancelAnimationFrame(raf);
 			if (buildRaf) cancelAnimationFrame(buildRaf);
+			if (moveRaf) cancelAnimationFrame(moveRaf);
+			clearTimeout(blinkT);
+			for (const t2 of homeT) clearTimeout(t2);
 		};
 	});
 </script>
@@ -934,6 +1080,28 @@
 	<circle class="crest-spray" cx="-122" cy="-9" r="1.2" />
 {/snippet}
 
+<!-- Die Flaschenpost: a corked green-glass bottle leaning on a stone, a
+     rolled paper inside, a washi tag on a string naming its cargo. -->
+{#snippet bottle(label: string)}
+	<ellipse class="bt-stone" cx="-16" cy="4" rx="20" ry="9" />
+	<path class="bt-stone-rim" d="M -30 0 Q -16 -6 -2 0" />
+	<g transform="rotate(-14)">
+		<path
+			class="bt-glass"
+			d="M -2 0 L 40 0 Q 48 0 48 -8 Q 48 -16 40 -16 L -2 -16 Q -10 -16 -10 -8 Q -10 0 -2 0 Z"
+		/>
+		<path class="bt-paper" d="M 4 -4 L 30 -4 L 32 -12 L 6 -12 Z" />
+		<path class="bt-glass2" d="M -6 -12 Q 16 -15 44 -13" />
+		<path class="bt-neck" d="M 48 -5 L 60 -5 L 60 -11 L 48 -11 Z" />
+		<path class="bt-cork" d="M 60 -3.6 L 68 -3.6 L 68 -12.4 L 60 -12.4 Z" />
+		<path class="bt-string" d="M 58 -10 Q 56 -22 48 -26" />
+	</g>
+	<g transform="translate(30 -34)">
+		<rect class="bt-tag" x="-4" y="-9" width={label.length * 5.6 + 12} height="17" rx="2.5" />
+		<text class="bt-tag-text" x={(label.length * 5.6 + 4) / 2} y="3.5">{label}</text>
+	</g>
+{/snippet}
+
 <!-- Notched lily-pad disc (top view) or its edge-on sliver. -->
 {#snippet padShape(rot: number, edge: boolean)}
 	{#if edge}
@@ -956,11 +1124,127 @@
 	{/if}
 {/snippet}
 
-<div class="dive-layer" class:is-over={overlay} class:instant bind:this={root} aria-hidden="true">
+<!-- the base instance is pure decoration (aria-hidden); the overlay hosts
+     real interactive elements, so only its decorative groups are hidden -->
+<div
+	class="dive-layer"
+	class:is-over={overlay}
+	class:instant
+	bind:this={root}
+	aria-hidden={overlay ? undefined : 'true'}
+>
 	{#if W > 0 && lineParams}
 		{#if overlay}
-			<!-- the companion koi + interactive creatures arrive in Phase 7 -->
-			<svg viewBox="0 0 {W} {Math.max(H, 1)}"></svg>
+			<svg viewBox="0 0 {W} {Math.max(H, 1)}">
+				<!-- the two free koi — they may cross the cards: you are IN the water -->
+				{#if odata}
+					<g aria-hidden="true">
+						{#each fkPos as p2, i2 (i2)}
+							<g class="free-koi" style="transform: translate({p2.x}px, {p2.y}px)">
+								<g
+									class="fk-pose"
+									style="transform: rotate({p2.a}deg) scale(1, {Math.abs(p2.a) > 90 ? -1 : 1})"
+								>
+									<g class="fk-bob" style="--fkdel:{i2 * -3.2}s">
+										<Koi
+											robe={odata.free[i2].robe}
+											scale={odata.free[i2].scale}
+											motion="tail"
+											shadow={false}
+											wag={2.3}
+										/>
+									</g>
+								</g>
+							</g>
+						{/each}
+						{#each pellets as pl (pl.id)}
+							<circle class="pellet" cx={pl.x} cy={pl.y} r="3.1" />
+						{/each}
+
+						<!-- the asagi companion: dives with you, riding the line -->
+						<g class="companion" style="transform: translate({compX}px, {compY}px)">
+							<g class="comp-pose" class:up={compUp}>
+								<Koi robe="asagi" scale={0.5} motion="tail" shadow={false} wag={1.9} />
+							</g>
+						</g>
+					</g>
+				{/if}
+
+				<!-- the namazu, half-buried beside the origin. In myth he shakes
+				     the earth; petted here, he keeps the sea calm instead. -->
+				{#if odata?.namazu}
+					<g transform="translate({odata.namazu.x} {odata.namazu.y})">
+						<g class="zone" class:on={isOn('origin')}>
+							<g class="grow" style="--gd:350ms">
+								<g aria-hidden="true">
+									<path
+										class="nz-body"
+										d="M -48 4 C -44 -16 -22 -26 6 -24 C 32 -22 46 -12 48 2 C 50 -4 54 -12 60 -16 C 62 -6 60 4 54 8 C 30 13 -28 13 -48 4 Z"
+									/>
+									<path class="nz-belly" d="M -44 5 C -30 9 20 10 46 7 C 20 12 -26 12 -44 5 Z" />
+									<path class="nz-fin" d="M -4 -24 C 2 -32 14 -32 20 -26" />
+									<path class="nz-mouth" d="M -48 -2 Q -38 2 -26 1" />
+									<path
+										class="nz-barbel"
+										d="M -46 -8 q -16 -3 -24 7 M -43 -12 q -14 -9 -24 -9 M -34 -3 q -10 4 -13 11"
+									/>
+									<ellipse class="nz-eyeball" cx="-26" cy="-14" rx="5.2" ry="4.8" />
+									<g transform="translate(-26 -14)">
+										<g class="nz-pupil" style="transform: rotate({nzGaze}deg)">
+											<circle cx="2" cy="0" r="2.3" />
+										</g>
+									</g>
+									<circle class="nz-glint" cx="-27.6" cy="-15.8" r="0.9" />
+									<ellipse class="nz-lid" class:blink={nzBlink} cx="-26" cy="-14" rx="5.4" ry="5" />
+									<path class="nz-sand" d="M -54 8 Q -30 2 0 6 T 58 6 L 58 16 L -54 16 Z" />
+								</g>
+								{#if calmN > 0}
+									{#key calmN}
+										<g class="calm-burst" aria-hidden="true">
+											<circle class="calm-b" cx="-30" cy="-22" r="2.2" style="--cd:0ms" />
+											<circle class="calm-b" cx="-22" cy="-26" r="1.6" style="--cd:140ms" />
+											<circle class="calm-b" cx="-36" cy="-27" r="1.3" style="--cd:260ms" />
+											<text class="calm-text" y="-38">{m.cv_namazu_calm()}</text>
+										</g>
+									{/key}
+								{/if}
+								<g
+									class="namazu-hit"
+									role="button"
+									tabindex="0"
+									aria-label={m.cv_namazu_label()}
+									onclick={namazuClick}
+									onkeydown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											e.preventDefault();
+											namazuClick();
+										}
+									}}
+								>
+									<rect class="hitbox" x="-62" y="-34" width="128" height="48" rx="12" />
+								</g>
+							</g>
+						</g>
+					</g>
+				{/if}
+
+				<!-- die Flaschenpost: the CV in a bottle, resting against a stone -->
+				{#if odata?.bottle}
+					<g transform="translate({odata.bottle.x} {odata.bottle.y})">
+						<g class="zone" class:on={isOn('origin')}>
+							<g class="grow" style="--gd:500ms">
+								{#if pdf}
+									<a class="bottle-link" href={pdf} download aria-label={m.cv_pdf_label()}>
+										{@render bottle(m.cv_pdf_label())}
+									</a>
+								{:else}
+									{@render bottle(m.cv_pdf_placeholder())}
+								{/if}
+							</g>
+						</g>
+					</g>
+				{/if}
+			</svg>
 		{:else}
 			<svg viewBox="0 0 {W} {Math.max(H, 1)}">
 				<defs>
@@ -1817,6 +2101,174 @@
 		opacity: 0.26;
 	}
 
+	/* ---- the overlay companions ---- */
+	.companion {
+		will-change: auto;
+	}
+	.comp-pose {
+		transform: rotate(90deg);
+	}
+	.comp-pose.up {
+		transform: rotate(-90deg);
+	}
+	.instant .comp-pose {
+		transform: rotate(0deg);
+	}
+	.pellet {
+		fill: #8a6a42;
+		stroke: #5c4527;
+		stroke-width: 0.8;
+	}
+	.instant .pellet {
+		opacity: 0.85;
+	}
+
+	/* ---- the namazu ---- */
+	.nz-body {
+		fill: #2c3a44;
+		stroke: #1a252d;
+		stroke-width: 1.1;
+		stroke-linejoin: round;
+	}
+	.nz-belly {
+		fill: #3d4f5b;
+		opacity: 0.9;
+	}
+	.nz-fin {
+		fill: none;
+		stroke: #1a252d;
+		stroke-width: 2.4;
+		stroke-linecap: round;
+	}
+	.nz-mouth {
+		fill: none;
+		stroke: #1a252d;
+		stroke-width: 1.3;
+		stroke-linecap: round;
+		opacity: 0.9;
+	}
+	.nz-barbel {
+		fill: none;
+		stroke: rgba(157, 179, 186, 0.75);
+		stroke-width: 1.5;
+		stroke-linecap: round;
+	}
+	.nz-glint {
+		fill: #f4fbfd;
+		opacity: 0.9;
+		pointer-events: none;
+	}
+	.nz-eyeball {
+		fill: #dfe9ee;
+	}
+	.nz-pupil circle {
+		fill: #10181d;
+	}
+	.nz-lid {
+		fill: #2c3a44;
+		transform: scaleY(0);
+		transform-box: fill-box;
+		transform-origin: center 15%;
+	}
+	.nz-sand {
+		fill: #091f2c;
+	}
+	.namazu-hit {
+		pointer-events: auto;
+		cursor: pointer;
+		outline: none;
+	}
+	.hitbox {
+		fill: transparent;
+	}
+	.namazu-hit:focus-visible .hitbox {
+		stroke: #cdeef6;
+		stroke-width: 1.6;
+		stroke-dasharray: 5 5;
+	}
+	.calm-b {
+		fill: none;
+		stroke: #cdeef6;
+		stroke-width: 1.2;
+		opacity: 0;
+	}
+	.calm-text {
+		fill: #cdeef6;
+		font:
+			italic 600 13px var(--font-display, Georgia),
+			serif;
+		text-anchor: middle;
+		opacity: 0;
+	}
+	.instant .calm-text,
+	.instant .calm-b {
+		opacity: 0.85;
+	}
+
+	/* ---- die Flaschenpost ---- */
+	.bottle-link {
+		pointer-events: auto;
+		cursor: pointer;
+		outline: none;
+	}
+	.bottle-link:focus-visible .bt-glass {
+		stroke: #cdeef6;
+		stroke-width: 2;
+	}
+	.bt-stone {
+		fill: #14323f;
+	}
+	.bt-stone-rim {
+		fill: none;
+		stroke: #3a6a7d;
+		stroke-width: 1.1;
+		stroke-linecap: round;
+		opacity: 0.55;
+	}
+	.bt-glass {
+		fill: rgba(140, 190, 170, 0.3);
+		stroke: #9fc4b4;
+		stroke-width: 1.2;
+	}
+	.bt-glass2 {
+		fill: none;
+		stroke: #cfe8dc;
+		stroke-width: 1;
+		opacity: 0.5;
+	}
+	.bt-paper {
+		fill: #efe5cc;
+		stroke: #b3a582;
+		stroke-width: 0.7;
+	}
+	.bt-neck {
+		fill: rgba(140, 190, 170, 0.32);
+		stroke: #9fc4b4;
+		stroke-width: 1.1;
+	}
+	.bt-cork {
+		fill: #8a6a4d;
+		stroke: #5c4527;
+		stroke-width: 0.9;
+	}
+	.bt-string {
+		fill: none;
+		stroke: #c9bd9d;
+		stroke-width: 1;
+		opacity: 0.8;
+	}
+	.bt-tag {
+		fill: #f5efdf;
+		stroke: rgba(44, 36, 27, 0.45);
+		stroke-width: 0.8;
+	}
+	.bt-tag-text {
+		fill: #2c241b;
+		font: 10px var(--font-body, sans-serif);
+		letter-spacing: 0.02em;
+		text-anchor: middle;
+	}
+
 	/* ---- kelp beds (HTML layer over the svg, still behind the cards) ---- */
 	.kelp-bed {
 		position: absolute;
@@ -1941,6 +2393,81 @@
 		.egg-mote.em2 {
 			animation-duration: 10s;
 			animation-delay: -5s;
+		}
+		.companion {
+			transition: transform 750ms cubic-bezier(0.3, 0.8, 0.3, 1);
+		}
+		.comp-pose {
+			transition: transform 650ms ease;
+		}
+		.free-koi {
+			transition: transform 1500ms cubic-bezier(0.3, 0.75, 0.3, 1);
+		}
+		.fk-pose {
+			transition: transform 900ms ease;
+		}
+		.fk-bob {
+			animation: dv-fkbob 6.5s ease-in-out var(--fkdel, 0s) infinite alternate;
+		}
+		.pellet {
+			animation: dv-pellet 1.9s ease-in forwards;
+		}
+		.nz-lid {
+			transition: transform 400ms ease;
+		}
+		.nz-lid.blink {
+			transform: scaleY(1);
+		}
+		.calm-b {
+			animation: dv-calm-b 1.3s ease-out var(--cd, 0ms) forwards;
+		}
+		.calm-text {
+			animation: dv-calm-text 1.7s ease-out 120ms forwards;
+		}
+	}
+	@keyframes dv-fkbob {
+		from {
+			transform: translateY(-3.5px);
+		}
+		to {
+			transform: translateY(3.5px);
+		}
+	}
+	@keyframes dv-pellet {
+		from {
+			translate: 0 0;
+			opacity: 1;
+		}
+		to {
+			translate: 0 44px;
+			opacity: 0;
+		}
+	}
+	@keyframes dv-calm-b {
+		from {
+			opacity: 0.85;
+			transform: translateY(0);
+		}
+		to {
+			opacity: 0;
+			transform: translateY(-26px);
+		}
+	}
+	@keyframes dv-calm-text {
+		0% {
+			opacity: 0;
+			transform: translateY(6px);
+		}
+		18% {
+			opacity: 1;
+			transform: translateY(-2px);
+		}
+		70% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0;
+			transform: translateY(-24px);
 		}
 	}
 	@keyframes dv-egg-breathe {

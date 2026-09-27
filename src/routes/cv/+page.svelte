@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { stations } from '$lib/content/cv';
+	import { cvPdf, stations } from '$lib/content/cv';
 	import { resolveLocalized, resolveSpan, type Station } from '$lib/content/schema';
 	import { getLocale } from '$lib/paraglide/runtime';
 	import * as m from '$lib/paraglide/messages';
@@ -168,7 +168,14 @@
 	     (atmosphere, sounding line, world), plus a sparse overlay instance
 	     above the cards (companions + interactive creatures). -->
 	<DiveLayer seed="cv-dive" grown={revealed} arrive={hydrated} tags={depthTags} />
-	<DiveLayer seed="cv-dive-over" overlay grown={revealed} arrive={hydrated} tags={depthTags} />
+	<DiveLayer
+		seed="cv-dive-over"
+		overlay
+		grown={revealed}
+		arrive={hydrated}
+		tags={depthTags}
+		pdf={cvPdf}
+	/>
 
 	<header class="sky" data-dive="sky">
 		<p class="eyebrow">{m.cv_eyebrow()}</p>
