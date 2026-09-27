@@ -1,10 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { page } from '$app/state';
-	import { deLocalizeUrl } from '$lib/paraglide/runtime';
 	import type { ThemeName } from '$lib/themes';
 	import FooterWave from './footer/FooterWave.svelte';
-	import FooterAbyss from './footer/FooterAbyss.svelte';
 	import FooterGarden from './footer/FooterGarden.svelte';
 	import FooterVaporwave from './footer/FooterVaporwave.svelte';
 	import FooterCosmos from './footer/FooterCosmos.svelte';
@@ -46,16 +43,8 @@
 		vaporwave: FooterVaporwave,
 		cosmos: FooterCosmos
 	};
-	// The CV dive ends in the abyss, not on a Hokusai wave — /cv (any locale)
-	// swaps the water footer for the seabed finale; the paper-scroll pages
-	// under /cv/[slug] keep the wave (paper-room fiction).
-	const abyss = $derived(theme === 'water' && deLocalizeUrl(page.url).pathname === '/cv');
 	const Decoration = $derived(
-		variant === 'workbench'
-			? FooterWorkbench
-			: abyss
-				? FooterAbyss
-				: (decorations[theme] ?? FooterGarden)
+		variant === 'workbench' ? FooterWorkbench : (decorations[theme] ?? FooterGarden)
 	);
 </script>
 
@@ -63,9 +52,7 @@
 	class="footer"
 	class:workbench={variant === 'workbench'}
 	class:overview={variant === 'overview'}
-	style="--bar-h:{barHeight}px; --wave-h:{waveHeight}px; --clear-l:{clearLeft}; --clear-r:{clearRight};{abyss
-		? ' --footer-bar-bg:#03101a;'
-		: ''}"
+	style="--bar-h:{barHeight}px; --wave-h:{waveHeight}px; --clear-l:{clearLeft}; --clear-r:{clearRight};"
 >
 	<!-- Theme decoration cresting above the bar. Purely decorative. -->
 	{#if variant !== 'overview'}
