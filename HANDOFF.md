@@ -45,29 +45,38 @@ The [inhabited workshop plan](docs/plans/projects-inhabited-workshop.md) is now
 integrated into the real `/projects` route. The owner rejected the earlier
 compact overview and later asked to restore its relationship to the vaporwave
 hub tile. The room now fills the page: studio doorway, sunset window, portfolio
-model, workbench apparatus and planning cards, then drawers, stool, rug, plant
+model, shared project workstations, then drawers, stool, rug, plant
 and cat. Violet walls, magenta neon, cyan reflections and a perspective floor
 grid retain the Projects palette alongside the wooden furniture.
 
 **Use <http://localhost:5173/projects>**, or `/de/projects`, for the current
 shared development preview. The old standalone study redirects here. The local
-production preview on port 5191 also contains this integrated room; see the
-[implementation review](docs/reviews/projects-inhabited-workshop-2026-09-27.md)
+production preview at <http://localhost:5191/projects> also contains this room;
+see the [collections review](docs/reviews/projects-collections-2026-09-27.md)
 for the build, browser checks and temporary artifact paths. The published site
 has not been changed. Final visual approval remains with the owner.
 
-All four projects still come from `content/projects.ts`, with localized native
-links and the same category and `tape-{slug}` anchors. The Projects layout owns
-lamp, pause, cat and drawer state across detail round trips. Return navigation
-restores the selected object and scroll, including the lower workbench. Route
-snapshots carry the complete room and freeze its ambient SVG frames.
+The [collections follow-up](docs/plans/projects-collections-drawers.md) adds
+Team Feed, RoomPlan, Flashcards, Noctalia Plugins and the upcoming Magic Mouse
+app. The wheel and physical workstations now group the nine entries into
+Studio, Web, Neovim and Desktop, with Orbit Toy kept as a small bench experiment.
+Open-source status is metadata. Existing slugs are preserved and the old
+`#opensource` fragment leads to Webfolio's Web station. Native project files
+expand with the content instead of creating another large scene per plugin.
+
+All three drawers now open, using native disclosures: floor-plan sketch, spare
+keys/electronics, then a tablet. The tablet's explicit Play button loads the
+Rickroll; Stop, closing the drawer and route exit remove its iframe. Snapshots
+exclude media to prevent a second player. Room controls and all three drawer
+states survive project visits. Returns restore the selected link and scroll.
+The main sign and station signs now use SVG neon tubes with HTML headings.
 
 Only visible ambient zones animate; hidden tabs, pause, route motion and reduced
-motion stop them. The floor-plan drawer and cat are optional native buttons.
-Without JavaScript, the entire static room and project links remain available.
-The desktop wheel clears the content; phones and short landscape screens use
-its existing normal-flow ledge. The channel player retains explicit Play,
-selection, eject, power, lamp, watch and remote behavior.
+motion stop them. Static project links and drawer disclosures work without
+JavaScript. The desktop wheel clears the content; phones and short landscape
+screens use its normal-flow ledge. The channel player's controls retain their
+behavior. See the [collections review](docs/reviews/projects-collections-2026-09-27.md)
+for the current build, checks and provider-test limits.
 
 ## Interaction model
 

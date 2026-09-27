@@ -131,3 +131,20 @@ HTML/SVG/CSS decision above and add no renderer.
 See the [implementation review](../reviews/projects-inhabited-workshop-2026-09-27.md)
 for browser checks, build provenance and test limits. This records the completed
 implementation; final approval of its appearance remains with the owner.
+
+## 2026-09-27: collections and drawer discoveries
+
+The owner's larger inventory now lives in shared Web, Neovim and Desktop
+workstations, alongside the Studio doorway. Native project files grow from the
+content collection. Open-source status remains metadata, and upcoming work can
+appear without an invented year or download link.
+
+All three drawers use native disclosures with two-way bindings to room state.
+The bottom drawer's tablet creates its video only after Play. Closing it or
+leaving the room removes the player; transition snapshots exclude media. Neon
+signs use original SVG tube paths alongside accessible HTML headings. These
+changes extend the existing HTML/SVG/CSS approach.
+
+See the [collections plan](../plans/projects-collections-drawers.md) and
+[validation review](../reviews/projects-collections-2026-09-27.md) for content
+sources, browser checks and real-provider playback observations.

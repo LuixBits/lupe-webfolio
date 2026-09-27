@@ -5,6 +5,11 @@ Implements the [inhabited workshop plan](../plans/projects-inhabited-workshop.md
 and the owner's later request to restore the vaporwave palette. Final visual
 approval remains with the owner.
 
+This review records the four-project baseline. The later
+[collections review](projects-collections-2026-09-27.md) covers the nine-project
+room, three working drawers and tube neon signs. Both local previews now serve
+that follow-up; the build directory and artifacts below remain historical.
+
 ## Result and integration
 
 The actual `/projects` route now contains the full room. Rafters and a mounted
