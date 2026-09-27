@@ -2,7 +2,14 @@ import { getContext } from 'svelte';
 export const workshopRoom = Symbol('workshop-room');
 // A new object per Projects layout, never shared between SSR requests.
 export function createWorkshopState() {
-	const room = $state({ lampOn: true, paused: false, catAwake: false, drawerOpen: false });
+	const room = $state({
+		lampOn: true,
+		paused: false,
+		catAwake: false,
+		drawerOpen: false,
+		partsOpen: false,
+		tabletOpen: false
+	});
 	return room;
 }
 export function useWorkshopState() {

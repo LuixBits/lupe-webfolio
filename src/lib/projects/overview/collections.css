@@ -1,0 +1,462 @@
+/* Workstations share one room; the catalogue grows inside their furniture. */
+.workshop-overview .workshop-sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+.workshop-overview .mounted-sign,
+.workshop-overview .room-head h1 {
+	max-width: 100%;
+}
+.workshop-overview .room-head h1 {
+	line-height: 1;
+}
+.workshop-overview .project-shelf {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+}
+.workshop-overview .shelf-heading {
+	margin-bottom: 10px;
+}
+.workshop-overview .shelf-heading h2 {
+	display: table;
+	max-width: 100%;
+	margin: 0 0 14px;
+	padding: 4px 10px;
+	font-size: var(--fs-h2);
+	line-height: 1;
+	border: 1px solid #a17fba;
+	border-radius: 18px 4px 18px 4px;
+	background: #21182fe6;
+	box-shadow:
+		4px 5px 0 #19132388,
+		inset 0 0 0 3px #352744;
+}
+.workshop-overview .shelf-heading p {
+	margin: 0;
+	color: #ddcde9;
+	font-size: var(--fs-body);
+	max-width: 34ch;
+}
+.workshop-overview .shelf-scene {
+	width: 100%;
+	max-width: 650px;
+	margin: auto auto 0;
+	pointer-events: none;
+}
+.workshop-overview .shelf-scene svg {
+	width: 100%;
+	height: auto;
+	display: block;
+}
+.workshop-overview .shelf-timber {
+	height: 30px;
+	flex: none;
+	margin: -10px -12px 0;
+	border-top: 2px solid #c9a284;
+	background:
+		linear-gradient(100deg, #95dfdb22, transparent 45%, #ff81d629),
+		linear-gradient(#ae865f, #896048 80%, #583d35);
+	box-shadow: 0 5px 0 #382738;
+}
+.workshop-overview .project-files {
+	list-style: none;
+	margin: 0 -12px;
+	padding: 15px 14px 19px;
+	background:
+		repeating-linear-gradient(0deg, #98674d22 0 2px, transparent 2px 38px),
+		linear-gradient(105deg, #694a40, #513745);
+	border-bottom: 9px solid #8c674f;
+	box-shadow: 4px 13px 17px #17132299;
+}
+.workshop-overview .project-files li + li {
+	margin-top: 13px;
+}
+.workshop-overview .project-file {
+	display: grid;
+	grid-template-columns: 2.9rem minmax(0, 1fr) 1rem;
+	align-items: start;
+	gap: 12px;
+	padding: 18px 15px;
+	background: linear-gradient(112deg, #f0e1c9, #e3cfb1);
+	color: #3b3044;
+	border: 1px solid #e4ccb0;
+	box-shadow:
+		0 3px 0 #b09a84,
+		2px 6px 7px #1b112e55;
+	text-decoration: none;
+}
+.workshop-overview .file-emblem {
+	display: block;
+	width: 100%;
+	aspect-ratio: 1;
+	padding: 6px;
+	background: #49384f;
+	color: #b6ede1;
+	border: 1px solid #876c91;
+	border-radius: 3px;
+}
+.workshop-overview .file-copy h3 {
+	margin: 0 0 7px;
+	font-size: var(--fs-h3);
+	line-height: 1.2;
+	letter-spacing: -0.035em;
+}
+.workshop-overview .file-copy p {
+	margin: 0;
+	font-size: var(--fs-body);
+	line-height: 1.5;
+}
+.workshop-overview .file-copy .project-status {
+	margin-top: 8px;
+	font-size: var(--fs-small);
+	color: #6b4057;
+}
+.workshop-overview .file-arrow {
+	font-size: var(--fs-body);
+	color: #69456b;
+}
+.workshop-overview .project-file:is(:hover, :focus-visible) {
+	background: #f8ead4;
+}
+.workshop-overview .project-file:is(:hover, :focus-visible) h3 {
+	text-decoration: underline;
+	text-underline-offset: 0.22em;
+}
+.workshop-overview .collection-bench {
+	padding-top: 60px;
+}
+.workshop-overview .collection-stations {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: 50px;
+	align-items: stretch;
+}
+.workshop-overview .bench-tools {
+	position: absolute;
+	right: 5%;
+	top: -28px;
+	width: 160px;
+	pointer-events: none;
+}
+.workshop-overview .bench-tools .tools {
+	position: static;
+	width: 100%;
+	opacity: 0.75;
+}
+.workshop-overview .workshop-experiments {
+	display: flex;
+	justify-content: flex-end;
+	gap: 20px;
+	flex-wrap: wrap;
+	padding: 24px 0 0;
+}
+.workshop-overview .workshop-experiments a {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	max-width: 100%;
+	text-decoration: none;
+	font-size: var(--fs-body);
+	color: #ebd9e8;
+}
+.workshop-overview .workshop-experiments a:hover strong {
+	text-decoration: underline;
+}
+.workshop-overview .prototype-art {
+	display: block;
+	width: 140px;
+	flex: none;
+}
+.workshop-overview .prototype-note {
+	display: block;
+	margin-top: 6px;
+	font-size: var(--fs-small);
+	color: #d6bfdc;
+}
+.workshop-overview.cool .project-file {
+	background: linear-gradient(112deg, #dce1d5, #ccd4cb);
+}
+
+/* Drawers extend in normal flow so every open tray and handle stays reachable. */
+.workshop-overview .underbench.drawer-cabinet {
+	min-height: 455px;
+	padding: 12px 0 80px;
+}
+.workshop-overview .drawers.interactive-drawers {
+	position: relative;
+	z-index: 3;
+	left: auto;
+	top: auto;
+	margin-left: var(--room-left);
+	width: min(38%, 540px);
+	max-width: none;
+	height: auto;
+	padding: 8px 12px 12px;
+}
+.workshop-overview .drawer-unit {
+	margin: 0;
+}
+.workshop-overview .interactive-drawers .drawer {
+	display: block;
+	list-style: none;
+	height: 74px;
+	margin: 5px 0;
+	cursor: pointer;
+	position: relative;
+	-webkit-tap-highlight-color: transparent;
+	transition:
+		background 160ms ease,
+		box-shadow 160ms ease;
+}
+.workshop-overview .drawer::-webkit-details-marker {
+	display: none;
+}
+.workshop-overview .drawer::marker {
+	content: '';
+}
+.workshop-overview .drawer > span {
+	position: absolute;
+	bottom: 8px;
+	right: 13px;
+	color: #e1c3ad;
+	font-size: var(--fs-small);
+}
+.workshop-overview .drawer-unit[open] > .drawer {
+	box-shadow:
+		0 5px 0 #382630,
+		inset 0 2px 0 #a7e0d6aa;
+	background: linear-gradient(90deg, #88614c, #a57454, #80604f);
+}
+.workshop-overview .drawer:is(:hover, :focus-visible) {
+	background: linear-gradient(90deg, #8a644c, #a47552, #815c44);
+}
+.workshop-overview summary:focus-visible {
+	outline: 3px solid #c2faf2;
+	outline-offset: 4px;
+}
+.workshop-overview .interactive-drawers .drawer-content {
+	position: relative;
+	left: auto;
+	right: auto;
+	top: auto;
+	z-index: auto;
+	padding: 12px;
+	margin: 0 0 12px;
+	border: 5px solid #9c7658;
+	border-top-width: 9px;
+	background: repeating-linear-gradient(92deg, #d3ab6822 0 1px, transparent 2px 12px), #624a43;
+	box-shadow:
+		inset 0 7px 16px #1e17257a,
+		0 3px 0 #35232f;
+	transform: none;
+}
+.workshop-overview .drawer-sketch {
+	display: grid;
+	place-items: center;
+	position: relative;
+	padding: 6px 20px;
+}
+.workshop-overview .drawer-sketch .floor-plan {
+	max-width: 240px;
+	max-height: 230px;
+}
+.workshop-overview .sketch-pencil {
+	position: absolute;
+	right: 18%;
+	top: 5%;
+	height: 85%;
+	width: 7px;
+	transform: rotate(15deg);
+	background: linear-gradient(90deg, #634964 20%, #b387b6 23% 65%, #e7b5e1 70%);
+	clip-path: polygon(0 0, 100% 0, 100% 92%, 50% 100%, 0 92%);
+}
+.workshop-overview .parts-tray svg {
+	display: block;
+	width: 100%;
+	max-height: 220px;
+}
+.workshop-overview .drawer-tablet {
+	position: relative;
+	padding: 15px 10px 12px;
+	border: 2px solid #b2a0bb;
+	border-radius: 15px;
+	background: #28232e;
+	box-shadow: 3px 8px 9px #160c2577;
+}
+.workshop-overview .drawer-tablet::before {
+	content: '';
+	position: absolute;
+	top: 5px;
+	left: calc(50% - 2px);
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	background: #839495;
+}
+.workshop-overview .tablet-screen {
+	position: relative;
+	display: grid;
+	width: 100%;
+	min-width: 0;
+	min-height: 180px;
+	aspect-ratio: 16/10;
+	overflow: hidden;
+	background:
+		radial-gradient(ellipse at 80% 0, #94569c66, transparent 65%),
+		repeating-linear-gradient(0deg, transparent 0 23px, #a072bb33 24px 25px), #241e38;
+	border: 1px solid #796487;
+	border-radius: 5px;
+}
+.workshop-overview .tablet-screen iframe {
+	display: block;
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	border: 0;
+}
+.workshop-overview .tablet-play {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	min-width: 0;
+	width: 100%;
+	padding: 16px 10px;
+	border: 0;
+	background: transparent;
+	color: #bbfff1;
+	font-size: var(--fs-body);
+}
+.workshop-overview .tablet-play svg {
+	width: 60px;
+	height: 60px;
+	flex: none;
+}
+.workshop-overview .tablet-play:is(:hover, :focus-visible) {
+	color: #ffe9ff;
+	background: #ff74d516;
+}
+.workshop-overview .tablet-play:focus-visible {
+	outline-offset: -4px;
+}
+.workshop-overview .tablet-controls {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 15px;
+	margin-top: 12px;
+	color: #ffecd9;
+}
+.workshop-overview .tablet-controls :is(button, a) {
+	font-size: var(--fs-small);
+	min-height: 44px;
+	display: inline-flex;
+	align-items: center;
+}
+.workshop-overview .tablet-controls button {
+	padding: 7px 10px;
+	background: #342636;
+	color: #ffe5ec;
+	border: 1px solid #c493b8;
+	border-radius: 4px;
+}
+.workshop-overview .drawer-cabinet .stool {
+	left: 68%;
+}
+
+@container (max-width: 62rem) {
+	.workshop-overview .window-bay {
+		grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+	}
+	.workshop-overview .collection-stations {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 70px;
+	}
+	.workshop-overview .project-shelf .shelf-scene {
+		max-width: 530px;
+	}
+}
+@media (max-width: 960px), (max-height: 560px) {
+	.workshop-overview .drawers.interactive-drawers {
+		margin-left: 9%;
+		width: 52%;
+	}
+}
+@media (max-width: 580px) {
+	.workshop-overview .collection-bench {
+		padding-top: 40px;
+	}
+	.workshop-overview .project-files {
+		padding: 12px 10px 17px;
+		margin-inline: -10px;
+	}
+	.workshop-overview .shelf-timber {
+		margin-inline: -10px;
+	}
+	.workshop-overview .project-file {
+		grid-template-columns: 2.1rem minmax(0, 1fr);
+		gap: 10px;
+		padding: 16px 12px;
+	}
+	.workshop-overview .file-arrow {
+		display: none;
+	}
+	.workshop-overview .file-emblem {
+		padding: 3px;
+	}
+	.workshop-overview .bench-tools {
+		right: 5%;
+		top: -25px;
+		width: 95px;
+	}
+	.workshop-overview .workshop-experiments {
+		justify-content: flex-start;
+	}
+	.workshop-overview .prototype-art {
+		width: 100px;
+	}
+	.workshop-overview .underbench.drawer-cabinet {
+		padding-bottom: 165px;
+	}
+	.workshop-overview .drawers.interactive-drawers {
+		margin-left: 6%;
+		width: 88%;
+		padding: 6px 8px 10px;
+		border-width: 6px;
+	}
+	.workshop-overview .interactive-drawers .drawer {
+		height: 66px;
+	}
+	.workshop-overview .interactive-drawers .drawer::after {
+		top: 23px;
+	}
+	.workshop-overview .interactive-drawers .drawer-content {
+		padding: 8px;
+		border-width: 4px;
+	}
+	.workshop-overview .drawer-cabinet .stool {
+		left: 58%;
+		bottom: -42px;
+		height: 200px;
+		width: 110px;
+	}
+	.workshop-overview .drawer-cabinet .basket {
+		bottom: 14px;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.workshop-overview .interactive-drawers .drawer {
+		transition: none;
+	}
+}

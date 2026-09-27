@@ -5,7 +5,9 @@
 	import { useWorkshopState } from './workshop-state.svelte';
 	import WorkshopConnections from './WorkshopConnections.svelte';
 	import WorkshopFloor from './WorkshopFloor.svelte';
+	import NeonSign from './NeonSign.svelte';
 	import './workshop.css';
+	import './collections.css';
 	let { children }: { children: Snippet } = $props();
 	const roomState = useWorkshopState();
 	const navigation = getContext<ProjectNavigation>(projectNavigation);
@@ -38,7 +40,11 @@
 	<div class="ceiling" aria-hidden="true"></div>
 	<WorkshopConnections />
 	<header class="room-head">
-		<div class="mounted-sign"><h1>{m.nav_projects()}</h1></div>
+		<div class="mounted-sign">
+			<h1>
+				<span class="workshop-sr-only">{m.nav_projects()}</span><NeonSign text={m.nav_projects()} />
+			</h1>
+		</div>
 		<p>{m.projects_intro()}</p>
 		<button
 			class="motion-switch"

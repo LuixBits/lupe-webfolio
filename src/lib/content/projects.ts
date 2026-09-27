@@ -1,7 +1,7 @@
 import { defineProjects, type Project } from './schema';
 
-/** Creative / dev projects, grouped by `category` into the Projects section:
- *  #youtube, #opensource, #web. Edit / extend freely.
+/** The studio plus Web, Neovim and Desktop workstations. Open source is a tag,
+ *  not a competing category. Small sample experiments sit at the end of the bench.
  *
  *  SAMPLE DATA: screenshots are generated stand-ins under /media/projects/…
  *  and the interactive embed points at a local mock build — both use the
@@ -86,7 +86,7 @@ export const projects: Project[] = defineProjects([
 		},
 		tags: ['svelte', 'open-source'],
 		year: 2026,
-		category: 'opensource',
+		category: 'web',
 		stack: ['SvelteKit', 'Svelte 5', 'TypeScript', 'Zod', 'GSAP'],
 		links: [{ label: 'Source', url: 'https://github.com/LuixBits/lupe-webfolio', rel: 'source' }]
 	},
@@ -95,12 +95,13 @@ export const projects: Project[] = defineProjects([
 		title: { en: 'Scrum Poker', de: 'Scrum Poker' },
 		tagline: { en: 'A 3D planning-poker app.', de: 'Eine 3D-Planning-Poker-App.' },
 		body: {
-			en: 'Sample entry — what the app does, in one honest paragraph, goes here.',
-			de: 'Beispieleintrag — was die App macht, in einem ehrlichen Absatz, steht später hier.'
+			en: 'Scrum Poker is a 3D planning-poker app.\n\nThe images on this page are sample artwork; actual captures of the application will replace them.',
+			de: 'Scrum Poker ist eine 3D-Planning-Poker-App.\n\nDie Bilder auf dieser Seite sind Beispielgrafiken. Echte Aufnahmen der Anwendung werden sie ersetzen.'
 		},
 		tags: ['sveltekit', '3d'],
 		year: 2025,
 		category: 'web',
+		status: 'sample',
 		stack: ['SvelteKit', 'Three.js', 'WebSocket'],
 		screenshots: [1, 2, 3].map((n) => ({
 			id: `screen-${n}`,
@@ -129,7 +130,8 @@ export const projects: Project[] = defineProjects([
 		},
 		tags: ['interactive'],
 		year: 2026,
-		category: 'web',
+		category: 'experiments',
+		status: 'sample',
 		stack: ['Canvas', 'Pointer Events'],
 		demo: {
 			embed: {
@@ -139,13 +141,131 @@ export const projects: Project[] = defineProjects([
 				title: { en: 'Orbit Toy — sample build', de: 'Orbit Toy — Beispiel-Build' }
 			}
 		}
+	},
+	{
+		slug: 'team-feed',
+		title: { en: 'Team Feed', de: 'Team Feed' },
+		tagline: {
+			en: 'A shared feed for Confluence and Markdown updates.',
+			de: 'Ein gemeinsamer Feed für Confluence- und Markdown-Updates.'
+		},
+		body: {
+			en: 'Team Feed is an Atlassian app that brings Confluence documents and selected Markdown updates into a shared feed. Readers return to their saved place, and discussions stay beneath each post.\n\nThe app lives inside Confluence as a page macro. Its development includes a local demo and a Forge runtime. Public release is still being prepared.',
+			de: 'Team Feed ist eine Atlassian-App, die Confluence-Dokumente und ausgewählte Markdown-Updates in einem gemeinsamen Feed bündelt. Leser kehren an ihre gespeicherte Stelle zurück, und Diskussionen bleiben direkt beim jeweiligen Beitrag.\n\nDie App läuft als Makro in Confluence-Seiten. Zur Entwicklung gehören eine lokale Demo und eine Forge-Laufzeit. Die öffentliche Veröffentlichung wird noch vorbereitet.'
+		},
+		category: 'web',
+		status: 'in-development',
+		tags: ['Atlassian', 'Confluence'],
+		stack: ['Vue', 'TypeScript', 'Atlassian Forge']
+	},
+	{
+		slug: 'roomplan-nvim',
+		title: { en: 'RoomPlan', de: 'RoomPlan' },
+		tagline: {
+			en: 'Plan rooms and furniture inside Neovim.',
+			de: 'Räume und Möbel direkt in Neovim planen.'
+		},
+		body: {
+			en: 'RoomPlan is a floor planner for Neovim, built around keyboard controls and exact metric geometry. Rooms, furniture, doors, windows and outlets belong to the same editable plan.\n\nPlans can be saved as JSON or embedded in a Norg document. The terminal canvas is a view of the stored measurements, so display rounding does not change the plan.',
+			de: 'RoomPlan ist ein Grundrissplaner für Neovim mit Tastatursteuerung und exakter metrischer Geometrie. Räume, Möbel, Türen, Fenster und Steckdosen gehören zum selben bearbeitbaren Plan.\n\nPläne lassen sich als JSON speichern oder in ein Norg-Dokument einbetten. Die Terminalansicht stellt die gespeicherten Masse dar; Rundungen auf dem Bildschirm verändern den Plan nicht.'
+		},
+		category: 'neovim',
+		tags: ['Neovim', 'open source'],
+		stack: ['Lua', 'Neovim'],
+		links: [
+			{
+				label: 'Source',
+				url: 'https://github.com/LuixBits/luixbits-roomplanner.nvim',
+				rel: 'source'
+			}
+		],
+		videos: [
+			{
+				id: 'roomplan-showcase',
+				title: 'I built a floor planner in Neovim',
+				provider: 'youtube',
+				src: 'bAPyriQQsNM',
+				poster: '/media/projects/luixbits/roomplanner.jpg',
+				duration: 789
+			}
+		]
+	},
+	{
+		slug: 'neorg-flashcards',
+		title: { en: 'Flashcards', de: 'Flashcards' },
+		tagline: {
+			en: 'Local flashcards, review sessions and plain Norg files.',
+			de: 'Lokale Lernkarten, Wiederholungen und einfache Norg-Dateien.'
+		},
+		body: {
+			en: 'A flashcard workspace for Neovim. Each subject has its own collection, card types, review schedule and history, stored locally as plain Norg files.\n\nCards can be created, browsed and reviewed in the editor. Neorg improves ordinary file editing, but the flashcard workspace also works without it.',
+			de: 'Ein Lernkarten-Arbeitsbereich für Neovim. Jedes Fach hat eine eigene Sammlung, Kartentypen, einen Wiederholungsplan und einen Verlauf, lokal in einfachen Norg-Dateien gespeichert.\n\nKarten lassen sich im Editor erstellen, durchsuchen und wiederholen. Neorg verbessert die normale Dateibearbeitung; der Lernkarten-Arbeitsbereich funktioniert auch ohne Neorg.'
+		},
+		category: 'neovim',
+		tags: ['Neovim', 'learning', 'open source'],
+		stack: ['Lua', 'Neovim', 'Norg'],
+		links: [
+			{
+				label: 'Source',
+				url: 'https://github.com/LuixBits/luixbits-neorg-flashcards.nvim',
+				rel: 'source'
+			}
+		]
+	},
+	{
+		slug: 'noctalia-plugins',
+		title: { en: 'Noctalia Plugins', de: 'Noctalia-Plugins' },
+		tagline: {
+			en: 'Desktop tools, starting with the Casio Deck.',
+			de: 'Desktop-Werkzeuge, angefangen mit dem Casio Deck.'
+		},
+		body: {
+			en: 'A collection of plugins for Noctalia. Casio Deck connects a Bluetooth Casio watch to desktop controls on Linux and Wayland.\n\nThe collection gives these desktop experiments a shared home. The Casio project and its setup are also documented on LuixBits.',
+			de: 'Eine Sammlung von Plugins für Noctalia. Casio Deck verbindet eine Bluetooth-Casio-Uhr mit Desktop-Steuerungen unter Linux und Wayland.\n\nDie Sammlung gibt diesen Desktop-Experimenten einen gemeinsamen Platz. Das Casio-Projekt und seine Einrichtung sind auch auf LuixBits dokumentiert.'
+		},
+		category: 'desktop',
+		tags: ['Noctalia', 'Linux', 'open source'],
+		links: [
+			{
+				label: 'Source',
+				url: 'https://github.com/LuixBits/luixbits-noctalia-plugins',
+				rel: 'source'
+			}
+		],
+		videos: [
+			{
+				id: 'casio-nixos',
+				title: 'My Casio Watch Controls NixOS Now || Noctalia Plugin',
+				provider: 'youtube',
+				src: 'SYBy4kMvbhY',
+				poster: '/media/projects/luixbits/casio.jpg',
+				duration: 597
+			}
+		]
+	},
+	{
+		slug: 'magic-mouse',
+		title: { en: 'Magic Mouse', de: 'Magic Mouse' },
+		tagline: {
+			en: 'A standalone app for the Magic Mouse.',
+			de: 'Eine eigenständige App für die Magic Mouse.'
+		},
+		body: {
+			en: 'An upcoming standalone application for the Magic Mouse. Features and release details will be added as the project takes shape.',
+			de: 'Eine geplante eigenständige Anwendung für die Magic Mouse. Funktionen und Details zur Veröffentlichung folgen, wenn das Projekt konkreter wird.'
+		},
+		category: 'desktop',
+		status: 'upcoming',
+		tags: ['desktop', 'input']
 	}
 ]);
 
 export const projectCategories = [
 	{ id: 'youtube', anchor: 'youtube' },
-	{ id: 'opensource', anchor: 'opensource' },
-	{ id: 'web', anchor: 'web' }
+	{ id: 'web', anchor: 'web' },
+	{ id: 'neovim', anchor: 'neovim' },
+	{ id: 'desktop', anchor: 'desktop' },
+	{ id: 'experiments', anchor: 'experiments' }
 ] as const;
 
 export function projectsByCategory(category: Project['category']): Project[] {

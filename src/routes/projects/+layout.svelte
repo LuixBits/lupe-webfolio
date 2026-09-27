@@ -72,6 +72,8 @@
 		const frame = oldPage.getBoundingClientRect();
 		const computed = getComputedStyle(oldPage);
 		departing = oldPage.cloneNode(true) as HTMLElement;
+		// A playing tablet belongs to the live room, never to the visual clone.
+		departing.querySelectorAll('iframe, video, audio').forEach((media) => media.remove());
 		// Ambient effects in the larger room must hold their visible frame in
 		// the departure snapshot instead of restarting when the clone mounts.
 		const originals = oldPage.querySelectorAll<HTMLElement>('[data-workshop-animated]');

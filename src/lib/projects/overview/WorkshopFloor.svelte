@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as m from '$lib/paraglide/messages';
-	import FloorPlan from '$lib/projects/workbench/FloorPlan.svelte';
+	import WorkshopDrawers from './WorkshopDrawers.svelte';
 	import WorkshopStool from './WorkshopStool.svelte';
 	import WorkshopBasket from './WorkshopBasket.svelte';
 	import WorkshopCatArt from './WorkshopCatArt.svelte';
@@ -8,7 +8,6 @@
 	import { roomActivity, useWorkshopState } from './workshop-state.svelte';
 	let { ready }: { ready: boolean } = $props();
 	const roomState = useWorkshopState();
-	const id = $props.id();
 	let gaze = $state(0);
 	let catBounds: DOMRect | undefined;
 	function look(event: PointerEvent) {
@@ -21,7 +20,7 @@
 	}
 </script>
 
-<div class="underbench" data-workshop="underbench">
+<div class="underbench drawer-cabinet" data-workshop="underbench">
 	<svg
 		class="cable-floor"
 		viewBox="0 0 1400 480"
@@ -45,30 +44,7 @@
 			stroke-width="4"
 		/>
 	</svg>
-	<div class="drawers" class:drawer-open={roomState.drawerOpen}>
-		<button
-			class="drawer sketch-handle"
-			type="button"
-			disabled={!ready}
-			aria-expanded={roomState.drawerOpen}
-			aria-controls={`${id}-sketch`}
-			aria-label={roomState.drawerOpen ? m.workshop_drawer_close() : m.workshop_drawer_open()}
-			title={roomState.drawerOpen ? m.workshop_drawer_close() : m.workshop_drawer_open()}
-			onclick={() => (roomState.drawerOpen = !roomState.drawerOpen)}
-			><span class="drawer-grip" aria-hidden="true"></span></button
-		>
-		<div
-			class="sketch-tray"
-			id={`${id}-sketch`}
-			hidden={!roomState.drawerOpen}
-			role="region"
-			aria-label={m.workshop_sketch()}
-		>
-			<FloorPlan />
-		</div>
-		<div class="drawer" aria-hidden="true"></div>
-		<div class="drawer" aria-hidden="true"></div>
-	</div>
+	<WorkshopDrawers {ready} />
 	<WorkshopStool /><WorkshopBasket />
 </div>
 <div class="floor ambient-zone" use:roomActivity data-workshop="floor">

@@ -6,6 +6,7 @@
 	import ChannelPlayer from '$lib/projects/ChannelPlayer.svelte';
 	import TapeJacket from '$lib/projects/TapeJacket.svelte';
 	import BackToShelf from '$lib/projects/BackToShelf.svelte';
+	import ProjectStatus from '$lib/projects/ProjectStatus.svelte';
 	import { resolveLocalized } from '$lib/content/schema';
 	import { getLocale } from '$lib/paraglide/runtime';
 	import * as m from '$lib/paraglide/messages';
@@ -24,7 +25,9 @@
 	/* Sample marker: the authored base-locale body self-identifies stand-in
 	   entries ("Sample entry — …"). Quiet note rendered on the sleeve; it
 	   disappears the moment real copy replaces the sample text. */
-	const isSample = $derived(/^sample/i.test(resolveLocalized(project.body, 'en')));
+	const isSample = $derived(
+		project.status === 'sample' || /^sample/i.test(resolveLocalized(project.body, 'en'))
+	);
 
 	/* Lending card: authored links plus the demo URL (deduped by URL). */
 	const cardLinks = $derived.by(() => {
@@ -61,6 +64,7 @@
 					<div class="heading">
 						<h1>{title}</h1>
 						<p class="tagline">{tagline}</p>
+						<ProjectStatus {project} />
 					</div>
 				</header>
 

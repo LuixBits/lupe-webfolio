@@ -16,8 +16,9 @@ export const menu: MenuItem[] = [
 		href: '/projects',
 		children: [
 			{ id: 'projects-youtube', label: m.nav_projects_youtube, href: '/projects#youtube' },
-			{ id: 'projects-opensource', label: m.nav_projects_opensource, href: '/projects#opensource' },
-			{ id: 'projects-web', label: m.nav_projects_web, href: '/projects#web' }
+			{ id: 'projects-web', label: m.nav_projects_web, href: '/projects#web' },
+			{ id: 'projects-neovim', label: m.nav_projects_neovim, href: '/projects#neovim' },
+			{ id: 'projects-desktop', label: m.nav_projects_desktop, href: '/projects#desktop' }
 		]
 	},
 	{

@@ -132,10 +132,12 @@ export const projectSchema = z.object({
 	tagline: localizedString,
 	body: localizedString,
 	tags: z.array(z.string()).default([]),
-	year: z.number().int(),
+	year: z.number().int().optional(),
 	featured: z.boolean().default(false),
-	/** Groups entries within the Projects section (#youtube / #opensource / #web). */
-	category: z.enum(['youtube', 'opensource', 'web']).optional(),
+	/** Group by the environment where the project is used; open source is a tag. */
+	category: z.enum(['youtube', 'web', 'neovim', 'desktop', 'experiments']).optional(),
+	/** Only announce availability when it has been explicitly established. */
+	status: z.enum(['upcoming', 'in-development', 'sample']).optional(),
 	/** A creator's channel gets a programme selector and a printed introduction. */
 	channel: z
 		.object({
@@ -323,7 +325,7 @@ export function defineProjects(input: unknown[]): Project[] {
 	return z
 		.array(projectSchema)
 		.parse(input)
-		.sort((a, b) => b.year - a.year);
+		.sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
 }
 
 /** Parse + validate hobby albums. */

@@ -14,7 +14,7 @@
 			stroke="currentColor"
 			stroke-width="2"
 		/>
-	{:else if project.category === 'opensource'}
+	{:else if project.slug === 'lupe-webfolio'}
 		<circle cx="35" cy="35" r="27" stroke="currentColor" /><circle
 			cx="35"
 			cy="35"
@@ -25,6 +25,18 @@
 			d="M35 8v21m0 12v21M8 35h21m12 0h21M16 16l15 15m9 9 14 14M54 16L39 31M16 54l15-15"
 			stroke="currentColor"
 		/>
+	{:else if project.category === 'neovim'}
+		<path
+			d="M10 13h50v39H10ZM17 23l8 6-8 6m16 0h14M24 60h22m-11-8v8"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+		/>
+	{:else if project.category === 'desktop'}
+		<rect x="9" y="12" width="41" height="32" rx="3" stroke="currentColor" stroke-width="2" />
+		<path d="M20 53h20m-10-9v9" stroke="currentColor" stroke-width="2" />
+		<rect x="49" y="38" width="15" height="23" rx="7" stroke="currentColor" stroke-width="2" />
+		<path d="M56.5 39v8" stroke="currentColor" />
 	{:else if project.demo?.embed}
 		<ellipse
 			cx="35"
