@@ -260,8 +260,13 @@ class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
   click → sinking pellet, one hungry asagi glides over, 1.5 s cooldown),
   the surfaced namazu (pupils follow fine pointers; click/Enter = slow
   blink + bubbles + "+1 ruhige See" — never a screen shake), and die
-  Flaschenpost (placeholder washi tag until `cvPdf` is set, then the
-  download). Each craft opens `/cv/<slug>` (`lib/cv/VesselDeck.svelte`):
+  Flaschenpost — a brushed arrow points at the bottle, whose tag reads
+  "CV als PDF"; it links to **/cv/flaschenpost**, where the corked
+  bottle stands beside its unrolled scroll offering the SAME CV in
+  five sleeves (Plain + the four worlds) as little proof prints.
+  Driven by `cvPrints[]` in `lib/content/cv.ts` (replaces `cvPdf`):
+  each entry's `file` stays undefined ("folgt — placeholder" chip)
+  until the owner drops PDFs under static/media/cv/. Each craft opens `/cv/<slug>` (`lib/cv/VesselDeck.svelte`):
   THE ZOOM (`lib/cv/DeckAboard.svelte`): the page background IS the
   craft, seen from above at deck height — boats render their own
   planking edge to edge (gunwales + pond water at the sides, a koi in
