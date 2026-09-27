@@ -114,9 +114,9 @@ selection, eject, power, lamp, watch and remote behavior.
   main's padding by 2.5rem top+bottom for the same reason).
 - `routes/*/+page.svelte` — each section has a bespoke presentation:
   About = Herbarium Folio + **Grove walk**, Projects = after-hours workshop,
-  Hobbies = Star Atlas, CV = **»Der Tauchgang«** (one continuous koi-pond
-  dive, see its own entry below). CV stations live in `lib/content/cv.ts`
-  (`stations[]` + `cvPdf` + `scrolls[]`).
+  Hobbies = Star Atlas, CV = **»Der Anlegesteg«** (one compact pond scene,
+  every craft a doorway — its own entry below). CV content lives in `lib/content/cv.ts`
+  (`stations[]` + `vessels[]` + `cvPdf` + `scrolls[]`).
 - **LuixBits workbench** (`/projects/my-channel`, including localized routes)
   keeps the Projects palette and CRT but has its own plaster wall, mounted
   neon title, wooden desk, and cable footer. The root layout selects this
@@ -177,55 +177,40 @@ class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
   never below ground; solid plume tail that flaps while she bolts —
   `.running .sq-tailg`). The garden footer ("the Seed", see footer
   entry) ends the descent where the tree began.
-- **The dive (CV)** — the page IS one dive through a Japanese koi pond:
-  the surface is today, the seabed is 2013, scrolling is diving (the
-  water twin of the About tree; full plan + resolved decisions in
-  `docs/plans/cv-koi-dive.md`). Drawn by `lib/water/dive/DiveLayer.svelte`
-  (+ `dive/generate.ts`), a faithful TreeLayer clone: a full-bleed z:-1
-  instance measures every `[data-dive]` anchor (required: `divewrap`,
-  `sky`, `waterline`, `origin`; plus `st-<id>` per station and the two
-  bank heads) and paints the whole world — the atmosphere as ONE computed
-  gradient (washi dawn → hard waterline break → sunlit aqua → twilight →
-  midnight → abyss ink, stops derived from the measured waterline/bed),
-  and the **sounding line**: a tapered rope from the boat that bends to
-  the bank corridor (left gutter under 900px), drifts on a dimension-hash
-  phase (`lineXAt`), pays out/rewinds via a scroll-scrubbed clip rect
-  (O(1): two rect heights per frame), knotted per station with
-  collision-aware italic depth tags (true time-derived meters, localized
-  by the page) and tie cords zone-gated per reveal. Shared vocabulary:
-  **sky · waterline · sunlit · twilight · midnight · seabed · origin**.
-  The world: wasen skiff + two koinobori, the Hokusai crest breaking over
-  its stern (FooterWave's breaker rebased + mirrored), standing torii
-  with slit-masked reflection, seigaiha band, rays/caustics, lily pads
-  with trailing stems, a plunge one-shot at the waterline reveal; koi
-  cast by era (kohaku at today → asagi twilight → a five-fish school and
-  six fry on ONE offset-path each), kelp beds (`KELP_PRESET` +
-  `variant="kelp"` in lsystem/Garden, bbox-scanned params), sunken tōrō
-  lanterns with warm glow pools behind the deep washi slips, algae on
-  the aging rope, dashed-stroke bubble columns; the seabed finale — dune
-  bands, the moss-dark sunken torii, and the **koi-egg clutch** (the
-  About Seed's mirror) at the plumb lead's landing, its light filaments
-  reaching through the under-clip into `FooterAbyss` (route-scoped in
-  `Footer.svelte` by delocalized pathname; `/cv/[slug]` keeps the
-  Hokusai `FooterWave`). A second sparse DiveLayer instance (z:3, above
-  the cards) carries the interactivity: the **asagi companion** riding
-  the line at your viewport (nose down diving, turning up when you
-  rise), **feed-the-koi** (click open water → pellet sinks, nearest of
-  two free koi glides over; 1.5 s cooldown), the **namazu** (eye follows
-  the cursor, click/Enter = slow blink + bubbles + "+1 ruhige See" — no
-  screen shake, ever) and the **Flaschenpost** (CV-as-PDF bottle;
-  placeholder washi tag until `cvPdf` is set, expected at
-  `static/media/cv/luiz-perren-cv.pdf`). Page side: washi station slips
-  (PaperScroll palette) in a two-bank weave — banks stay whole in the
-  DOM (screen readers hear Erfahrung, then Ausbildung; hash anchors
-  `#experience`/`#education` sit on the h2s) while a display:contents
-  grid interleaves both banks by depth row so concurrent stations sit
-  side by side; under 900px one depth-ordered column beside the gutter
-  line. SIGA renders as one grouped panel (two role slips + mizuhiki
-  cord); the army card carries an origami crane (deliberately NOT a red
-  cross). Reduced motion / SSR / no-JS all land fully drawn (koi park at
-  their `--rest` offsets, kelp snaps grown, the companion parks beside
-  the first station).
+- **The mooring (CV)** — the whole CV is ONE pond at dawn, composed like
+  a signed woodblock print (plan + judgment calls:
+  `docs/plans/cv-mooring.md`; it supersedes the one-night dive build of
+  `cv-koi-dive.md`, whose asset library it reuses). **Work floats,
+  education grows:** five bespoke crafts in `lib/water/pond/Vessel.svelte`
+  — the SIGA flagship (two lashed cargo crates = the two roles, mizuhiki
+  cord, koinobori, lit chōchin), the HSLU lotus raft (MA + BSc pads in
+  bloom, stake sign, tombo dragonfly), the Neptun skiff (trident
+  boat-hook), the Armee punt (origami crane — deliberately NOT a red
+  cross), the weathered EMVs rowboat towing two school pads. **Time is
+  distance:** newest big in the foreground, the far moss-vermilion torii
+  marks 2013 ("Hier beginnt die Strömung."), and one dashed mooring
+  current ties every craft to the "heute" bollard; uki floats carry the
+  spans. Print devices: kumo cloud bars, kasumi mist, seigaiha patches,
+  dash-stylized reflections (no masks), bokashi sky, the artist's LP seal.
+  `lib/water/pond/PondScene.svelte` holds TWO fixed compositions — the
+  wide PANORAMA and, under 700px, the vertical QUAY (same fleet walked
+  down an S-current) — both SSR-rendered with real `<a>` links per craft
+  (hover/focus lifts the craft in a foam ring that doubles as the hit
+  target), a media query shows one, and interactions convert pointer
+  coords through the active layout's CTM. Play: feed-the-koi (open-water
+  click → sinking pellet, one hungry asagi glides over, 1.5 s cooldown),
+  the surfaced namazu (pupils follow fine pointers; click/Enter = slow
+  blink + bubbles + "+1 ruhige See" — never a screen shake), and die
+  Flaschenpost (placeholder washi tag until `cvPdf` is set, then the
+  download). Each craft opens `/cv/<slug>` (`lib/cv/VesselDeck.svelte`):
+  a berth band with the SAME craft floating (shared art component), then
+  the **Logbuch** of washi station slips (PaperScroll palette); the
+  future thesis scroll hangs off the HSLU MA slip via `stations.detail`.
+  Wheel CV children: SIGA / HSLU / Neptun (routes, no hash anchors).
+  Reduced motion = a finished still print (koi parked at `--rest`
+  offsets, zero pond animations, games disabled); no-JS gets the full
+  working harbor and decks. Shared vocabulary: sky · horizon ·
+  current · craft/berth · uki tag · bollard · gate.
 - Grove chapters grow into view on scroll — a shared IntersectionObserver
   (`lib/garden/reveal.ts`) flips per-chapter classes, CSS does the animating
   (transform/opacity one-shots). `Garden.svelte` has `start` (grow when
@@ -249,17 +234,18 @@ class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
 
 - Orbit Toy and Scrum Poker still contain sample project content. The overview
   renders the actual inventory without empty slots.
-- **CV dive**: the station data is REAL (LinkedIn export 2026-09), but —
-  full `skills` arrays (slots marked "— placeholder" where the export
-  truncated "+N"), the `cv_lead` prose (marked placeholder; `cv_origin`
-  ships the plan's caption — rewrite if wanted), the real CV PDF (drop at
-  `static/media/cv/luiz-perren-cv.pdf`, set `cvPdf` in `lib/content/cv.ts`
-  — the Flaschenpost becomes the download), and the MA thesis as a
-  kakemono scroll (author it in `scrolls[]` with slug `thesis`, wire
-  `stations[hslu-ma].detail: 'thesis'`; the sample paper
-  `perception-in-low-light` stays only as the PaperScroll design fixture
-  until then). Also owner-check: `EMVs Visp/Sion` org naming came from
-  the plan's table — verify the spelling.
+- **CV mooring**: the station data is REAL (LinkedIn export 2026-09),
+  but — full `skills` arrays (slots marked "— placeholder" where the
+  export truncated "+N"), the `cv_lead` prose (marked placeholder;
+  `cv_origin` ships the agreed caption — rewrite if wanted), the real CV
+  PDF (drop at `static/media/cv/luiz-perren-cv.pdf`, set `cvPdf` in
+  `lib/content/cv.ts` — die Flaschenpost becomes the download link), and
+  the MA thesis as a kakemono scroll (author it in `scrolls[]` with slug
+  `thesis`, wire `stations[hslu-ma].detail: 'thesis'` — the hanko then
+  appears on the HSLU deck; the sample paper `perception-in-low-light`
+  stays only as the PaperScroll design fixture until then). Also
+  owner-check: the `EMVs` org naming (hull + deck + wheel spell it that
+  way) — verify the spelling.
 - Real hobby photos/videos (Rick Astley + stock shots are placeholders),
   and the About
   page's optional herbarium fields (epithet/since/link notes — see

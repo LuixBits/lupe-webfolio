@@ -1,5 +1,10 @@
 # CV — »Der Tauchgang« (The Dive)
 
+> **SUPERSEDED 2026-09-27** by `cv-mooring.md` (»Der Anlegesteg«): the owner
+> reviewed the finished dive and re-concepted the page as one compact pond
+> scene with enter-able craft. The dive page/DiveLayer were removed; its
+> asset library (koi, torii, crane, washi language, kelp preset) lives on.
+
 **Plan written 2026-09-27. Status: IMPLEMENTED — all ten phases built,
 verified and committed the same night (Phases 0–9, commits
 `f34b337 … 892716c` + the docs commit; the actual rollback hash before work

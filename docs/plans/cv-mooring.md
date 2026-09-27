@@ -66,8 +66,8 @@ One panoramic pond, roughly a viewport. **Work floats, education grows:**
 
 ## Phases
 
-P1 content+routes+wheel → P2 panorama + compact `/cv` + dive removal →
-P3 quay + life + play → P4 hardening (the dive's assertion matrix, minus
+**IMPLEMENTED the same day** — P1 content+routes+wheel → P2 panorama +
+compact `/cv` + dive removal → P3 quay + life + play → P4 hardening (the dive's assertion matrix, minus
 scrub/dive-specific checks, plus scene link hit-targets) + HANDOFF.
 
 Same rules as ever: gentle motion, no wobble, reduced-motion lands fully

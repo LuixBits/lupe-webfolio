@@ -378,6 +378,10 @@
 				<stop offset="0.35" stop-color="#abdbe6" />
 				<stop offset="1" stop-color="#7cc2d6" />
 			</linearGradient>
+			<linearGradient id="pd-out" x1="0" y1="0" x2="0" y2="1">
+				<stop offset="0" stop-color="#e8f4f8" stop-opacity="0" />
+				<stop offset="1" stop-color="#e8f4f8" />
+			</linearGradient>
 			<radialGradient id="pd-sun">
 				<stop offset="0" stop-color="#f9edd0" stop-opacity="0.95" />
 				<stop offset="0.45" stop-color="#f6e6bb" stop-opacity="0.5" />
@@ -495,6 +499,8 @@
 
 		{@render play('pano')}
 
+		<rect y="498" width="1200" height="30" fill="url(#pd-out)" />
+
 		<!-- the print is signed -->
 		<g transform="translate(1152 494)">{@render seal()}</g>
 	</svg>
@@ -505,6 +511,10 @@
 			<linearGradient id="pq-sky" x1="0" y1="0" x2="0" y2="1">
 				<stop offset="0" stop-color="#f4efe2" />
 				<stop offset="1" stop-color="#dcebe9" />
+			</linearGradient>
+			<linearGradient id="pq-out" x1="0" y1="0" x2="0" y2="1">
+				<stop offset="0" stop-color="#e8f4f8" stop-opacity="0" />
+				<stop offset="1" stop-color="#e8f4f8" />
 			</linearGradient>
 			<radialGradient id="pq-sun">
 				<stop offset="0" stop-color="#f9edd0" stop-opacity="0.95" />
@@ -591,6 +601,7 @@
 
 		{@render play('quay')}
 
+		<rect y="908" width="420" height="32" fill="url(#pq-out)" />
 		<g transform="translate(382 916)">{@render seal()}</g>
 	</svg>
 </div>
