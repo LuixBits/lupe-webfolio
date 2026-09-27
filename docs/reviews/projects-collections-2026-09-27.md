@@ -6,6 +6,11 @@ three working drawers, a tablet Rickroll and more neon lettering. The
 [collections plan](../plans/projects-collections-drawers.md) records the
 structure and content sources.
 
+The later [floor and typography review](projects-floor-and-type-2026-09-27.md)
+records the refined artwork, explicit type rules and enlarged-text fixes. Both
+local previews now serve that revision; this review preserves the collections
+milestone and its original artifacts.
+
 ## Result
 
 The room now contains nine native project links. Studio leads to LuixBits; Web

@@ -17,6 +17,8 @@ setup quirks (NixOS Playwright → system chromium, ports) are in the assistant'
 project memory. `npm run check` must stay at 0 errors.
 
 Projects UI text uses only the shared `--fs-*` scale in `src/app.css`.
+The [Projects typography rules](docs/projects-typography.md) list all six sizes,
+their roles, the Righteous / Space Mono pairing and the neon lettering treatment.
 Keep useful content and metadata; omit decorative micro-labels, status chips,
 channel codes, repeated tags, and serial-number copy. Let the shelves, CRT,
 paper textures, and remote-control back link carry the theme.
@@ -70,6 +72,13 @@ Rickroll; Stop, closing the drawer and route exit remove its iframe. Snapshots
 exclude media to prevent a second player. Room controls and all three drawer
 states survive project visits. Returns restore the selected link and scroll.
 The main sign and station signs now use SVG neon tubes with HTML headings.
+
+The [floor and typography refinement](docs/reviews/projects-floor-and-type-2026-09-27.md)
+redraws the cat, stool, plant, basket, rug and shared floor-plan sheet. The six
+font-size roles are documented in the typography guide above. Enlarged text
+now reflows cassette labels, the channel masthead, desk objects and project
+sleeves. All Projects routes use the phone navigation ledge, so detail-page
+content and footer controls clear the wheel as well.
 
 Only visible ambient zones animate; hidden tabs, pause, route motion and reduced
 motion stop them. Static project links and drawer disclosures work without

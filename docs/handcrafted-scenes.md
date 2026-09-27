@@ -194,6 +194,8 @@ provider controls. The ink Play arrow measures the real button through a
 Use the shared sizes in [app.css](../src/app.css): `--fs-hero`, `--fs-h1`,
 `--fs-h2`, `--fs-h3`, `--fs-body` and `--fs-small`. Typography communicates
 hierarchy; labels should not multiply merely to make an object look technical.
+The [Projects typography rules](projects-typography.md) map those tokens to
+specific roles and record the permitted typefaces and neon treatment.
 
 The compact cassette revision reduced shell padding, reel size and rack gaps.
 It moved the thumbnail from the reel window to a small, rotated paper print on
