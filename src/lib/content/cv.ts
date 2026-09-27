@@ -175,10 +175,48 @@ export const stations: Station[] = defineStations([
 	}
 ]);
 
-/** The Flaschenpost target — the CV as a PDF. Stays undefined until the
- *  owner drops the real file (expected: static/media/cv/luiz-perren-cv.pdf);
- *  the bottle renders a "PDF folgt — placeholder" tag meanwhile. */
-export const cvPdf: string | undefined = undefined;
+/** The Flaschenpost's cargo — the same CV printed once per world of this
+ *  site, plus a plain unthemed one. `file` stays undefined until the owner
+ *  drops the PDFs (expected under static/media/cv/, e.g.
+ *  luiz-perren-cv.pdf / luiz-perren-cv-garden.pdf / …); the scroll shows a
+ *  "folgt — placeholder" chip meanwhile. The pond's bottle always links to
+ *  /cv/flaschenpost, where these are offered. */
+export interface CvPrint {
+	id: 'plain' | 'garden' | 'water' | 'vaporwave' | 'cosmos';
+	label: { en: string; de: string };
+	note: { en: string; de: string };
+	file?: string;
+}
+export const cvPrints: CvPrint[] = [
+	{
+		id: 'plain',
+		label: { en: 'Plain', de: 'Schlicht' },
+		note: {
+			en: 'classic, unthemed — for the busy inbox',
+			de: 'klassisch, ohne Thema — fürs eilige Postfach'
+		}
+	},
+	{
+		id: 'garden',
+		label: { en: 'Garden', de: 'Garten' },
+		note: { en: "in the About grove's greens", de: 'in den Grüntönen des Hains' }
+	},
+	{
+		id: 'water',
+		label: { en: 'Water', de: 'Wasser' },
+		note: { en: "on this pond's paper", de: 'auf dem Papier dieses Teichs' }
+	},
+	{
+		id: 'vaporwave',
+		label: { en: 'Vaporwave', de: 'Vaporwave' },
+		note: { en: 'neon on deep purple', de: 'Neon auf tiefem Violett' }
+	},
+	{
+		id: 'cosmos',
+		label: { en: 'Cosmos', de: 'Kosmos' },
+		note: { en: 'under the night sky', de: 'unter dem Nachthimmel' }
+	}
+];
 
 /** THE FLEET — the pond groups the stations by organisation: work floats
  *  (boats), education grows (lily pads). Each vessel is one craft on the

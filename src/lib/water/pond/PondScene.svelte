@@ -14,7 +14,7 @@
 	 *  bars, kasumi mist, seigaiha patches, dash-stylized reflections, the
 	 *  artist's seal. */
 	import { onMount } from 'svelte';
-	import { cvPdf, HULL_NAME, vessels, vesselStations } from '$lib/content/cv';
+	import { HULL_NAME, vessels, vesselStations } from '$lib/content/cv';
 	import { resolveLocalized, resolveSpan, type Vessel as VesselT } from '$lib/content/schema';
 	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
 	import * as m from '$lib/paraglide/messages';
@@ -475,14 +475,18 @@
 			{@render namazuShape()}
 		</g>
 	</g>
+	<!-- the annotated way to the Flaschenpost -->
+	{#if key === 'pano'}
+		<path class="bt-arrow" d="M 716 776 C 748 766 780 782 800 808" />
+		<path class="bt-arrow" d="M 800 808 L 786 804 M 800 808 L 797 794" />
+	{:else}
+		<path class="bt-arrow" d="M 246 834 C 268 826 290 840 304 856" />
+		<path class="bt-arrow" d="M 304 856 L 292 853 M 304 856 L 302 844" />
+	{/if}
 	<g transform="translate({sp.bottle.x} {sp.bottle.y})">
-		{#if cvPdf}
-			<a class="bottle-link" href={cvPdf} download aria-label={m.cv_pdf_label()}>
-				{@render bottleShape(m.cv_pdf_label())}
-			</a>
-		{:else}
-			<g class="bob" style="--bd:8.4s">{@render bottleShape(m.cv_pdf_placeholder())}</g>
-		{/if}
+		<a class="bottle-link" href={localizeHref('/cv/flaschenpost')} aria-label={m.cv_pdf_label()}>
+			<g class="bob" style="--bd:8.4s">{@render bottleShape(m.cv_bottle_arrow())}</g>
+		</a>
 	</g>
 {/snippet}
 
@@ -997,6 +1001,13 @@
 	.bottle-link:focus-visible .bt-glass {
 		stroke: #14424f;
 		stroke-width: 2;
+	}
+	.bt-arrow {
+		fill: none;
+		stroke: #6d4a2e;
+		stroke-width: 2.4;
+		stroke-linecap: round;
+		opacity: 0.85;
 	}
 	.bt-glass {
 		fill: rgba(140, 190, 170, 0.42);
