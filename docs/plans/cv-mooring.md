@@ -72,7 +72,13 @@ print, split strictly by track (education pads left / work boats right,
 EFZ+BM as their own 'schule' pad cluster), the uki span-tags were replaced
 by year chips threaded on the central current plus two mooring ropes per
 craft (spans as rigging), and the nonsensical wave footer became
-FooterJetty — the dock underfoot. Baseline phases: — P1 content+routes+wheel → P2 panorama +
+FooterJetty — the dock underfoot. **v3 after review round 2** (pano bank
+board hid behind SIGA; "make things a little bigger"; typography
+question): the bank boards became vertical NOBORI banners at the scene's
+outer edges (stacked letters, red mon, scallop hem, faint skewX flutter),
+another ~12% size pass on taller canvases (pano 1000×920 / quay 420×1020),
+and Shippori Mincho became the water theme's `--font-display` (Spectral
+fallback, Karla body). Baseline phases: — P1 content+routes+wheel → P2 panorama +
 compact `/cv` + dive removal → P3 quay + life + play → P4 hardening (the dive's assertion matrix, minus
 scrub/dive-specific checks, plus scene link hit-targets) + HANDOFF.
 

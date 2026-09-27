@@ -68,54 +68,54 @@
 
 	const PANO: Layout = {
 		w: 1000,
-		h: 880,
+		h: 920,
 		waterY: 120,
 		knots: [
-			{ key: 'heute', x: 500, y: 175 },
-			{ key: '2024', x: 489, y: 268 },
-			{ key: '2021', x: 509, y: 372 },
-			{ key: '2019', x: 497, y: 452 },
-			{ key: '2018', x: 486, y: 528 },
-			{ key: '2017', x: 505, y: 612 },
-			{ key: '2013', x: 496, y: 742 }
+			{ key: 'heute', x: 500, y: 178 },
+			{ key: '2024', x: 489, y: 282 },
+			{ key: '2021', x: 509, y: 396 },
+			{ key: '2019', x: 497, y: 482 },
+			{ key: '2018', x: 486, y: 560 },
+			{ key: '2017', x: 505, y: 648 },
+			{ key: '2013', x: 496, y: 784 }
 		],
 		crafts: [
-			{ slug: 'siga', x: 740, y: 224, s: 1.22, ax: -96, from: 'heute', to: '2021' },
-			{ slug: 'neptun', x: 735, y: 412, s: 1.22, ax: -56, from: '2021', to: '2019' },
-			{ slug: 'armee', x: 742, y: 570, s: 1.18, ax: -48, from: '2018', to: '2017' },
-			{ slug: 'emvs', x: 738, y: 677, s: 1.2, ax: -60, from: '2017', to: '2013' },
-			{ slug: 'hslu', x: 255, y: 385, s: 1.18, ax: 74, from: '2024', to: '2018' },
-			{ slug: 'schule', x: 262, y: 677, s: 1.15, ax: 44, from: '2017', to: '2013' }
+			{ slug: 'siga', x: 742, y: 240, s: 1.35, ax: -96, from: 'heute', to: '2021' },
+			{ slug: 'neptun', x: 740, y: 440, s: 1.32, ax: -56, from: '2021', to: '2019' },
+			{ slug: 'armee', x: 748, y: 604, s: 1.26, ax: -48, from: '2018', to: '2017' },
+			{ slug: 'emvs', x: 742, y: 716, s: 1.3, ax: -60, from: '2017', to: '2013' },
+			{ slug: 'hslu', x: 250, y: 408, s: 1.28, ax: 74, from: '2024', to: '2018' },
+			{ slug: 'schule', x: 258, y: 716, s: 1.24, ax: 44, from: '2017', to: '2013' }
 		],
-		gate: { x: 441, y: 650, s: 0.78 },
-		signL: { x: 240, y: 152 },
-		signR: { x: 760, y: 152 }
+		gate: { x: 437, y: 684, s: 0.85 },
+		signL: { x: 84, y: 36 },
+		signR: { x: 916, y: 36 }
 	};
 
 	const QUAY: Layout = {
 		w: 420,
-		h: 980,
+		h: 1020,
 		waterY: 120,
 		knots: [
-			{ key: 'heute', x: 205, y: 172 },
-			{ key: '2024', x: 198, y: 258 },
-			{ key: '2021', x: 212, y: 348 },
-			{ key: '2019', x: 200, y: 428 },
-			{ key: '2018', x: 194, y: 500 },
-			{ key: '2017', x: 210, y: 578 },
-			{ key: '2013', x: 202, y: 690 }
+			{ key: 'heute', x: 205, y: 174 },
+			{ key: '2024', x: 198, y: 270 },
+			{ key: '2021', x: 212, y: 368 },
+			{ key: '2019', x: 200, y: 452 },
+			{ key: '2018', x: 194, y: 530 },
+			{ key: '2017', x: 210, y: 614 },
+			{ key: '2013', x: 202, y: 738 }
 		],
 		crafts: [
-			{ slug: 'siga', x: 312, y: 215, s: 0.8, ax: -80, from: 'heute', to: '2021' },
-			{ slug: 'neptun', x: 312, y: 388, s: 0.8, ax: -48, from: '2021', to: '2019' },
-			{ slug: 'armee', x: 314, y: 540, s: 0.78, ax: -42, from: '2018', to: '2017' },
-			{ slug: 'emvs', x: 312, y: 634, s: 0.8, ax: -52, from: '2017', to: '2013' },
-			{ slug: 'hslu', x: 106, y: 380, s: 0.78, ax: 52, from: '2024', to: '2018' },
-			{ slug: 'schule', x: 110, y: 634, s: 0.78, ax: 34, from: '2017', to: '2013' }
+			{ slug: 'siga', x: 300, y: 232, s: 0.88, ax: -80, from: 'heute', to: '2021' },
+			{ slug: 'neptun', x: 306, y: 410, s: 0.86, ax: -48, from: '2021', to: '2019' },
+			{ slug: 'armee', x: 308, y: 572, s: 0.84, ax: -42, from: '2018', to: '2017' },
+			{ slug: 'emvs', x: 306, y: 672, s: 0.86, ax: -52, from: '2017', to: '2013' },
+			{ slug: 'hslu', x: 104, y: 402, s: 0.84, ax: 52, from: '2024', to: '2018' },
+			{ slug: 'schule', x: 108, y: 672, s: 0.84, ax: 34, from: '2017', to: '2013' }
 		],
-		gate: { x: 161, y: 622, s: 0.58 },
-		signL: { x: 86, y: 92 },
-		signR: { x: 334, y: 92 }
+		gate: { x: 160, y: 667, s: 0.6 },
+		signL: { x: 26, y: 52 },
+		signR: { x: 394, y: 52 }
 	};
 
 	const knotOf = (l: Layout, key: string) => l.knots.find((k) => k.key === key)!;
@@ -162,15 +162,15 @@
 	const PLAY: Record<'pano' | 'quay', PlaySpots> = {
 		pano: {
 			waterY: 120,
-			fkHome: { x: 500, y: 818 },
-			namazu: { x: 165, y: 800, s: 1 },
-			bottle: { x: 830, y: 792 }
+			fkHome: { x: 500, y: 858 },
+			namazu: { x: 168, y: 840, s: 1.08 },
+			bottle: { x: 828, y: 832 }
 		},
 		quay: {
 			waterY: 120,
-			fkHome: { x: 205, y: 806 },
-			namazu: { x: 75, y: 812, s: 0.74 },
-			bottle: { x: 322, y: 798 }
+			fkHome: { x: 205, y: 882 },
+			namazu: { x: 78, y: 888, s: 0.8 },
+			bottle: { x: 320, y: 876 }
 		}
 	};
 
@@ -309,8 +309,15 @@
 	</g>
 	<g transform="translate(17 -32) rotate(4)">
 		<path class="uk-tie" d="M -8 6 Q -13 2 -16 4" />
-		<rect class="uk-tag" x="-6" y="-9" width={m.cv_today().length * 7 + 14} height="20" rx="3" />
-		<text class="uk-text uk-text--big" x={(m.cv_today().length * 7 + 2) / 2} y="5.5"
+		<rect
+			class="uk-tag"
+			x="-6"
+			y="-10.5"
+			width={m.cv_today().length * 7.8 + 15}
+			height="23"
+			rx="3"
+		/>
+		<text class="uk-text uk-text--big" x={(m.cv_today().length * 7.8 + 3) / 2} y="6"
 			>{m.cv_today()}</text
 		>
 	</g>
@@ -320,27 +327,42 @@
 {#snippet yearChip(text: string)}
 	<rect
 		class="uk-tag"
-		x={-(text.length * 6.6 + 12) / 2}
-		y="-10"
-		width={text.length * 6.6 + 12}
-		height="20"
+		x={-(text.length * 7.6 + 14) / 2}
+		y="-11.5"
+		width={text.length * 7.6 + 14}
+		height="23"
 		rx="3"
 	/>
-	<text class="uk-text uk-text--big" x="0" y="4.5">{text}</text>
+	<text class="uk-text uk-text--big" x="0" y="5.2">{text}</text>
 {/snippet}
 
-<!-- the two bank boards: Ausbildung grows left, Erfahrung floats right -->
-{#snippet bankSign(text: string)}
-	<path class="bs-post" d="M 0 30 L 0 9" />
-	<rect
-		class="bs-board"
-		x={-(text.length * 7.4 + 22) / 2}
-		y="-12"
-		width={text.length * 7.4 + 22}
-		height="25"
-		rx="3.5"
-	/>
-	<text class="bs-text" x="0" y="5.5">{text}</text>
+<!-- the bank flags: nobori banners planted in the shallows at each edge,
+     lettering stacked down the cloth. Local origin = the rod/pole joint;
+     `flip` hangs the cloth on the pole's other side (facing inward). -->
+{#snippet nobori(text: string, flip: boolean, s: number)}
+	{@const d = flip ? -1 : 1}
+	{@const cx = d * 21}
+	<g transform="scale({s})">
+		<path class="nb-pole" d="M 0 -10 L 0 186" />
+		<path class="nb-rod" d="M 0 0 L {d * 42} 0" />
+		<g class="nb-flutter" style="--nd:{flip ? -2.6 : 0}s">
+			<path
+				class="nb-cloth"
+				d="M {d * 4} 2 L {d * 38} 2 L {d * 38} 164 L {d * 30} 158 L {d * 21} 165 L {d *
+					12} 158 L {d * 4} 164 Z"
+			/>
+			<circle class="nb-mon" {cx} cy="18" r="7" />
+			<text class="nb-text" x={cx} y="40">
+				{#each text.toUpperCase().split('') as ch, i (i)}
+					<tspan x={cx} dy={i === 0 ? 0 : 13.2}>{ch}</tspan>
+				{/each}
+			</text>
+		</g>
+		<path class="nb-tie" d="M 0 22 L {d * 5} 22 M 0 76 L {d * 5} 76 M 0 128 L {d * 5} 128" />
+		<g class="vx-reflect2">
+			<path d="M {d * -6} 194 L {d * 7} 194" style="stroke-width:2.6" />
+		</g>
+	</g>
 {/snippet}
 
 {#snippet seal()}
@@ -458,8 +480,10 @@
 
 <!-- the shared harbor body: banks, current, ropes, fleet, years, gate -->
 {#snippet harbor(l: Layout)}
-	<g transform="translate({l.signL.x} {l.signL.y})">{@render bankSign(m.cv_education())}</g>
-	<g transform="translate({l.signR.x} {l.signR.y})">{@render bankSign(m.cv_positions())}</g>
+	{@const ns = l.w > 700 ? 1 : 0.8}
+	<g transform="translate({l.signL.x} {l.signL.y})">{@render nobori(m.cv_education(), false, ns)}</g
+	>
+	<g transform="translate({l.signR.x} {l.signR.y})">{@render nobori(m.cv_positions(), true, ns)}</g>
 
 	<path class="current" d={currentPath(l)} />
 
@@ -547,7 +571,7 @@
 		<rect class="sg-patch" x="30" y="121" width="260" height="32" rx="10" fill="url(#pd-sg)" />
 		<rect class="sg-patch p2" x="430" y="121" width="150" height="24" rx="9" fill="url(#pd-sg)" />
 		<rect class="sg-patch p3" x="720" y="121" width="250" height="30" rx="9" fill="url(#pd-sg)" />
-		<rect class="sg-patch p4" x="360" y="772" width="280" height="30" rx="10" fill="url(#pd-sg)" />
+		<rect class="sg-patch p4" x="360" y="816" width="280" height="30" rx="10" fill="url(#pd-sg)" />
 
 		<g class="drift-a" transform="translate(300 205)">{@render kasumi(430)}</g>
 
@@ -555,36 +579,36 @@
 		<g class="under">
 			<Koi
 				robe="kohaku"
-				scale={0.66}
+				scale={0.74}
 				motion="tail"
 				shadow={false}
 				wag={2.4}
-				swim={{ path: loop(160, 505, 85, 15), dur: 74, rest: '30%' }}
+				swim={{ path: loop(160, 525, 92, 16), dur: 74, rest: '30%' }}
 			/>
 		</g>
 		<g class="under u2">
 			<Koi
 				robe="hi"
-				scale={0.4}
+				scale={0.46}
 				motion="tail"
 				shadow={false}
 				wag={1.9}
-				swim={{ path: loop(895, 318, 62, 12), dur: 52, rest: '64%', delay: -17 }}
+				swim={{ path: loop(898, 336, 66, 12), dur: 52, rest: '64%', delay: -17 }}
 			/>
 		</g>
 
 		{@render harbor(PANO)}
 
-		<g transform="translate(830 540)">
+		<g transform="translate(834 566)">
 			<ellipse class="ring" rx="28" ry="7" style="--rd:0s" />
 			<ellipse class="ring" rx="28" ry="7" style="--rd:4.4s" />
 		</g>
-		<g class="drift-b" transform="translate(80 748)">{@render kasumi(250)}</g>
+		<g class="drift-b" transform="translate(80 788)">{@render kasumi(250)}</g>
 
 		{@render play('pano')}
 
 		<rect y={PANO.h - 30} width={PANO.w} height="30" fill="url(#pd-out)" />
-		<g transform="translate(938 845)">{@render seal()}</g>
+		<g transform="translate(938 884)">{@render seal()}</g>
 	</svg>
 
 	<!-- ============ THE QUAY (<700px): the same harbor, narrow ============ -->
@@ -633,18 +657,18 @@
 		<g class="under">
 			<Koi
 				robe="kohaku"
-				scale={0.4}
+				scale={0.46}
 				motion="tail"
 				shadow={false}
 				wag={2.2}
-				swim={{ path: loop(95, 505, 48, 10), dur: 52, rest: '30%' }}
+				swim={{ path: loop(95, 522, 52, 11), dur: 52, rest: '30%' }}
 			/>
 		</g>
 
 		{@render harbor(QUAY)}
 
-		<g class="drift-a" transform="translate(140 458)">{@render kasumi(220)}</g>
-		<g transform="translate(330 300)">
+		<g class="drift-a" transform="translate(140 478)">{@render kasumi(220)}</g>
+		<g transform="translate(334 312)">
 			<ellipse class="ring" rx="22" ry="6" style="--rd:0s" />
 			<ellipse class="ring" rx="22" ry="6" style="--rd:4.5s" />
 		</g>
@@ -652,7 +676,7 @@
 		{@render play('quay')}
 
 		<rect y={QUAY.h - 32} width={QUAY.w} height="32" fill="url(#pq-out)" />
-		<g transform="translate(382 950)">{@render seal()}</g>
+		<g transform="translate(382 988)">{@render seal()}</g>
 	</svg>
 </div>
 
@@ -753,24 +777,38 @@
 		opacity: 0.85;
 	}
 
-	/* ---- bank boards ---- */
-	.bs-post {
+	/* ---- nobori bank banners ---- */
+	.nb-pole {
+		fill: none;
 		stroke: #6d5334;
-		stroke-width: 3;
+		stroke-width: 3.4;
 		stroke-linecap: round;
 	}
-	.bs-board {
-		fill: #efe5cc;
+	.nb-rod {
+		fill: none;
 		stroke: #6d5334;
-		stroke-width: 1.2;
+		stroke-width: 2.6;
+		stroke-linecap: round;
 	}
-	.bs-text {
+	.nb-cloth {
+		fill: #f5efdf;
+		stroke: rgba(44, 36, 27, 0.5);
+		stroke-width: 1.1;
+	}
+	.nb-mon {
+		fill: #c43f2a;
+	}
+	.nb-text {
 		fill: #2c241b;
 		font:
 			600 12.5px var(--font-display, Georgia),
 			serif;
-		letter-spacing: 0.06em;
 		text-anchor: middle;
+	}
+	.nb-tie {
+		fill: none;
+		stroke: #8a6a42;
+		stroke-width: 1.2;
 	}
 
 	/* ---- craft links ---- */
@@ -1015,6 +1053,18 @@
 		}
 		.calm-text {
 			animation: pd-calm-text 1.7s ease-out 120ms forwards;
+		}
+		/* the cloth stirs from its hanging rod — barely, like the pond air */
+		.nb-flutter {
+			animation: pd-flutter 5.8s ease-in-out var(--nd, 0s) infinite alternate;
+		}
+	}
+	@keyframes pd-flutter {
+		from {
+			transform: skewX(-1.2deg);
+		}
+		to {
+			transform: skewX(1.4deg);
 		}
 	}
 	@keyframes pd-arrive {

@@ -8,6 +8,9 @@
 	import '@fontsource/spectral/400-italic.css';
 	import '@fontsource/spectral/500.css';
 	import '@fontsource/spectral/700.css';
+	import '@fontsource/shippori-mincho/400.css';
+	import '@fontsource/shippori-mincho/600.css';
+	import '@fontsource/shippori-mincho/700.css';
 	import '@fontsource-variable/karla';
 	import '@fontsource/righteous';
 	import '@fontsource/space-mono';

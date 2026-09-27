@@ -191,8 +191,10 @@ class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
   `docs/plans/cv-mooring.md`; it supersedes the one-night dive build of
   `cv-koi-dive.md`, whose asset library it reuses). **Work floats,
   education grows — split by bank:** Ausbildung as lily pads on the LEFT,
-  Erfahrung as boats on the RIGHT of one central timeline current, under
-  two bank boards. Six bespoke crafts in `lib/water/pond/Vessel.svelte`
+  Erfahrung as boats on the RIGHT of one central timeline current, each
+  bank flying its NOBORI banner — vertical stacked-letter cloth on a
+  pole at the scene's outer edge (sky strip, clear of every craft), red
+  mon, hemmed scallop, a barely-there skewX flutter from the hanging rod. Six bespoke crafts in `lib/water/pond/Vessel.svelte`
   — the SIGA flagship (two lashed cargo crates = the two roles, mizuhiki
   cord, koinobori, lit chōchin), the HSLU lotus raft (MA + BSc pads in
   bloom, stake sign, tombo dragonfly), the Neptun skiff (trident
@@ -229,7 +231,15 @@ class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
   Reduced motion = a finished still print (koi parked at `--rest`
   offsets, zero pond animations, games disabled); no-JS gets the full
   working harbor and decks. Shared vocabulary: sky · horizon ·
-  current · craft/berth · uki tag · bollard · gate.
+  current · craft/berth · uki tag · bollard · gate · nobori.
+  **v3 (owner review round 2)**: the bank boards became the edge nobori
+  (the pano board had sat inside SIGA's silhouette), the whole print
+  grew again (~12% larger fleet on taller canvases — pano 1000×920,
+  quay 420×1020, bigger chips/koi/namazu), and the water world got its
+  own display face: **Shippori Mincho** (Fontsource, weights 400/600/
+  700) set as `--font-display` for `[data-theme='water']` in
+  `themes.css` — an engraved mincho that matches the woodblock print;
+  Spectral stays as fallback, Karla keeps body/small text.
 - Grove chapters grow into view on scroll — a shared IntersectionObserver
   (`lib/garden/reveal.ts`) flips per-chapter classes, CSS does the animating
   (transform/opacity one-shots). `Garden.svelte` has `start` (grow when

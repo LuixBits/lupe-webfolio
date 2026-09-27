@@ -172,7 +172,7 @@
 	}
 	.berth-tag {
 		font:
-			italic 13px var(--font-display, Georgia),
+			italic 14px var(--font-display, Georgia),
 			serif;
 		fill: #14424f;
 		text-anchor: end;

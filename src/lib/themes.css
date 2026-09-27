@@ -65,10 +65,12 @@
 	--water-foam: #cdeef6;
 	--label-active-fg: #04181d;
 	--on-hub: #e6f4f9;
-	--font-display: 'Spectral', Georgia, serif;
+	/* Shippori Mincho: an engraved mincho serif — the woodblock print's own
+	   voice (Spectral stays as fallback; Karla carries small text). */
+	--font-display: 'Shippori Mincho', 'Spectral', Georgia, serif;
 	--font-body: 'Karla Variable', 'Karla', system-ui, sans-serif;
 	--heading-transform: none;
-	--heading-spacing: normal;
+	--heading-spacing: 0.015em;
 }
 
 /* 🌆 Projects — vaporwave neon on deep purple. */
