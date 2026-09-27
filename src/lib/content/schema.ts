@@ -220,6 +220,10 @@ export const stationSchema = z.object({
 	group: z.string().optional(),
 	/** Panel note on the first group member, e.g. "5 Jahre 2 Monate". */
 	groupNote: localizedString.optional(),
+	/** 2–3 first-person sentences: what actually happened here. */
+	story: localizedString.optional(),
+	/** One line: what this chapter handed to the next (what the rope carries). */
+	takeaway: localizedString.optional(),
 	/** Slug into /cv/[slug] (the thesis scroll, once it exists). */
 	detail: z.string().optional(),
 	/** Organisation website — renders a hanko link on the card. */

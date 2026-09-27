@@ -93,6 +93,14 @@ export const stations: Station[] = defineStations([
 		location: { en: 'Lucerne', de: 'Luzern' },
 		pensum: 'part',
 		skills: [{ en: 'Linux Desktop', de: 'Linux Desktop' }],
+		story: {
+			en: 'I ran the Lucerne help point: notebook handover weeks at the universities, repairs, and the Linux questions nobody else wanted. — placeholder',
+			de: 'Ich habe den Help Point Luzern geführt: Übergabewochen an den Hochschulen, Reparaturen und die Linux-Fragen, die sonst niemand wollte. — Platzhalter'
+		},
+		takeaway: {
+			en: 'Calm support under queue pressure — and Linux as my daily driver. — placeholder',
+			de: 'Ruhiger Support trotz Warteschlange — und Linux als Alltag. — Platzhalter'
+		},
 		url: 'https://www.projektneptun.ch'
 	},
 	{
@@ -113,7 +121,15 @@ export const stations: Station[] = defineStations([
 		span: '2013 – 2017',
 		start: 2013.6,
 		end: 2017.6,
-		skills: [{ en: 'Skills — placeholder', de: 'Kenntnisse — Platzhalter' }]
+		skills: [{ en: 'Skills — placeholder', de: 'Kenntnisse — Platzhalter' }],
+		story: {
+			en: 'The school half of the apprenticeship: modules at EMVs Visp, from hardware up to the first real programming. — placeholder',
+			de: 'Die Schulseite der Lehre: Module an der EMVs Visp, von Hardware bis zur ersten richtigen Programmierung. — Platzhalter'
+		},
+		takeaway: {
+			en: 'A finished EFZ — and proof that I learn best by building. — placeholder',
+			de: 'Das EFZ — und der Beweis, dass ich beim Bauen am besten lerne. — Platzhalter'
+		}
 	},
 	{
 		id: 'bm',
@@ -125,7 +141,15 @@ export const stations: Station[] = defineStations([
 		},
 		span: '2013 – 2017',
 		start: 2013.6,
-		end: 2017.6
+		end: 2017.6,
+		story: {
+			en: 'The technical vocational baccalaureate (TALS) alongside the apprenticeship — the maths and science that later carried the degree. — placeholder',
+			de: 'Die Technische Berufsmaturität (TALS) parallel zur Lehre — Mathe und Naturwissenschaft, die später das Studium getragen haben. — Platzhalter'
+		},
+		takeaway: {
+			en: 'The door to HSLU. — placeholder',
+			de: 'Die Tür zur HSLU. — Platzhalter'
+		}
 	},
 	{
 		id: 'emvs-lehre',
@@ -135,7 +159,19 @@ export const stations: Station[] = defineStations([
 		span: '2013 – 2017',
 		start: 2013.6,
 		end: 2017.6,
-		duration: { en: '4 yrs', de: '4 Jahre' }
+		duration: { en: '4 yrs', de: '4 Jahre' },
+		skills: [
+			{ en: 'Support — placeholder', de: 'Support — Platzhalter' },
+			{ en: 'Networks — placeholder', de: 'Netzwerk — Platzhalter' }
+		],
+		story: {
+			en: 'Four years of IT apprenticeship at EMVs in Sion: user support, networks, and the first scripts that saved real hours. — placeholder',
+			de: 'Vier Jahre Informatik-Lehre bei der EMVs in Sitten: Support, Netzwerk und die ersten Skripte, die echte Stunden gespart haben. — Platzhalter'
+		},
+		takeaway: {
+			en: 'The craft itself — and a taste for automating the boring parts. — placeholder',
+			de: 'Das Handwerk — und die Lust, das Langweilige zu automatisieren. — Platzhalter'
+		}
 	}
 ]);
 

@@ -1,8 +1,13 @@
 <script lang="ts">
 	/** Aboard a vessel — the detail page behind each craft on the CV pond.
 	 *  A small water band up top carries the SAME art as the pond (you
-	 *  really boarded that boat), then the Logbuch: one washi slip per
-	 *  station lived at this organisation. */
+	 *  really boarded that boat), then the station content. THREE demo
+	 *  presentations are live side by side for the owner to compare
+	 *  (2026-09-27): schule = the open Logbuch spread, emvs = the cargo
+	 *  manifest (berth grown into the hero, so no separate berth band),
+	 *  neptun = the rigging line; the rest keep the original washi slips
+	 *  as the baseline. Once the owner picks one, it becomes the single
+	 *  presentation for all vessels. */
 	import { HULL_NAME, vesselStations } from '$lib/content/cv';
 	import { resolveLocalized, resolveSpan, type Station, type Vessel } from '$lib/content/schema';
 	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
@@ -11,11 +16,20 @@
 	import Vessel_ from '$lib/water/pond/Vessel.svelte';
 	import Crane from '$lib/water/pond/Crane.svelte';
 	import Hanko from './Hanko.svelte';
+	import DeckLog from './DeckLog.svelte';
+	import DeckCargo from './DeckCargo.svelte';
+	import DeckRig from './DeckRig.svelte';
 
 	let { vessel }: { vessel: Vessel } = $props();
 
 	const locale = getLocale();
 	const stations = $derived(vesselStations(vessel));
+	const VARIANT: Partial<Record<Vessel['slug'], 'log' | 'cargo' | 'rig'>> = {
+		schule: 'log',
+		emvs: 'cargo',
+		neptun: 'rig'
+	};
+	const variant = $derived(VARIANT[vessel.slug] ?? 'slips');
 	const orgLabel = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 	const GLYPH: Record<string, string> = { siga: 'SIGA', hslu: 'HSLU', neptun: 'PN', emvs: 'EMVs' };
 	const desc = $derived(
@@ -74,41 +88,44 @@
 <article class="page deck">
 	<a class="back" href={localizeHref('/cv')}>← {m.paper_back()}</a>
 
-	<!-- the mooring band: the very craft you boarded, riding its water -->
-	<div class="berth" aria-hidden="true">
-		<svg viewBox="0 0 640 190" preserveAspectRatio="xMidYMid meet">
-			<defs>
-				<linearGradient id="deck-sky" x1="0" y1="0" x2="0" y2="1">
-					<stop offset="0" stop-color="#f4efe2" />
-					<stop offset="1" stop-color="#dceef2" />
-				</linearGradient>
-				<linearGradient id="deck-water" x1="0" y1="0" x2="0" y2="1">
-					<stop offset="0" stop-color="#cfeaf0" />
-					<stop offset="1" stop-color="#8ecbdb" />
-				</linearGradient>
-			</defs>
-			<rect width="640" height="112" fill="url(#deck-sky)" />
-			<rect y="112" width="640" height="78" fill="url(#deck-water)" />
-			<path class="berth-line" d="M 0 112 L 640 112" />
-			<g class="berth-ring">
-				<ellipse cx="320" cy="118" rx="120" ry="9" />
-				<ellipse cx="320" cy="118" rx="78" ry="6" />
-			</g>
-			<g transform="translate(320 112)">
-				<g class="berth-bob"><Vessel_ slug={vessel.slug} name={HULL_NAME[vessel.slug]} /></g>
-			</g>
-			<g transform="translate(120 152)" opacity="0.75">
-				<g class="berth-koi">
-					<Koi robe="asagi" scale={0.34} motion="tail" shadow={false} wag={2.1} />
+	<!-- the mooring band: the very craft you boarded, riding its water
+	     (the cargo variant grows this into its own hero instead) -->
+	{#if variant !== 'cargo'}
+		<div class="berth" aria-hidden="true">
+			<svg viewBox="0 0 640 190" preserveAspectRatio="xMidYMid meet">
+				<defs>
+					<linearGradient id="deck-sky" x1="0" y1="0" x2="0" y2="1">
+						<stop offset="0" stop-color="#f4efe2" />
+						<stop offset="1" stop-color="#dceef2" />
+					</linearGradient>
+					<linearGradient id="deck-water" x1="0" y1="0" x2="0" y2="1">
+						<stop offset="0" stop-color="#cfeaf0" />
+						<stop offset="1" stop-color="#8ecbdb" />
+					</linearGradient>
+				</defs>
+				<rect width="640" height="112" fill="url(#deck-sky)" />
+				<rect y="112" width="640" height="78" fill="url(#deck-water)" />
+				<path class="berth-line" d="M 0 112 L 640 112" />
+				<g class="berth-ring">
+					<ellipse cx="320" cy="118" rx="120" ry="9" />
+					<ellipse cx="320" cy="118" rx="78" ry="6" />
 				</g>
-			</g>
-			<g class="wv">
-				<path d="M 48 138 Q 56 133.5 64 138 Q 72 133.5 80 138" />
-				<path d="M 528 158 Q 536 153.5 544 158 Q 552 153.5 560 158" />
-			</g>
-			<text class="berth-tag" x="576" y="128">{resolveSpan(vessel.span, locale)}</text>
-		</svg>
-	</div>
+				<g transform="translate(320 112)">
+					<g class="berth-bob"><Vessel_ slug={vessel.slug} name={HULL_NAME[vessel.slug]} /></g>
+				</g>
+				<g transform="translate(120 152)" opacity="0.75">
+					<g class="berth-koi">
+						<Koi robe="asagi" scale={0.34} motion="tail" shadow={false} wag={2.1} />
+					</g>
+				</g>
+				<g class="wv">
+					<path d="M 48 138 Q 56 133.5 64 138 Q 72 133.5 80 138" />
+					<path d="M 528 158 Q 536 153.5 544 158 Q 552 153.5 560 158" />
+				</g>
+				<text class="berth-tag" x="576" y="128">{resolveSpan(vessel.span, locale)}</text>
+			</svg>
+		</div>
+	{/if}
 
 	<header class="deck-head">
 		<p class="eyebrow">{m.cv_aboard()}</p>
@@ -116,12 +133,20 @@
 		{#if vessel.note}<p class="note">{resolveLocalized(vessel.note, locale)}</p>{/if}
 	</header>
 
-	<h2 class="logbook-h">{m.cv_logbook()}</h2>
-	<div class="slips">
-		{#each stations as s (s.id)}
-			{@render slip(s)}
-		{/each}
-	</div>
+	{#if variant === 'log'}
+		<DeckLog {vessel} {stations} />
+	{:else if variant === 'cargo'}
+		<DeckCargo {vessel} {stations} />
+	{:else if variant === 'rig'}
+		<DeckRig {vessel} {stations} />
+	{:else}
+		<h2 class="logbook-h">{m.cv_logbook()}</h2>
+		<div class="slips">
+			{#each stations as s (s.id)}
+				{@render slip(s)}
+			{/each}
+		</div>
+	{/if}
 
 	{#if vessel.url}
 		<div class="org-stamp">
