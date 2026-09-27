@@ -4,6 +4,11 @@ Date: 2026-09-27. Implements the
 [after-hours workshop plan](../plans/projects-after-hours-workshop.md), including
 the owner's request during implementation for a larger, more expressive room.
 
+**Owner follow-up:** this delivery was still too simple and compact. The owner
+requested an inhabited room using the whole space, with About as a reference.
+The [next plan](../plans/projects-inhabited-workshop.md) replaces the visual
+direction. The checks recorded below apply to this baseline, not that proposal.
+
 ## Implemented
 
 The overview is a plum plaster room with a mounted neon Projects sign, a full

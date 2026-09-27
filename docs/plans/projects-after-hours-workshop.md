@@ -1,5 +1,10 @@
 # Projects: the after-hours workshop
 
+**Superseded composition:** after reviewing the implementation, the owner
+requested a much larger room with the depth and life of About. Continue from
+[Projects: an inhabited workshop](projects-inhabited-workshop.md). This first
+plan remains the record of the implemented baseline and its navigation work.
+
 Date: 2026-09-27. The owner selected the after-hours workshop direction and
 requested suitable transitions. The proposal below was implemented on the same
 date; the owner also requested a larger, more expressive room during the work.
