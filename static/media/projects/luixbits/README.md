@@ -9,3 +9,6 @@ See the project's [licensing and provenance](https://github.com/NixOS/branding#l
 The local SVG removes editor metadata and simplifies markup, preserving the
 original geometry and colours. The paper sticker and caption are styled in
 `src/lib/projects/ChannelPlayer.svelte`.
+
+The Projects side-wall print also uses this SVG, unchanged, inside original
+frame artwork in `src/lib/projects/overview/WorkshopWallPrint.svelte`.

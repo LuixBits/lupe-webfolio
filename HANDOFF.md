@@ -51,18 +51,27 @@ model, shared project workstations, then drawers, stool, rug, plant
 and cat. Violet walls, magenta neon, cyan reflections and a perspective floor
 grid retain the Projects palette alongside the wooden furniture.
 
-The [ultrawide refinement](docs/reviews/projects-ultrawide-2026-09-27.md) caps
-the room and footer at **1600px**, centred within the full-width wall. The cap
-is `--workshop-max-width` in the root layout; narrower screens remain fluid.
-Wheel clearance decreases as the outside gutters grow, keeping the room balanced.
-Responsive queries belong to the room itself so departure snapshots retain its
-composition. The heading now contains only the neon sign. The subtitle, motion
-button and animated rain were removed at the owner's request.
+The [side-wall refinement](docs/reviews/projects-side-walls-2026-09-27.md) raises
+the room and footer cap to **2000px**, replacing the earlier 1600px limit.
+`--workshop-max-width` in the root layout controls it; narrower screens remain
+fluid. The outside space becomes perspective walls with ceiling lines, corner
+posts and a continuation of the floor. Framed developer jokes appear when the
+walls have enough space. The duck portrait is a localized button with a secret;
+its state survives project visits. The artwork adds no animation loop.
+
+On all Projects routes, the desktop wheel stops at 1240px left and 600px below
+the viewport centre. Its pivot then sits 240px outside the overview's left edge,
+keeping the fan clear of both the room and pictures. Phone and short-screen
+placement still uses the navigation ledge. If the room cap changes, review the
+matching desktop limits in `RadialMenu.svelte`. Responsive queries belong to
+the room itself, and side walls stay inside its departure snapshot. The heading
+contains only the neon sign; the subtitle, motion button and animated rain
+remain removed at the owner's request.
 
 **Use <http://localhost:5173/projects>**, or `/de/projects`, for the current
 shared development preview. The old standalone study redirects here. The local
 production preview at <http://localhost:5191/projects> also contains this room;
-see the [ultrawide review](docs/reviews/projects-ultrawide-2026-09-27.md)
+see the [side-wall review](docs/reviews/projects-side-walls-2026-09-27.md)
 for the build, browser checks and temporary artifact paths. The published site
 has not been changed. Final visual approval remains with the owner.
 
@@ -106,7 +115,7 @@ motion stop them. The sunset window is static and has no visibility observer.
 Static project links and drawer disclosures work without
 JavaScript. The desktop wheel clears the content; phones and short landscape
 screens use its normal-flow ledge. The channel player's controls retain their
-behavior. See the [ultrawide review](docs/reviews/projects-ultrawide-2026-09-27.md)
+behavior. See the [side-wall review](docs/reviews/projects-side-walls-2026-09-27.md)
 for the current build and checks, and the
 [collections review](docs/reviews/projects-collections-2026-09-27.md) for earlier
 real-provider playback observations.

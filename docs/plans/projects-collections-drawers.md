@@ -99,3 +99,6 @@ Implementation and validation are recorded in the
 [workstation follow-up](../reviews/projects-stations-2026-09-27.md). The later
 [ultrawide refinement](../reviews/projects-ultrawide-2026-09-27.md) caps the room
 at 1600px, redraws the Defy and removes the subtitle, rain and motion button.
+The subsequent [side-wall refinement](../reviews/projects-side-walls-2026-09-27.md)
+raises that cap to 2000px, fills the surrounding space with perspective walls
+and framed jokes, and bounds the navigation's distance on large displays.
