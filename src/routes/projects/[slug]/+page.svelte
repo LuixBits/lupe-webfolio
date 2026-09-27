@@ -4,6 +4,7 @@
 	// (ProjectDetail.svelte remains untouched for the CV route.)
 	import CounterTv from '$lib/projects/CounterTv.svelte';
 	import ChannelPlayer from '$lib/projects/ChannelPlayer.svelte';
+	import StudioRoom from '$lib/projects/workbench/StudioRoom.svelte';
 	import TapeJacket from '$lib/projects/TapeJacket.svelte';
 	import BackToShelf from '$lib/projects/BackToShelf.svelte';
 	import ProjectStatus from '$lib/projects/ProjectStatus.svelte';
@@ -45,12 +46,18 @@
 	<meta name="description" content={tagline} />
 </svelte:head>
 
-<article class="page vhs-detail" class:no-media={!hasMedia}>
-	<BackToShelf slug={project.slug} />
-
+<article
+	class="page vhs-detail"
+	class:studio-page={Boolean(project.channel)}
+	class:no-media={!hasMedia}
+>
 	{#if project.channel}
-		{#key project.slug}<ChannelPlayer {project} {locale} />{/key}
+		<StudioRoom>
+			<BackToShelf slug={project.slug} />
+			{#key project.slug}<ChannelPlayer {project} {locale} />{/key}
+		</StudioRoom>
 	{:else}
+		<BackToShelf slug={project.slug} />
 		<div class="counter">
 			{#if hasMedia}
 				<div class="deckcol">
@@ -115,6 +122,10 @@
 		overflow-wrap: anywhere;
 		max-width: 78rem;
 		padding-bottom: 7.5rem;
+	}
+	.page.vhs-detail.studio-page {
+		max-width: none;
+		padding: 0;
 	}
 	.sleeve {
 		container: sleeve / inline-size;

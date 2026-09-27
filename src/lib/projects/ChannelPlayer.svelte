@@ -8,6 +8,8 @@
 	import WorkbenchKeyboard from './workbench/WorkbenchKeyboard.svelte';
 	import FloorPlan from './workbench/FloorPlan.svelte';
 	import VideoCassette from './workbench/VideoCassette.svelte';
+	import NeonSign from './overview/NeonSign.svelte';
+	import StudioWallDecor from './workbench/StudioWallDecor.svelte';
 	import { projectNavigation, type ProjectNavigation } from './navigation';
 
 	let { project, locale }: { project: Project; locale: string } = $props();
@@ -90,7 +92,7 @@
 							/>
 						</div>
 					{/if}
-					<h1 id="channel-title">{title}</h1>
+					<h1 id="channel-title"><span class="sr-only">{title}</span><NeonSign text={title} /></h1>
 				</header>
 				<p class="tagline">{resolveLocalized(project.tagline, locale)}</p>
 				<p class="instruction">{m.channel_choose_tape()}</p>
@@ -111,6 +113,7 @@
 			</section>
 		</div>
 
+		<StudioWallDecor />
 		<div class="desk-surface">
 			<div class="lamp-pool" aria-hidden="true"></div>
 			<div class="bench-tools">
@@ -189,6 +192,17 @@
 {/if}
 
 <style>
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+		border: 0;
+	}
 	.workbench-scene {
 		position: relative;
 		isolation: isolate;
@@ -325,15 +339,11 @@
 		border-radius: 3px;
 	}
 	h1 {
+		min-width: 0;
 		margin: 0;
 		overflow-wrap: anywhere;
 		font-size: var(--fs-h1);
 		line-height: var(--lh-tight);
-		text-shadow:
-			-1px 0 #9bfff9,
-			0 0 4px #fff4ff,
-			0 0 16px #ff5ed194,
-			0 0 35px #ff5ed14d;
 	}
 	.tagline {
 		color: var(--fg-muted);
@@ -646,12 +656,12 @@
 		line-height: var(--lh-body);
 		transform: rotate(-8deg);
 	}
-	@media (min-width: 65rem) {
+	@container studio-room (min-width: 80rem) {
 		.channel-counter {
 			grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
 		}
 	}
-	@media (min-width: 40rem) and (max-width: 64.99rem) {
+	@container studio-room (min-width: 40rem) and (max-width: 79.99rem) {
 		.deckcol {
 			max-width: 42rem;
 			width: 100%;

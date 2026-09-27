@@ -181,9 +181,11 @@
 <style>
 	.app.workbench {
 		position: relative;
-		--bg: #241924;
-		--footer-bar-bg: #19131b;
-		--fg-muted: #c9b3cb;
+		--workshop-max-width: 2000px;
+		--workshop-gutter: max(0px, calc((100vw - var(--workshop-max-width)) / 2));
+		--bg: #24153c;
+		--footer-bar-bg: #180f29;
+		--fg-muted: #d6c6e8;
 	}
 	.app.overview {
 		position: relative;
@@ -193,18 +195,21 @@
 		--footer-bar-bg: #180f29;
 		--fg-muted: #d6bfeb;
 	}
-	.overview main {
+	.overview main,
+	.workbench main {
 		padding: 0;
 		width: 100%;
 		max-width: var(--workshop-max-width);
 		margin-inline: auto;
 	}
-	.overview :global(footer.overview) {
+	.overview :global(footer.overview),
+	.workbench :global(footer.workbench) {
 		width: 100%;
 		max-width: var(--workshop-max-width);
 		margin-inline: auto;
 	}
-	.overview :global(footer.overview .bar) {
+	.overview :global(footer.overview .bar),
+	.workbench :global(footer.workbench .bar) {
 		padding-left: calc(
 			clamp(1rem, 4vw, 2.5rem) + max(0px, var(--clear-l) - var(--workshop-gutter, 0px))
 		);
@@ -223,7 +228,8 @@
 		.overview main {
 			padding: 0;
 		}
-		.overview :global(footer.overview .bar) {
+		.overview :global(footer.overview .bar),
+		.workbench :global(footer.workbench .bar) {
 			padding-inline: clamp(1rem, 4vw, 2.5rem);
 		}
 	}
