@@ -253,13 +253,18 @@ class="grow">` scaling from its junction (`transform-origin: 0px 0px` in
   instead of certificates — the owner wants no diplomas uploaded); the
   future thesis scroll hangs off the HSLU MA slip via `stations.detail`.
   Wheel CV children: SIGA / HSLU / Neptun (routes, no hash anchors).
-  `/cv` ends on **FooterJetty** — the dock you stand on: the pond's own
-  water runs into the footer and laps a foam scallop against the edge
-  board, pile heads carry stretch-safe plank rows (joints, knots), and
-  a fixed center vignette holds the mooring rope on its cleat, the
-  coil, a breathing glass lamp and a straw hat set down to watch —
-  while the /cv/* deck and scroll pages out on the water keep the
-  Hokusai `FooterWave` (route-scoped in `Footer.svelte`).
+  The WHOLE water corner ends on **FooterJetty** — the dock you stand
+  on: the pond's own water runs into the footer and laps a foam scallop
+  against the edge board, pile heads carry stretch-safe plank rows
+  (joints, knots), and a fixed center vignette holds the mooring rope
+  on its cleat, the coil, a breathing glass lamp and a straw hat set
+  down to watch. (`FooterWave` is retired from routes but kept in the
+  library.) `lib/decor/WaterDecor.svelte` is the same morning in the
+  margins of every /cv/* page — dawn wash, kumo + birds, kasumi mist,
+  two surface koi in ripple rings (the shared Koi component), momiji,
+  still wave marks, seigaiha medallions; it replaced the dive era's
+  underwater set (kelp/bubbles/caustics), which read as an aquarium
+  beside the mooring. GSAP drift is barely-there; reduce = still.
   Reduced motion = a finished still print (koi parked at `--rest`
   offsets, zero pond animations, games disabled); no-JS gets the full
   working harbor and decks. Shared vocabulary: sky · horizon ·
