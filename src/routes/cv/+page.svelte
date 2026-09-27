@@ -164,19 +164,6 @@
 {/snippet}
 
 <div class="page page--dive" class:living={hydrated}>
-	<!-- THE DIVE: one procedural water column painted behind the content
-	     (atmosphere, sounding line, world), plus a sparse overlay instance
-	     above the cards (companions + interactive creatures). -->
-	<DiveLayer seed="cv-dive" grown={revealed} arrive={hydrated} tags={depthTags} />
-	<DiveLayer
-		seed="cv-dive-over"
-		overlay
-		grown={revealed}
-		arrive={hydrated}
-		tags={depthTags}
-		pdf={cvPdf}
-	/>
-
 	<header class="sky" data-dive="sky">
 		<p class="eyebrow">{m.cv_eyebrow()}</p>
 		<h1>{m.nav_cv()}</h1>
@@ -285,6 +272,21 @@
 	>
 		<p class="origin-line">{m.cv_origin()}</p>
 	</section>
+
+	<!-- THE DIVE: one procedural water column painted behind the content
+	     (atmosphere, sounding line, world), plus a sparse overlay instance
+	     above the cards (companions + the interactive seabed creatures).
+	     Last in the DOM so the creatures follow the cards in tab order;
+	     z-index puts the art where it belongs. -->
+	<DiveLayer seed="cv-dive" grown={revealed} arrive={hydrated} tags={depthTags} />
+	<DiveLayer
+		seed="cv-dive-over"
+		overlay
+		grown={revealed}
+		arrive={hydrated}
+		tags={depthTags}
+		pdf={cvPdf}
+	/>
 </div>
 
 <style>

@@ -796,7 +796,9 @@
 						scale: 0.52
 					},
 					{
-						home: { x: Math.min(W - 90, W * 0.68), y: waterY + (bedY - waterY) * 0.55 },
+						// beyond the right bank on desktop — parked in open water,
+						// never resting on a card
+						home: { x: Math.min(W - 80, wrap.x1 + 76), y: waterY + (bedY - waterY) * 0.5 },
 						robe: 'kohaku',
 						scale: 0.44
 					}
@@ -804,8 +806,14 @@
 				odata = {
 					compHome: { x: 0, y: siga ? siga.y0 + 80 : waterY + 150 },
 					free,
-					namazu: { x: Math.min(W - 92, eggsX + (central ? 255 : 125)), y: bedY + 14 },
-					bottle: { x: Math.max(56, eggsX - (central ? 470 : 155)), y: bedY + 12 }
+					// narrow beds are crowded: the namazu tucks in FRONT of the
+					// sunken gate's feet (a fish resting under the torii)
+					namazu: central
+						? { x: Math.min(W - 92, eggsX + 255), y: bedY + 14 }
+						: { x: Math.min(W - 72, eggsX + 108), y: bedY + 22 },
+					bottle: central
+						? { x: Math.max(56, eggsX - 530), y: bedY + 12 }
+						: { x: Math.max(46, eggsX - 122), y: bedY + 22 }
 				};
 				if (instant || compY === 0) compY = odata.compHome.y;
 				if (fkPos.length === 0) fkPos = free.map((f2) => ({ x: f2.home.x, y: f2.home.y, a: 0 }));
@@ -1094,12 +1102,13 @@
 		<path class="bt-glass2" d="M -6 -12 Q 16 -15 44 -13" />
 		<path class="bt-neck" d="M 48 -5 L 60 -5 L 60 -11 L 48 -11 Z" />
 		<path class="bt-cork" d="M 60 -3.6 L 68 -3.6 L 68 -12.4 L 60 -12.4 Z" />
-		<path class="bt-string" d="M 58 -10 Q 56 -22 48 -26" />
 	</g>
-	<g transform="translate(30 -34)">
+	<!-- the tag lies on the sand below the neck, clear of the origin caption -->
+	<g transform="translate(18 16) rotate(-3)">
 		<rect class="bt-tag" x="-4" y="-9" width={label.length * 5.6 + 12} height="17" rx="2.5" />
 		<text class="bt-tag-text" x={(label.length * 5.6 + 4) / 2} y="3.5">{label}</text>
 	</g>
+	<path class="bt-string" d="M 52 -14 Q 40 2 24 8" />
 {/snippet}
 
 <!-- Notched lily-pad disc (top view) or its edge-on sliver. -->
@@ -2102,9 +2111,6 @@
 	}
 
 	/* ---- the overlay companions ---- */
-	.companion {
-		will-change: auto;
-	}
 	.comp-pose {
 		transform: rotate(90deg);
 	}
